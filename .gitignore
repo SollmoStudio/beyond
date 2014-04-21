@@ -21,3 +21,7 @@ RUNNING_PID
 tags
 # Ignore vim swap files
 *.sw?
+# Ignore Intellij
+.idea/
+*.iml
+*.iws
