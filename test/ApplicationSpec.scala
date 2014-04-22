@@ -26,5 +26,13 @@ class ApplicationSpec extends Specification {
       contentType(home) must beSome.which(_ == "text/html")
       contentAsString(home) must contain ("Your new application is ready.")
     }
+
+    "respond to ping with pong" in new WithApplication {
+      val ping = route(FakeRequest(POST, "/ping")).get
+
+      status(ping) must equalTo(OK)
+      contentType(ping) must beSome.which(_ == "text/plain")
+      contentAsString(ping) must equalTo ("pong")
+    }
   }
 }
