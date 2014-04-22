@@ -1,6 +1,8 @@
 beyond
 ======
 
+[![Build Status](https://travis-ci.org/SollmoStudio/beyond.png?branch=master)](https://travis-ci.org/SollmoStudio/beyond)
+
 Beyond: The Scalable Game Server Framework
 
 ### Licence
