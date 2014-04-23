@@ -9,3 +9,6 @@ GET     /                           controllers.Application.index
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 POST    /ping                       controllers.Application.ping
+
+POST    /session/login              controllers.Session.login
+POST    /session/logout             controllers.Session.logout

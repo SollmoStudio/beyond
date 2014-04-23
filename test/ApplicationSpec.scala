@@ -34,5 +34,20 @@ class ApplicationSpec extends Specification {
       contentType(ping) must beSome.which(_ == "text/plain")
       contentAsString(ping) must equalTo ("pong")
     }
+
+    "login" in new WithApplication {
+      val login = route(FakeRequest(POST, "/session/login")
+        .withFormUrlEncodedBody("username" -> "myname", "password" -> "mypass")).get
+
+      status(login) must equalTo(OK)
+      contentType(login) must beSome.which(_ == "text/plain")
+      contentAsString(login) must equalTo("Hello myname")
+    }
+
+    "logout without login" in new WithApplication {
+      val login = route(FakeRequest(POST, "/session/logout")).get
+
+      status(login) must equalTo(FORBIDDEN)
+    }
   }
 }
