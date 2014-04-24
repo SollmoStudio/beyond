@@ -1,4 +1,5 @@
 [![Stories in Ready](https://badge.waffle.io/sollmostudio/beyond.png?label=ready&title=Ready)](https://waffle.io/sollmostudio/beyond)
+[![Stories in Ready](https://badge.waffle.io/sollmostudio/beyond.png?label=ready&title=Ready)](https://waffle.io/sollmostudio/beyond)
 beyond
 ======
 
