@@ -1,8 +1,8 @@
-[![Stories in Ready](https://badge.waffle.io/sollmostudio/beyond.png?label=ready&title=Ready)](https://waffle.io/sollmostudio/beyond)
 beyond
 ======
 
 [![Build Status](https://travis-ci.org/SollmoStudio/beyond.png?branch=master)](https://travis-ci.org/SollmoStudio/beyond)
+[![Stories in Ready](https://badge.waffle.io/sollmostudio/beyond.png?label=ready&title=Ready)](https://waffle.io/sollmostudio/beyond)
 
 Beyond: The Scalable Game Server Framework
 
