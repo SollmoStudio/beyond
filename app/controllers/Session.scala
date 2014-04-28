@@ -20,7 +20,7 @@ object Authenticated extends ActionBuilder[AuthenticatedRequest] {
 }
 
 object Session extends Controller {
-  val loginForm = Form(
+  private val loginForm = Form(
     tuple(
       "username" -> text,
       "password" -> text
