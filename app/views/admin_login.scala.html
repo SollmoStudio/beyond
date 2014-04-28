@@ -1,3 +1,5 @@
+@(errorMessage: String = "")
+
 @main("Admin Login") {
     <img class="center" src="@routes.Assets.at("images/logo2.png")" />
     <div id="content"></div>
@@ -21,6 +23,7 @@
                         <label className="checkbox">
                             <input type="checkbox" value="remember-me" /> Remember me
                         </label>
+                        {this.props.errorMessage ? <div className="alert alert-danger">{this.props.errorMessage}</div> : ''}
                         <button className="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
                     </form>
                 );
@@ -28,7 +31,7 @@
         });
 
         React.renderComponent(
-            <LoginForm postUrl="@routes.Admin.doLogin" heading="Welcome to Beyond" />,
+            <LoginForm postUrl="@routes.Admin.doLogin" heading="Welcome to Beyond" errorMessage="@errorMessage" />,
             document.getElementById('content')
         );
     </script>

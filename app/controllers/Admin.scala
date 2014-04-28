@@ -31,11 +31,16 @@ object Admin extends Controller {
   }
 
   def doLogin : Action[AnyContent] = Action { implicit request =>
-    // FIXME: Needs form validation.
-    val loginData = loginForm.bindFromRequest.get
-    // FIXME: Check password and redirect to login page if the given password is incorrect.
-
-    val session = "username" -> loginData.username
-    Redirect(routes.Admin.index).withSession(session)
+    loginForm.bindFromRequest.fold(
+      formWithErrors => {
+        // FIXME: Create an error type instead of passing String.
+        BadRequest(views.html.admin_login("Invalid username"))
+      },
+      loginData => {
+        // FIXME: Check password and redirect to login page if the given password is incorrect.
+        val session = "username" -> loginData.username
+        Redirect(routes.Admin.index).withSession(session)
+      }
+    )
   }
 }
