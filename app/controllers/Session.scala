@@ -1,6 +1,6 @@
 package controllers
 
-import beyond.Authenticated
+import beyond.UserAction
 import play.api.data.Form
 import play.api.data.Forms.text
 import play.api.data.Forms.tuple
@@ -17,12 +17,13 @@ object Session extends Controller {
   def login : Action[AnyContent] = Action { implicit request =>
     val data = loginForm.bindFromRequest.data
     // FIXME: Check password
+
     val username = data("username")
     val session = ("username", username)
     Ok("Hello " + username).withSession(session)
   }
 
-  def logout : Action[AnyContent] = Authenticated { request =>
+  def logout : Action[AnyContent] = UserAction { request =>
     Ok("Goodbye " + request.username).withNewSession
   }
 }
