@@ -1,0 +1,24 @@
+@(title: String)(content: Html)
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>@title</title>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+            <!-- FIXME: Use the minified versions only in production mode -->
+        <link rel="stylesheet" href="@routes.Assets.at("bootstrap-3.1.1/css/bootstrap.min.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+        <script src="@routes.Assets.at("javascripts/jquery-1.9.0.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("react-0.10.0.min.js")"></script>
+            <!-- FIXME: Don't use JSXTransformer in production mode. Precompile JSX files instead. -->
+        <script src="@routes.Assets.at("JSXTransformer-0.10.0.js")"></script>
+        <script src="@routes.Assets.at("bootstrap-3.1.1/js/bootstrap.min.js")"></script>
+    </head>
+    <body>
+    @content
+    </body>
+</html>
