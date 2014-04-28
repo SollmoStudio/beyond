@@ -44,6 +44,15 @@ class ApplicationSpec extends Specification {
       contentAsString(login) must equalTo("Hello myname")
     }
 
+    "logout when username exists in session" in new WithApplication {
+      val logout = route(FakeRequest(POST, "/session/logout").withSession("username" -> "myname")).get
+
+      status(logout) must equalTo(OK)
+      contentType(logout) must beSome.which(_ == "text/plain")
+      contentAsString(logout) must equalTo("Goodbye myname")
+      session(logout).isEmpty must equalTo (true)
+    }
+
     "logout without login" in new WithApplication {
       val login = route(FakeRequest(POST, "/session/logout")).get
 
