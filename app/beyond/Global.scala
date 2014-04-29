@@ -1,3 +1,5 @@
+package beyond
+
 import play.api.Application
 import play.api.GlobalSettings
 import play.api.Mode
