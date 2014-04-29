@@ -2,6 +2,7 @@ package beyond
 
 import play.api.Application
 import play.api.GlobalSettings
+import play.api.libs.concurrent.Akka
 import play.api.Mode
 import play.api.Play
 import play.api.mvc.RequestHeader
@@ -21,9 +22,7 @@ object Global extends GlobalSettings {
   def mongoConnection: Option[MongoConnection] = connection
 
   override def onStart(app: Application) {
-    // FIXME: MongoDriver creates a new Akka's ActorSystem.
-    // Reuse an existing system to avoid wasting resources.
-    val driver = new MongoDriver
+    val driver = new MongoDriver(Akka.system(app))
     connection = Some(driver.connection(List("localhost")))
   }
 
