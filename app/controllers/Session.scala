@@ -1,10 +1,10 @@
 package controllers
 
 import play.api.data.Form
-import play.api.data.Forms.tuple
 import play.api.data.Forms.text
-import play.api.mvc._
+import play.api.data.Forms.tuple
 import play.api.mvc.Results.Forbidden
+import play.api.mvc._
 import scala.concurrent.Future
 
 class AuthenticatedRequest[A](val username: String, request: Request[A]) extends WrappedRequest[A](request)
