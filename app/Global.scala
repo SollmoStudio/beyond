@@ -14,19 +14,19 @@ object Global extends GlobalSettings {
   // the driver may create a new ActorSystem, and the connection
   // will connect to the servers. It is a good idea to store the
   // driver and the connection to reuse them.
-  private var connection: MongoConnection = null
+  private var connection: Option[MongoConnection] = None
 
-  def mongoConnection: MongoConnection = connection
+  def mongoConnection: Option[MongoConnection] = connection
 
   override def onStart(app: Application) {
     // FIXME: MongoDriver creates a new Akka's ActorSystem.
     // Reuse an existing system to avoid wasting resources.
     val driver = new MongoDriver
-    connection = driver.connection(List("localhost"))
+    connection = Some(driver.connection(List("localhost")))
   }
 
   override def onStop(app: Application) {
-    connection = null
+    connection = None
   }
 
   override def onHandlerNotFound(request: RequestHeader): Future[SimpleResult] = {
