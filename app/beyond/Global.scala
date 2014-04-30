@@ -1,18 +1,37 @@
 package beyond
 
 import play.api.Application
-import play.api.GlobalSettings
 import play.api.libs.concurrent.Akka
 import play.api.Mode
 import play.api.Play
+import play.api.libs.concurrent.Promise
+import play.api.mvc.Filter
 import play.api.mvc.RequestHeader
+import play.api.mvc.Results.InternalServerError
 import play.api.mvc.Results.NotFound
 import play.api.mvc.SimpleResult
+import play.api.mvc.WithFilters
 import reactivemongo.api.MongoConnection
 import reactivemongo.api.MongoDriver
+import scala.concurrent.duration._
 import scala.concurrent.Future
 
-object Global extends GlobalSettings {
+private object TimeoutFilter extends Filter {
+  def apply(next: (RequestHeader) => Future[SimpleResult])(request: RequestHeader): Future[SimpleResult] = {
+    import play.api.libs.concurrent.Execution.Implicits.defaultContext
+
+    // FIXME: Make TimeoutDuration configurable.
+    val TimeoutDuration = 30.second
+    val timeoutFuture = Promise.timeout("Timeout", TimeoutDuration)
+    val resultFuture = next(request)
+    Future.firstCompletedOf(Seq(resultFuture, timeoutFuture)).map {
+      case result: SimpleResult => result
+      case errorMessage: String => InternalServerError(errorMessage)
+    }
+  }
+}
+
+object Global extends WithFilters(TimeoutFilter) {
   // MongoDriver and MongoConnection involve creation costs
   // the driver may create a new ActorSystem, and the connection
   // will connect to the servers. It is a good idea to store the
