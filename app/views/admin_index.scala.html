@@ -1,3 +1,61 @@
+@(jsonServerInfo: String)
+
 @admin_main("Admin Home") {
-    <h1>Beyond Admin Home</h1>
+    @admin_header()
+    <div id="content"></div>
+    <script type="text/jsx">
+    /** @@jsx React.DOM */
+    var Table = React.createClass({
+        render: function() {
+            var tableRows = $.map(this.props.data, function(value, key) {
+                return <tr><td>{key}</td><td>{value}</td></tr>;
+            });
+
+            return (
+                <table className="table">
+                    {tableRows}
+                </table>
+            );
+        }
+    });
+
+    var PanelBody = React.createClass({
+        render: function() {
+            return (
+                <div className="panel-body">
+                    <p>{this.props.children}</p>
+                </div>
+            );
+        }
+    });
+
+    var PanelHeading = React.createClass({
+        render: function() {
+            return (
+                <div className="panel-heading">{this.props.heading}</div>
+            );
+        }
+    });
+
+    var TablePanel = React.createClass({
+        render: function() {
+            return (
+                <div className="panel panel-default">
+                    <PanelHeading heading={this.props.heading} />
+                    <PanelBody>{this.props.children}</PanelBody>
+                    <Table data={this.props.data} />
+                </div>
+            );
+        }
+    });
+
+    var data = @Html(jsonServerInfo);
+
+    React.renderComponent(
+        <TablePanel heading="Server Information" data={data}>
+            Display the server information for the local server and the settings for Beyond framework in the configuration file
+        </TablePanel>,
+        document.getElementById('content')
+    );
+    </script>
 }

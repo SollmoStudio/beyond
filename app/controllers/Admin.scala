@@ -1,13 +1,17 @@
 package controllers
 
 import beyond.Global
-import play.api._
+import play.api.Play
+import play.api.Mode
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
+import play.api.libs.json._
+import play.core.PlayVersion
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.bson.BSONDocument
 import scala.concurrent.Future
+import scala.util.Properties
 
 object Admin extends Controller {
   private case class LoginData(username: String, password: String)
@@ -22,9 +26,21 @@ object Admin extends Controller {
     )(LoginData.apply)(LoginData.unapply)
   )
 
+  private def serverInfo : Map[String, String] = {
+    import Play.current
+    Map(
+      "OS Name" -> Properties.osName,
+      "Play mode" -> Play.mode.toString,
+      "PlayVersion current" -> PlayVersion.current,
+      "PlayVersion sbtVersion" -> PlayVersion.sbtVersion,
+      "PlayVersion scalaVersion" -> PlayVersion.scalaVersion
+    )
+  }
+
   def index : Action[AnyContent]= Action { request =>
     request.session.get("username").map { username =>
-      Ok(views.html.admin_index())
+      val jsonServerInfo = Json.stringify(Json.toJson(serverInfo))
+      Ok(views.html.admin_index(jsonServerInfo))
     }.getOrElse {
       Redirect(routes.Admin.login)
     }
