@@ -6,6 +6,7 @@ libraryDependencies ++= Seq(
   jdbc,
   anorm,
   cache,
+  "org.mozilla" % "rhino" % "1.7R4",
   "org.reactivemongo" %% "reactivemongo" % "0.10.0"
 )     
 
