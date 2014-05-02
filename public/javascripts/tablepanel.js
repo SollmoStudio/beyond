@@ -1,5 +1,5 @@
 /** @jsx React.DOM */
-define(["react"], function(React) {
+define(["jquery", "react", "bootstrap"], function($, React) {
     var Table = React.createClass({
         render: function() {
             var tableRows = $.map(this.props.data, function(value, key) {
