@@ -5,87 +5,65 @@
     <div id="content"></div>
     <script type="text/jsx">
     /** @@jsx React.DOM */
-    // FIXME: Move Header to a separate JSX file.
-    var Header = React.createClass({
-        render: function() {
-            var liElements = $.map(this.props.menus, function(value, key) {
-                return <li><a href={value}>{key}</a></li>;
-            });
+    require(["jsx!header"], function (Header) {
+        var Table = React.createClass({
+            render: function() {
+                var tableRows = $.map(this.props.data, function(value, key) {
+                    return <tr><td>{key}</td><td>{value}</td></tr>;
+                });
 
-            return (
-                <div className="navbar navbar-inverse navbar-fixed-top" role="navigation">
-                    <div className="container-fluid">
-                        <div className="navbar-header">
-                            <a className="navbar-brand" href="#">{this.props.projectName}</a>
-                        </div>
-                        <div className="navbar-collapse collapse">
-                            <ul className="nav navbar-nav navbar-right">
-                                    {liElements}
-                            </ul>
-                        </div>
+                return (
+                    <table className="table">
+                        {tableRows}
+                    </table>
+                );
+            }
+        });
+
+        var PanelBody = React.createClass({
+            render: function() {
+                return (
+                    <div className="panel-body">
+                        <p>{this.props.children}</p>
                     </div>
-                </div>
-            );
-        }
+                );
+            }
+        });
+
+        var PanelHeading = React.createClass({
+            render: function() {
+                return (
+                    <div className="panel-heading">{this.props.heading}</div>
+                );
+            }
+        });
+
+        var TablePanel = React.createClass({
+            render: function() {
+                return (
+                    <div className="panel panel-default">
+                        <PanelHeading heading={this.props.heading} />
+                        <PanelBody>{this.props.children}</PanelBody>
+                        <Table data={this.props.data} />
+                    </div>
+                );
+            }
+        });
+
+        var headerMenus = { "Home" : "#" };
+        var data = @Html(jsonServerInfo);
+
+        React.renderComponent(
+            <Header projectName="Beyond Framework" menus={headerMenus} />,
+            document.getElementById('header')
+        );
+
+        React.renderComponent(
+            <TablePanel heading="Server Information" data={data}>
+                Display the server information for the local server and the settings for Beyond framework in the configuration file
+            </TablePanel>,
+            document.getElementById('content')
+        );
     });
-
-    var Table = React.createClass({
-        render: function() {
-            var tableRows = $.map(this.props.data, function(value, key) {
-                return <tr><td>{key}</td><td>{value}</td></tr>;
-            });
-
-            return (
-                <table className="table">
-                    {tableRows}
-                </table>
-            );
-        }
-    });
-
-    var PanelBody = React.createClass({
-        render: function() {
-            return (
-                <div className="panel-body">
-                    <p>{this.props.children}</p>
-                </div>
-            );
-        }
-    });
-
-    var PanelHeading = React.createClass({
-        render: function() {
-            return (
-                <div className="panel-heading">{this.props.heading}</div>
-            );
-        }
-    });
-
-    var TablePanel = React.createClass({
-        render: function() {
-            return (
-                <div className="panel panel-default">
-                    <PanelHeading heading={this.props.heading} />
-                    <PanelBody>{this.props.children}</PanelBody>
-                    <Table data={this.props.data} />
-                </div>
-            );
-        }
-    });
-
-    var headerMenus = { "Home" : "#" };
-    var data = @Html(jsonServerInfo);
-
-    React.renderComponent(
-        <Header projectName="Beyond Framework" menus={headerMenus} />,
-        document.getElementById('header')
-    );
-
-    React.renderComponent(
-        <TablePanel heading="Server Information" data={data}>
-            Display the server information for the local server and the settings for Beyond framework in the configuration file
-        </TablePanel>,
-        document.getElementById('content')
-    );
     </script>
 }
