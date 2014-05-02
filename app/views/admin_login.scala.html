@@ -5,7 +5,7 @@
     <div id="content"></div>
     <script type="text/jsx">
         /** @@jsx React.DOM */
-        require(["jsx!loginform"], function (LoginForm) {
+        require(["react", "jsx!loginform"], function (React, LoginForm) {
             React.renderComponent(
                 <LoginForm postUrl="@routes.Admin.doLogin" heading="Welcome to Beyond" errorMessage="@errorMessage" />,
                 document.getElementById('content')

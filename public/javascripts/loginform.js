@@ -1,5 +1,5 @@
 /** @jsx React.DOM */
-define(function() {
+define(["react"], function(React) {
     return React.createClass({
         handleSubmit: function () {
             var username = this.refs.username.getDOMNode().value.trim();

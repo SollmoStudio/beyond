@@ -1,5 +1,5 @@
 /** @jsx React.DOM */
-define(function() {
+define(["react"], function(React) {
     var Table = React.createClass({
         render: function() {
             var tableRows = $.map(this.props.data, function(value, key) {

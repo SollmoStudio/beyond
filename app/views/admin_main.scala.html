@@ -13,7 +13,6 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
         <script src="@routes.Assets.at("javascripts/jquery-1.9.0.min.js")" type="text/javascript"></script>
-        <script src="@routes.Assets.at("react-0.10.0.min.js")"></script>
             <!-- FIXME: Don't use JSXTransformer in production mode. Precompile JSX files instead. -->
         <script src="@routes.Assets.at("JSXTransformer-0.10.0.js")"></script>
         <script src="@routes.Assets.at("bootstrap-3.1.1/js/bootstrap.min.js")"></script>
@@ -23,7 +22,8 @@
                 baseUrl: "@routes.Assets.at("javascripts")",
                 paths: {
                     jsx: "@routes.Assets.at("jsx")",
-                    JSXTransformer: "@routes.Assets.at("JSXTransformer-0.10.0")"
+                    JSXTransformer: "@routes.Assets.at("JSXTransformer-0.10.0")",
+                    react: "@routes.Assets.at("react-0.10.0.min")"
                 },
                 shim: {
                     JSXTransformer: {

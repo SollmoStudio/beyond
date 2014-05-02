@@ -1,5 +1,5 @@
 /** @jsx React.DOM */
-define(function() {
+define(["react"], function(React) {
     return React.createClass({
         render: function() {
             var liElements = $.map(this.props.menus, function (value, key) {

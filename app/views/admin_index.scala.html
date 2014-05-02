@@ -5,7 +5,7 @@
     <div id="content"></div>
     <script type="text/jsx">
     /** @@jsx React.DOM */
-    require(["jsx!header", "jsx!tablepanel"], function (Header, TablePanel) {
+    require(["react", "jsx!header", "jsx!tablepanel"], function (React, Header, TablePanel) {
         var headerMenus = { "Home" : "#" };
         var data = @Html(jsonServerInfo);
 
