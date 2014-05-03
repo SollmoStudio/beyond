@@ -16,3 +16,5 @@ POST    /session/logout             controllers.Session.logout
 GET     /admin/                     controllers.Admin.index
 GET     /admin/login                controllers.Admin.login
 POST    /admin/login                controllers.Admin.doLogin
+
+POST    /plugin/*path               controllers.Plugin.route(path)
