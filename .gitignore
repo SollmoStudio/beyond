@@ -30,3 +30,5 @@ activator-sbt-echo-play-shim.sbt
 project/activator-sbt-echo-play-shim.sbt
 project/activator-sbt-eclipse-shim.sbt
 project/activator-sbt-idea-shim.sbt
+# MongoDB database path
+data
