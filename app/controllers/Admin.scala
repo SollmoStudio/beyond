@@ -60,8 +60,8 @@ object Admin extends Controller {
       loginData => {
         import play.api.libs.concurrent.Execution.Implicits._
 
-        val db = Global.mongoConnection.get.db("admin")
-        val collection = db.collection[BSONCollection]("password")
+        val db = Global.mongoConnection.get.db("beyond")
+        val collection = db.collection[BSONCollection]("admin.password")
         val query = BSONDocument("username" -> loginData.username)
         val filter = BSONDocument("password" -> 1, "_id" -> 0)
 
