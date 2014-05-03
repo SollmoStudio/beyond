@@ -6,6 +6,23 @@ beyond
 
 Beyond: The Scalable Game Server Framework
 
+### Running Beyond
+
+Beyond requires a recent version of [Scala] and [Play Framework].
+
+[Scala]: http://www.scala-lang.org/
+[Play Framework]:http://www.playframework.com/
+
+If you have these installed, running Beyond is straightforward:
+
+Check out Beyond using Git:
+
+    git clone git@github.com:SollmoStudio/beyond.git
+
+Change to the beyond directory and run play:
+
+    play run
+
 ### Licence
 
 This software is licensed under the Apache 2 license, quoted below.
