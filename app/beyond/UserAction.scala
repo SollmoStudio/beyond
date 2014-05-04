@@ -21,7 +21,7 @@ import play.api.mvc.WrappedRequest
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-class UserActionRequest[A](val username: String, request: Request[A]) extends WrappedRequest[A](request)
+class RequestWithUsername[A](val username: String, request: Request[A]) extends WrappedRequest[A](request)
 
 object UserAction {
   private def createUserActionRouter() = {
@@ -34,24 +34,24 @@ object UserAction {
 
   def apply(block: => SimpleResult): Action[AnyContent] = apply(_ => block)
 
-  def apply(block: UserActionRequest[AnyContent] => SimpleResult): Action[AnyContent] = apply(BodyParsers.parse.anyContent)(block)
+  def apply(block: RequestWithUsername[AnyContent] => SimpleResult): Action[AnyContent] = apply(BodyParsers.parse.anyContent)(block)
 
-  def apply[A](bodyParser: BodyParser[A])(block: UserActionRequest[A] => SimpleResult): Action[A] = async(bodyParser) { request =>
+  def apply[A](bodyParser: BodyParser[A])(block: RequestWithUsername[A] => SimpleResult): Action[A] = async(bodyParser) { request =>
     Future.successful(block(request))
   }
 
   def async(block: => Future[SimpleResult]): Action[AnyContent] = async(_ => block)
 
-  def async(block: UserActionRequest[AnyContent] => Future[SimpleResult]): Action[AnyContent] = async(BodyParsers.parse.anyContent)(block)
+  def async(block: RequestWithUsername[AnyContent] => Future[SimpleResult]): Action[AnyContent] = async(BodyParsers.parse.anyContent)(block)
 
-  def async[A](bodyParser: BodyParser[A])(block: UserActionRequest[A] => Future[SimpleResult]): Action[A] = new Action[A] {
+  def async[A](bodyParser: BodyParser[A])(block: RequestWithUsername[A] => Future[SimpleResult]): Action[A] = new Action[A] {
     override def parser: BodyParser[A] = bodyParser
 
     override def apply(request: Request[A]): Future[SimpleResult] = {
       // FIXME: Verify if this request belongs to this server.
       request.session.get("username").map { username =>
         implicit val Timeout: Timeout= 1000
-        ask(userActionActor, BlockAndRequest(block, new UserActionRequest(username, request))).asInstanceOf[Future[SimpleResult]]
+        ask(userActionActor, BlockAndRequest(block, new RequestWithUsername(username, request))).asInstanceOf[Future[SimpleResult]]
       } getOrElse {
         Future.successful(Forbidden)
       }
@@ -59,7 +59,7 @@ object UserAction {
   }
 }
 
-private case class BlockAndRequest[A] (block: (UserActionRequest[A]) => Future[SimpleResult], request: UserActionRequest[A]) extends ConsistentHashable {
+private case class BlockAndRequest[A] (block: (RequestWithUsername[A]) => Future[SimpleResult], request: RequestWithUsername[A]) extends ConsistentHashable {
   // FIXME: Use a better hashing algorithm.
   override def consistentHashKey: Any = request.username.hashCode()
 }
