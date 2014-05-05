@@ -19,8 +19,7 @@ object Session extends Controller {
     // FIXME: Check password
 
     val username = data("username")
-    val session = ("username", username)
-    Ok("Hello " + username).withSession(session)
+    Ok("Hello " + username).withSession("username" -> username)
   }
 
   def logout : Action[AnyContent] = UserAction { request =>
