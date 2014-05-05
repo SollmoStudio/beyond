@@ -15,7 +15,7 @@ object GamePlugin {
   def apply(): GamePlugin = {
     // FIXME: Don't hardcode plugin source code here.
     val source = "function handle(path) { return 'Hello ' + path; }"
-    val cx: Context = Context.enter()
+    val cx: Context = BeyondContextFactory.enterContext()
     try {
       val scope: Scriptable = cx.initStandardObjects()
       cx.evaluateString(scope, source, "source", 1, null)
@@ -31,7 +31,7 @@ object GamePlugin {
 
   private class GamePluginImpl(scope: Scriptable, handler: Function) extends GamePlugin {
     def handle(path: String): String = {
-      val cx: Context = Context.enter()
+      val cx: Context = BeyondContextFactory.enterContext()
       try {
         val args: Array[AnyRef] = Array(path)
         val result = handler.call(cx, scope, scope, args)
