@@ -1,5 +1,6 @@
 package beyond.plugin
 
+import org.mozilla.javascript.commonjs.module.ModuleScope
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextAction
 import org.mozilla.javascript.Function
@@ -51,22 +52,24 @@ object GamePlugin {
       if (!global.isInitialized) {
         global.init(contextFactory)
       }
-      cx.evaluateString(global, source, "source", 1, null)
+      // FIXME: Pass the module URI once we load scripts from file path.
+      val scope = new ModuleScope(global, null, null)
+      cx.evaluateString(scope, source, "source", 1, null)
       // FIXME: Don't hardcode the name of handler function.
       // FIXME: handler might be Scriptable.NOT_FOUND if there is no function named "handle".
       // Also, it might not be an instance of Function.
-      val handler = global.get("handle", global).asInstanceOf[Function]
-      new GamePluginImpl(handler)
+      val handler = scope.get("handle", scope).asInstanceOf[Function]
+      new GamePluginImpl(scope, handler)
     } finally {
       Context.exit()
     }
   }
 
-  private class GamePluginImpl(handler: Function) extends GamePlugin {
+  private class GamePluginImpl(scope: ModuleScope, handler: Function) extends GamePlugin {
     def handle(path: String): String = {
       val result = contextFactory.call { cx: Context =>
         val args: Array[AnyRef] = Array(path)
-        handler.call(cx, global, global, args)
+        handler.call(cx, scope, scope, args)
       }
       result.toString
     }
