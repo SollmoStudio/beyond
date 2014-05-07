@@ -54,7 +54,10 @@ object GamePlugin {
       }
       // FIXME: Pass the module URI once we load scripts from file path.
       val scope = new ModuleScope(global, null, null)
-      cx.evaluateString(scope, source, "source", 1, null)
+      // FIXME: Cache compiled scripts for faster execution later.
+      val script = cx.compileString(source, "source", 1, null)
+      script.exec(cx, scope)
+
       // FIXME: Don't hardcode the name of handler function.
       // FIXME: handler might be Scriptable.NOT_FOUND if there is no function named "handle".
       // Also, it might not be an instance of Function.
