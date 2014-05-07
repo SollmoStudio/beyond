@@ -21,6 +21,14 @@ object GamePlugin {
   // because we don't need all powers of Global.
   private val global: Global = new Global
 
+  // FIXME: We don't want to allow plugins to terminate the system.
+  // Delete this once we replace Global with our own global scope.
+  global.initQuitAction {
+    (_: Context, exitCode: Int) => System.exit(exitCode)
+  }
+
+  global.init(contextFactory)
+
   // FIXME: Move implicit functions for Rhino interoperability to another package.
   private implicit def functionToQuitAction(f: (Context, Int) => Unit): QuitAction = {
     new QuitAction {
@@ -39,19 +47,10 @@ object GamePlugin {
   }
 
   def apply(): GamePlugin = {
-    // FIXME: We don't want to allow plugins to terminate the system.
-    // Delete this once we replace Global with our own global scope.
-    global.initQuitAction {
-      (_: Context, exitCode: Int) => System.exit(exitCode)
-    }
-
     // FIXME: Don't hardcode plugin source code here.
     val source = "function handle(path) { return 'Hello ' + path; }"
     val cx: Context = contextFactory.enterContext()
     try {
-      if (!global.isInitialized) {
-        global.init(contextFactory)
-      }
       // FIXME: Pass the module URI once we load scripts from file path.
       val scope = new ModuleScope(global, null, null)
       // FIXME: Cache compiled scripts for faster execution later.
