@@ -40,13 +40,19 @@ object Global extends WithFilters(TimeoutFilter) {
 
   def mongoConnection: Option[MongoConnection] = connection
 
+  private var zooKeeperLauncher: Option[ZooKeeperLauncher] = None
+
   override def onStart(app: Application) {
     val driver = new MongoDriver(Akka.system(app))
     connection = Some(driver.connection(List("localhost")))
+
+    zooKeeperLauncher = Some(new ZooKeeperLauncher)
+    zooKeeperLauncher.foreach(_.launch())
   }
 
   override def onStop(app: Application) {
     connection = None
+    zooKeeperLauncher = None
   }
 
   override def onHandlerNotFound(request: RequestHeader): Future[SimpleResult] = {
