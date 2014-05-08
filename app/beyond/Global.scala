@@ -1,5 +1,7 @@
 package beyond
 
+import akka.actor.ActorRef
+import akka.actor.Props
 import play.api.Application
 import play.api.libs.concurrent.Akka
 import play.api.Mode
@@ -40,18 +42,20 @@ object Global extends WithFilters(TimeoutFilter) {
 
   def mongoConnection: Option[MongoConnection] = connection
 
-  private var zooKeeperLauncher: Option[ZooKeeperLauncher] = None
+  // FIXME: When we have more servers, create a supervision tree here.
+  private var zooKeeperLauncher: Option[ActorRef] = _
 
   override def onStart(app: Application) {
     val driver = new MongoDriver(Akka.system(app))
     connection = Some(driver.connection(List("localhost")))
 
-    zooKeeperLauncher = Some(new ZooKeeperLauncher)
-    zooKeeperLauncher.foreach(_.launch())
+    zooKeeperLauncher = Some(Akka.system(app).actorOf(Props[ZooKeeperLauncher], name = "zooKeeperLauncher"))
+    zooKeeperLauncher.foreach(_ ! ZookeeperLauncherCommand.Launch)
   }
 
   override def onStop(app: Application) {
     connection = None
+    zooKeeperLauncher.foreach(_ ! ZookeeperLauncherCommand.Shutdown)
     zooKeeperLauncher = None
   }
 
