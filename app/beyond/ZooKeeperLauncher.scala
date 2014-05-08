@@ -4,7 +4,7 @@ import akka.actor.Actor
 import org.apache.zookeeper.server.ServerConfig
 import org.apache.zookeeper.server.ZooKeeperServerMain
 
-object ZookeeperLauncherCommand extends Enumeration {
+object ZooKeeperLauncherCommand extends Enumeration {
   val Launch, Shutdown = Value
 }
 
@@ -40,9 +40,9 @@ class ZooKeeperLauncher extends Actor {
 
   override def receive: Receive = {
     // FIXME: Check if this beyond instance should launch a ZooKeeperServer.
-    case ZookeeperLauncherCommand.Launch =>
+    case ZooKeeperLauncherCommand.Launch =>
       zkServerThread.start()
-    case ZookeeperLauncherCommand.Shutdown =>
+    case ZooKeeperLauncherCommand.Shutdown =>
       zkServerThread.shutdown()
   }
 }
