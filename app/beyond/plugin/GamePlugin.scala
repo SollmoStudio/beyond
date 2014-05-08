@@ -15,7 +15,7 @@ trait GamePlugin {
 
 // FIXME: Handle script errors.
 object GamePlugin {
-  private val contextFactory: BeyondContextFactory = new BeyondContextFactory
+  private val contextFactory: BeyondContextFactory = new BeyondContextFactory(new BeyondContextFactoryConfig)
 
   // FIXME: Need a new class extending org.mozilla.javascript.TopLevel
   // because we don't need all powers of Global.
