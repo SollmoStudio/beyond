@@ -52,18 +52,15 @@ object Global extends WithFilters(TimeoutFilter) {
     connection = Some(driver.connection(List("localhost")))
 
     zooKeeperLauncher = Some(Akka.system(app).actorOf(Props[ZooKeeperLauncher], name = "zooKeeperLauncher"))
-    zooKeeperLauncher.foreach(_ ! ZooKeeperLauncherCommand.Launch)
-
     mongoDBLauncher = Some(Akka.system(app).actorOf(Props[MongoDBLauncher], name = "mongoDBLauncher"))
-    mongoDBLauncher.foreach(_ ! MongoDBLauncherCommand.Launch)
   }
 
   override def onStop(app: Application) {
     connection = None
-    zooKeeperLauncher.foreach(_ ! ZooKeeperLauncherCommand.Shutdown)
+    zooKeeperLauncher.foreach(Akka.system(app).stop(_))
     zooKeeperLauncher = None
 
-    mongoDBLauncher.foreach(_ ! MongoDBLauncherCommand.Shutdown)
+    mongoDBLauncher.foreach(Akka.system(app).stop(_))
     mongoDBLauncher = None
   }
 
