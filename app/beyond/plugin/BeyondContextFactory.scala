@@ -4,10 +4,12 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
 import scala.annotation.switch
 
-class BeyondContextFactory(strictMode: Boolean = false,
-                           strictVars: Boolean = true,
-                           warningAsError: Boolean = false,
-                           parentProtoProperties: Boolean = true) extends ContextFactory {
+case class BeyondContextFactoryConfig(strictMode: Boolean = false,
+                                      strictVars: Boolean = true,
+                                      warningAsError: Boolean = false,
+                                      parentProtoProperties: Boolean = true)
+
+class BeyondContextFactory(config: BeyondContextFactoryConfig) extends ContextFactory {
   override def onContextCreated(cx: Context) {
     super.onContextCreated(cx)
     cx.setWrapFactory(BeyondWrapFactory)
@@ -23,12 +25,12 @@ class BeyondContextFactory(strictMode: Boolean = false,
 
   protected override def hasFeature(cx: Context, featureIndex: Int): Boolean = {
     (featureIndex: @switch) match {
-      case Context.FEATURE_STRICT_VARS => strictVars
-      case Context.FEATURE_STRICT_EVAL => strictMode
-      case Context.FEATURE_STRICT_MODE => strictMode
+      case Context.FEATURE_STRICT_VARS => config.strictVars
+      case Context.FEATURE_STRICT_EVAL => config.strictMode
+      case Context.FEATURE_STRICT_MODE => config.strictMode
       case Context.FEATURE_RESERVED_KEYWORD_AS_IDENTIFIER => true
-      case Context.FEATURE_WARNING_AS_ERROR => warningAsError
-      case Context.FEATURE_PARENT_PROTO_PROPERTIES => parentProtoProperties
+      case Context.FEATURE_WARNING_AS_ERROR => config.warningAsError
+      case Context.FEATURE_PARENT_PROTO_PROPERTIES => config.parentProtoProperties
       case Context.FEATURE_LOCATION_INFORMATION_IN_ERROR => true
       case _ => super.hasFeature(cx, featureIndex);
     }
