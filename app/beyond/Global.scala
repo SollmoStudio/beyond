@@ -45,18 +45,26 @@ object Global extends WithFilters(TimeoutFilter) {
   // FIXME: When we have more servers, create a supervision tree here.
   private var zooKeeperLauncher: Option[ActorRef] = _
 
+  private var mongoDBLauncher: Option[ActorRef] = _
+
   override def onStart(app: Application) {
     val driver = new MongoDriver(Akka.system(app))
     connection = Some(driver.connection(List("localhost")))
 
     zooKeeperLauncher = Some(Akka.system(app).actorOf(Props[ZooKeeperLauncher], name = "zooKeeperLauncher"))
     zooKeeperLauncher.foreach(_ ! ZooKeeperLauncherCommand.Launch)
+
+    mongoDBLauncher = Some(Akka.system(app).actorOf(Props[MongoDBLauncher], name = "mongoDBLauncher"))
+    mongoDBLauncher.foreach(_ ! MongoDBLauncherCommand.Launch)
   }
 
   override def onStop(app: Application) {
     connection = None
     zooKeeperLauncher.foreach(_ ! ZooKeeperLauncherCommand.Shutdown)
     zooKeeperLauncher = None
+
+    mongoDBLauncher.foreach(_ ! MongoDBLauncherCommand.Shutdown)
+    mongoDBLauncher = None
   }
 
   override def onHandlerNotFound(request: RequestHeader): Future[SimpleResult] = {
