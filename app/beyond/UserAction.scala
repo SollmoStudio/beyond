@@ -17,6 +17,7 @@ import play.api.mvc.Request
 import play.api.mvc.Results.Forbidden
 import play.api.mvc.SimpleResult
 import play.api.mvc.WrappedRequest
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
@@ -51,7 +52,7 @@ object UserAction {
     override def apply(request: Request[A]): Future[SimpleResult] = {
       // FIXME: Verify if this request belongs to this server.
       request.session.get("username").map { username =>
-        implicit val Timeout: Timeout= 1000
+        implicit val timeout = Timeout(1 seconds)
         ask(userActionActor, BlockAndRequest(block, new RequestWithUsername(username, request))).asInstanceOf[Future[SimpleResult]]
       } getOrElse {
         Future.successful(Forbidden)
