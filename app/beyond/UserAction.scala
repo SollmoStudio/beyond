@@ -8,7 +8,6 @@ import akka.pattern.pipe
 import akka.routing.ConsistentHashingRouter
 import akka.routing.ConsistentHashingRouter.ConsistentHashable
 import akka.util.Timeout
-import play.api.Play.current
 import play.api.libs.concurrent.Akka
 import play.api.mvc.Action
 import play.api.mvc.AnyContent
@@ -25,6 +24,8 @@ class RequestWithUsername[A](val username: String, request: Request[A]) extends 
 
 object UserAction {
   private def createUserActionRouter() = {
+    import play.api.Play.current
+
     val numProcessors = Runtime.getRuntime().availableProcessors()
     val router = ConsistentHashingRouter(nrOfInstances = numProcessors)
     Akka.system.actorOf(Props[UserActionActor].withRouter(router), name = "userActionActor")
