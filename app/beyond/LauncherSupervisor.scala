@@ -6,7 +6,7 @@ import akka.actor.Props
 import akka.actor.SupervisorStrategy._
 
 class LauncherSupervisor extends Actor {
-  context.actorOf(Props[ZooKeeperLauncher], name = "zooKeeperLauncher")
+  context.actorOf(Props[ZooKeeperLauncher].withDispatcher("akka.io.pinned-dispatcher"), name = "zooKeeperLauncher")
   context.actorOf(Props[MongoDBLauncher], name = "mongoDBLauncher")
 
   override val supervisorStrategy =
