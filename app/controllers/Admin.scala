@@ -46,8 +46,12 @@ object Admin extends Controller {
     }
   }
 
-  def login : Action[AnyContent] = Action {
-    Ok(views.html.admin_login())
+  def login : Action[AnyContent] = Action { request =>
+    request.session.get("username").map { username =>
+      Redirect(routes.Admin.index)
+    }.getOrElse {
+      Ok(views.html.admin_login())
+    }
   }
 
   def doLogin : Action[AnyContent] = Action.async { implicit request =>
