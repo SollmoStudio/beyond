@@ -6,6 +6,7 @@ libraryDependencies ++= Seq(
   jdbc,
   anorm,
   cache,
+  "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
   "org.apache.curator" % "curator-recipes" % "2.4.2",
   "org.apache.zookeeper" % "zookeeper" % "3.4.6",
   "org.mozilla" % "rhino" % "1.7R4",
