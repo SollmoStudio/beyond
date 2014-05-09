@@ -42,20 +42,20 @@ object Global extends WithFilters(TimeoutFilter) {
 
   def mongoConnection: Option[MongoConnection] = connection
 
-  private var launcherSupervisor: Option[ActorRef] = _
+  private var beyondSupervisor: Option[ActorRef] = _
 
   override def onStart(app: Application) {
     val driver = new MongoDriver(Akka.system(app))
     connection = Some(driver.connection(List("localhost")))
 
-    launcherSupervisor = Some(Akka.system(app).actorOf(Props[LauncherSupervisor], name = "launcherSupervisor"))
+    beyondSupervisor = Some(Akka.system(app).actorOf(Props[BeyondSupervisor], name = "beyondSupervisor"))
   }
 
   override def onStop(app: Application) {
     connection = None
 
-    launcherSupervisor.foreach(Akka.system(app).stop(_))
-    launcherSupervisor = None
+    beyondSupervisor.foreach(Akka.system(app).stop(_))
+    beyondSupervisor = None
   }
 
   override def onHandlerNotFound(request: RequestHeader): Future[SimpleResult] = {

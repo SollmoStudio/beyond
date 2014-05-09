@@ -1,11 +1,9 @@
 package beyond
 
-import akka.actor.ActorRef
 import akka.actor.Actor
-import akka.actor.Props
+import akka.actor.ActorSelection
 import akka.pattern.ask
 import akka.pattern.pipe
-import akka.routing.ConsistentHashingRouter
 import akka.routing.ConsistentHashingRouter.ConsistentHashable
 import akka.util.Timeout
 import play.api.libs.concurrent.Akka
@@ -24,15 +22,9 @@ import scala.concurrent.Future
 class RequestWithUsername[A](val username: String, request: Request[A]) extends WrappedRequest[A](request)
 
 object UserAction {
-  private def createUserActionRouter() = {
-    import play.api.Play.current
+  import play.api.Play.current
 
-    val numProcessors = Runtime.getRuntime().availableProcessors()
-    val router = ConsistentHashingRouter(nrOfInstances = numProcessors)
-    Akka.system.actorOf(Props[UserActionActor].withRouter(router), name = "userActionActor")
-  }
-
-  private val userActionActor: ActorRef = createUserActionRouter()
+  private val userActionActor: ActorSelection = Akka.system.actorSelection("/user/beyondSupervisor/userActionActor")
 
   def apply(block: => SimpleResult): Action[AnyContent] = apply(_ => block)
 
