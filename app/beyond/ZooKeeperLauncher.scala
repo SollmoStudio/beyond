@@ -1,8 +1,14 @@
 package beyond
 
 import akka.actor.Actor
+import java.io.IOException
+import org.apache.zookeeper.client.FourLetterWordMain.send4LetterWord
 import org.apache.zookeeper.server.ServerConfig
 import org.apache.zookeeper.server.ZooKeeperServerMain
+import scala.annotation.tailrec
+import scala.concurrent.duration._
+
+class LauncherInitializationException extends RuntimeException
 
 // FIXME: Shutdown the server and crash this actor if the underlying ZooKeeper
 // server does not respond.
@@ -34,12 +40,62 @@ class ZooKeeperLauncher extends Actor {
 
   private val zkServerThread: ZooKeeperThread = new ZooKeeperThread
 
+  private val host = "127.0.0.1"
+  private val port = config.getClientPortAddress.getPort
+
+  // Retry until the given block returns true.
+  @tailrec
+  private def retryWithinTimeRange(timeRange: Duration, interval: Duration)(block: => Boolean): Boolean = {
+    val start = System.currentTimeMillis()
+    if (block) {
+      true
+    } else {
+      Thread.sleep(interval.toMillis)
+
+      val elapsed = System.currentTimeMillis() - start
+      val newTimeRange = timeRange - elapsed.millis
+      if (newTimeRange > Duration.Zero) {
+        retryWithinTimeRange(newTimeRange, interval)(block)
+      } else {
+        false
+      }
+    }
+  }
+
+  private def waitForServerUp() {
+    val success = retryWithinTimeRange(timeRange = 10 seconds, interval = 250 millis) {
+      try {
+        send4LetterWord(host, port, "stat").contains("Zookeeper version:")
+      } catch {
+        // Ignore. this is expected if server is not up yet.
+        case _: IOException => false
+      }
+    }
+    if (!success) {
+      throw new LauncherInitializationException
+    }
+  }
+
+  private def waitForServerDown() {
+    // FIXME: Log if shutdown fails.
+    retryWithinTimeRange(timeRange = 10 seconds, interval = 250 millis) {
+      try {
+        send4LetterWord(host, port, "stat")
+        false
+      } catch {
+        case _: IOException => true
+      }
+    }
+  }
+
   override def preStart() {
     zkServerThread.start()
+    waitForServerUp()
   }
 
   override def postStop() {
     zkServerThread.shutdown()
+    waitForServerDown()
   }
 
   override def receive: Receive = {
