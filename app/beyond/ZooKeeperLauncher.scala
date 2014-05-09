@@ -114,6 +114,7 @@ class ZooKeeperLauncher extends Actor {
     tick.cancel()
 
     zkServerThread.shutdown()
+    zkServerThread.join()
     waitForServerDown()
   }
 
