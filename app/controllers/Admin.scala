@@ -54,6 +54,10 @@ object Admin extends Controller {
     }
   }
 
+  def logout : Action[AnyContent] = Action {
+    Redirect(routes.Admin.index).withNewSession
+  }
+
   def doLogin : Action[AnyContent] = Action.async { implicit request =>
     loginForm.bindFromRequest.fold(
       formWithErrors => {

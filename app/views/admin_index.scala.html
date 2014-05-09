@@ -6,7 +6,7 @@
     <script type="text/jsx">
     /** @@jsx React.DOM */
     require(["react", "jsx!header", "jsx!tablepanel"], function (React, Header, TablePanel) {
-        var headerMenus = { "Home" : "#" };
+        var headerMenus = { "Home" : "#", "Logout" : "/admin/logout" };
         var data = @Html(jsonServerInfo);
 
         React.renderComponent(
