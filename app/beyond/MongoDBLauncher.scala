@@ -18,12 +18,17 @@ class MongoDBLauncher extends Actor {
   private var process: Option[Process] = _
 
   override def preStart() {
+    // FIXME: Don't hardcode MongoDB data directory.
+    val dbPath = new File("data")
+    if (!dbPath.exists()) {
+      dbPath.mkdirs()
+    }
+
     val maybePath = mongodPaths.find(new File(_).isFile)
     // FIXME: What if there is no mongod binary?
     maybePath.foreach {
       path =>
-      // FIXME: Don't hardcode MongoDB data directory.
-        val processBuilder = Process(Seq(path, "--dbpath", "data"))
+        val processBuilder = Process(Seq(path, "--dbpath", dbPath.getCanonicalPath))
         process = Some(processBuilder.run())
     }
   }
