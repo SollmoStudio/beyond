@@ -10,7 +10,7 @@ libraryDependencies ++= Seq(
   "org.apache.zookeeper" % "zookeeper" % "3.4.6",
   "org.mozilla" % "rhino" % "1.7R4",
   "org.reactivemongo" %% "reactivemongo" % "0.10.0"
-)     
+).map(_.exclude("org.slf4j", "slf4j-log4j12"))
 
 play.Project.playScalaSettings
 
