@@ -8,11 +8,9 @@ import org.apache.zookeeper.server.ZooKeeperServerMain
 import scala.annotation.tailrec
 import scala.concurrent.duration._
 
-class LauncherInitializationException extends RuntimeException
-
-// FIXME: Shutdown the server and crash this actor if the underlying ZooKeeper
-// server does not respond.
 class ZooKeeperLauncher extends Actor {
+  case object HeartBeat
+
   class BeyondZooKeeperServerMain extends ZooKeeperServerMain {
     // Make shutdown() public because it is protected in ZooKeeperServerMain.
     override def shutdown() {
@@ -42,6 +40,10 @@ class ZooKeeperLauncher extends Actor {
 
   private val host = "127.0.0.1"
   private val port = config.getClientPortAddress.getPort
+
+  import play.api.libs.concurrent.Execution.Implicits._
+  // FIXME: Check if the scheduler keeps sending messages while the actor is blocking on health check.
+  val tick = context.system.scheduler.schedule(initialDelay = 10 seconds, interval = 1 seconds, self, HeartBeat)
 
   // Retry until the given block returns true.
   @tailrec
@@ -88,18 +90,35 @@ class ZooKeeperLauncher extends Actor {
     }
   }
 
+  private def healthCheck() {
+    // FIXME: Adjust time range and interval.
+    val success = retryWithinTimeRange(timeRange = 30 seconds, interval = 1 seconds) {
+      try {
+        send4LetterWord(host, port, "stat").contains("Zookeeper version:")
+      } catch {
+        case _: IOException =>
+          throw new ServerNotRespondingException
+      }
+    }
+    if (!success) {
+      throw new ServerNotRespondingException
+    }
+  }
+
   override def preStart() {
     zkServerThread.start()
     waitForServerUp()
   }
 
   override def postStop() {
+    tick.cancel()
+
     zkServerThread.shutdown()
     waitForServerDown()
   }
 
   override def receive: Receive = {
-    case _ =>
+    case HeartBeat => healthCheck()
   }
 }
 
