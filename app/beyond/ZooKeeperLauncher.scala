@@ -1,6 +1,7 @@
 package beyond
 
 import akka.actor.Actor
+import akka.actor.ActorLogging
 import java.io.IOException
 import org.apache.zookeeper.client.FourLetterWordMain.send4LetterWord
 import org.apache.zookeeper.server.ServerConfig
@@ -8,7 +9,7 @@ import org.apache.zookeeper.server.ZooKeeperServerMain
 import scala.annotation.tailrec
 import scala.concurrent.duration._
 
-class ZooKeeperLauncher extends Actor {
+class ZooKeeperLauncher extends Actor with ActorLogging {
   case object HeartBeat
 
   class BeyondZooKeeperServerMain extends ZooKeeperServerMain {
@@ -102,6 +103,7 @@ class ZooKeeperLauncher extends Actor {
   override def preStart() {
     zkServerThread.start()
     waitForServerUp()
+    log.info("ZooKeeper started")
   }
 
   override def postStop() {
@@ -110,6 +112,7 @@ class ZooKeeperLauncher extends Actor {
     zkServer.shutdown()
     zkServerThread.join()
     waitForServerDown()
+    log.info("ZooKeeper stopped")
   }
 
   override def receive: Receive = {
