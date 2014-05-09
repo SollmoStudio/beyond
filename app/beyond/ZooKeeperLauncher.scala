@@ -18,16 +18,6 @@ class ZooKeeperLauncher extends Actor {
     }
   }
 
-  class ZooKeeperThread extends Thread {
-    override def run() {
-      zkServer.runFromConfig(config)
-    }
-
-    def shutdown() {
-      zkServer.shutdown()
-    }
-  }
-
   // FIXME: Currently, ZooKeeperLauncher launches a standalone ZooKeeper server.
   // Setup a ZooKeeper cluster instead.
   private val zkServer: BeyondZooKeeperServerMain = new BeyondZooKeeperServerMain
@@ -36,7 +26,11 @@ class ZooKeeperLauncher extends Actor {
   // FIXME: Don't hardcode the configuration file.
   config.parse("zoo.cfg")
 
-  private val zkServerThread: ZooKeeperThread = new ZooKeeperThread
+  private val zkServerThread: Thread = new Thread(new Runnable {
+    override def run() {
+      zkServer.runFromConfig(config)
+    }
+  })
 
   private val host = "127.0.0.1"
   private val port = config.getClientPortAddress.getPort
@@ -113,7 +107,7 @@ class ZooKeeperLauncher extends Actor {
   override def postStop() {
     tick.cancel()
 
-    zkServerThread.shutdown()
+    zkServer.shutdown()
     zkServerThread.join()
     waitForServerDown()
   }
