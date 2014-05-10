@@ -24,8 +24,8 @@ class ZooKeeperLauncher extends Actor with ActorLogging {
   private val zkServer: BeyondZooKeeperServerMain = new BeyondZooKeeperServerMain
   private val config: ServerConfig = new ServerConfig
 
-  // FIXME: Don't hardcode the configuration file.
-  config.parse("zoo.cfg")
+  import play.api.Play.current
+  config.parse(current.configuration.getString("beyond.zookeeper.config-path").getOrElse("zoo.cfg"))
 
   private val zkServerThread: Thread = new Thread(new Runnable {
     override def run() {
