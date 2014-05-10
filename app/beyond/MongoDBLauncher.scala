@@ -1,6 +1,7 @@
 package beyond
 
 import akka.actor.Actor
+import akka.actor.ActorLogging
 import java.io.File
 import scala.sys.process.Process
 
@@ -8,7 +9,7 @@ import scala.sys.process.Process
 // once we have more than one process launchers.
 // FIXME: Shutdown the server and crash this actor if the underlying MongoDB
 // server does not respond.
-class MongoDBLauncher extends Actor {
+class MongoDBLauncher extends Actor with ActorLogging {
   // FIXME: Add more mongod paths.
   private val mongodPaths = Seq(
     "/usr/bin/mongod",
@@ -28,6 +29,7 @@ class MongoDBLauncher extends Actor {
       path =>
         val processBuilder = Process(Seq(path, "--dbpath", dbPath.getCanonicalPath))
         process = Some(processBuilder.run())
+        log.info("MongoDB started")
     }.getOrElse {
       throw new LauncherInitializationException
     }
@@ -36,6 +38,7 @@ class MongoDBLauncher extends Actor {
   override def postStop() {
     process.foreach(_.destroy())
     process = None
+    log.info("MongoDB stopped")
   }
 
   override def receive: Receive = {
