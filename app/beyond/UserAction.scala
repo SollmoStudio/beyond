@@ -55,7 +55,7 @@ object UserAction {
 
 private case class BlockAndRequest[A] (block: (RequestWithUsername[A]) => Future[SimpleResult], request: RequestWithUsername[A]) extends ConsistentHashable {
   // FIXME: Use a better hashing algorithm.
-  override def consistentHashKey: Any = request.username.hashCode()
+  override def consistentHashKey: Any = request.username.##
 }
 
 private class UserActionActor extends Actor {
