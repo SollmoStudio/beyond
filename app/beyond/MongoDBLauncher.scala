@@ -18,8 +18,8 @@ class MongoDBLauncher extends Actor {
   private var process: Option[Process] = _
 
   override def preStart() {
-    // FIXME: Don't hardcode MongoDB data directory.
-    val dbPath = new File("data")
+    import play.api.Play.current
+    val dbPath = new File(current.configuration.getString("beyond.mongodb.dbpath").getOrElse("data"))
     if (!dbPath.exists()) {
       dbPath.mkdirs()
     }
