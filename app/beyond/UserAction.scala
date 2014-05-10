@@ -61,7 +61,9 @@ private case class BlockAndRequest[A] (block: (RequestWithUsername[A]) => Future
 private class UserActionActor extends Actor {
   override def receive: Receive = {
     case BlockAndRequest(block, request) => {
-      implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
+      import play.api.libs.concurrent.Akka
+      import play.api.Play.current
+      implicit val ec: ExecutionContext = Akka.system.dispatcher
       block(request) pipeTo sender
     }
   }
