@@ -24,12 +24,12 @@ class MongoDBLauncher extends Actor {
       dbPath.mkdirs()
     }
 
-    val maybePath = mongodPaths.find(new File(_).isFile)
-    // FIXME: What if there is no mongod binary?
-    maybePath.foreach {
+    mongodPaths.find(new File(_).isFile).map {
       path =>
         val processBuilder = Process(Seq(path, "--dbpath", dbPath.getCanonicalPath))
         process = Some(processBuilder.run())
+    }.getOrElse {
+      throw new LauncherInitializationException
     }
   }
 
