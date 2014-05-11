@@ -9,8 +9,12 @@ import org.apache.zookeeper.server.ZooKeeperServerMain
 import scala.annotation.tailrec
 import scala.concurrent.duration._
 
-class ZooKeeperLauncher extends Actor with ActorLogging {
+object ZooKeeperLauncher {
   case object HeartBeat
+}
+
+class ZooKeeperLauncher extends Actor with ActorLogging {
+  import ZooKeeperLauncher._
 
   class BeyondZooKeeperServerMain extends ZooKeeperServerMain {
     // Make shutdown() public because it is protected in ZooKeeperServerMain.
