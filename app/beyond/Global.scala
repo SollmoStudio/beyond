@@ -21,10 +21,10 @@ import scala.concurrent.Future
 private object TimeoutFilter extends Filter {
   def apply(next: (RequestHeader) => Future[SimpleResult])(request: RequestHeader): Future[SimpleResult] = {
     import play.api.libs.concurrent.Execution.Implicits.defaultContext
+    import play.api.Play.current
 
-    // FIXME: Make TimeoutDuration configurable.
-    val TimeoutDuration = 30.second
-    val timeoutFuture = Promise.timeout("Timeout", TimeoutDuration)
+    val timeout = Duration(current.configuration.getString("beyond.request-timeout").getOrElse("30s"))
+    val timeoutFuture = Promise.timeout("Timeout", timeout)
     val resultFuture = next(request)
     Future.firstCompletedOf(Seq(resultFuture, timeoutFuture)).map {
       case result: SimpleResult => result
