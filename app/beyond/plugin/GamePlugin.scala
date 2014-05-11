@@ -4,13 +4,15 @@ import org.mozilla.javascript.commonjs.module.ModuleScope
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextAction
 import org.mozilla.javascript.Function
+import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.tools.shell.Global
 import org.mozilla.javascript.tools.shell.QuitAction
+import play.api.mvc.Request
 
 trait GamePlugin {
-  // FIXME: Pass request parameters along with path and
-  // make it possible to return the result asynchronously.
-  def handle(path: String): String
+  // FIXME: Make it possible to return the result asynchronously.
+  def handle[A](request: Request[A]): String
 }
 
 // FIXME: Handle script errors.
@@ -28,6 +30,7 @@ object GamePlugin {
   }
 
   global.init(contextFactory)
+  ScriptableObject.defineClass(global, classOf[ScriptableRequest[_]])
 
   // FIXME: Move implicit functions for Rhino interoperability to another package.
   private implicit def functionToQuitAction(f: (Context, Int) => Unit): QuitAction = {
@@ -48,7 +51,7 @@ object GamePlugin {
 
   def apply(): GamePlugin = {
     // FIXME: Don't hardcode plugin source code here.
-    val source = "function handle(path) { return 'Hello ' + path; }"
+    val source = "function handle(req) { return 'Hello ' + req.uri; }"
     val cx: Context = contextFactory.enterContext()
     try {
       // FIXME: Pass the module URI once we load scripts from file path.
@@ -68,9 +71,10 @@ object GamePlugin {
   }
 
   private class GamePluginImpl(scope: ModuleScope, handler: Function) extends GamePlugin {
-    def handle(path: String): String = {
+    def handle[A](request: Request[A]): String = {
       val result = contextFactory.call { cx: Context =>
-        val args: Array[AnyRef] = Array(path)
+        val scriptableRequest: Scriptable = cx.newObject(scope, "Request", Array(request))
+        val args: Array[AnyRef] = Array(scriptableRequest)
         handler.call(cx, scope, scope, args)
       }
       result.toString

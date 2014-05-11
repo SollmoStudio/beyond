@@ -8,7 +8,7 @@ object Plugin extends Controller {
   private val gamePlugin: GamePlugin = GamePlugin()
 
   def route(path: String) : Action[AnyContent] = Action { request =>
-    val result = gamePlugin.handle(request.path)
+    val result = gamePlugin.handle(request)
     Ok(result)
   }
 }
