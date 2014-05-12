@@ -6,6 +6,19 @@ import akka.actor.Props
 import akka.actor.SupervisorStrategy
 import akka.actor.SupervisorStrategy._
 import akka.routing.ConsistentHashingRouter
+import beyond.route.Leader
+import beyond.route.RoutingTableView
+import java.net.InetAddress
+
+object BeyondSupervisor {
+  val routingTable: RoutingTableView = {
+    import play.api.Play.current
+    val defaultPort = 9000
+    val hostAddress = current.configuration.getString("http.address").getOrElse(InetAddress.getLocalHost().getHostAddress)
+    val port = current.configuration.getInt("http.port").getOrElse(defaultPort)
+    new RoutingTableView(hostAddress + ":" + port.toString)
+  }
+}
 
 class BeyondSupervisor extends Actor {
   override def preStart() {
@@ -24,6 +37,7 @@ class BeyondSupervisor extends Actor {
                                          supervisorStrategy = SupervisorStrategy.defaultStrategy)
     context.actorOf(Props[UserActionActor].withRouter(router), name = "userActionActor")
     context.actorOf(Props[LauncherSupervisor], name = "launcherSupervisor")
+    context.actorOf(Props[Leader], name = "routingTableLeader")
   }
 
   override val supervisorStrategy =
