@@ -26,4 +26,12 @@ class CuratorConnection(connectionString: String) extends Closeable with StrictL
     curatorFramework.close()
     logger.info("Curator connection to %s closed".format(connectionString))
   }
+
+  def ensureZNodeExists(path: String) {
+    try {
+      curatorFramework.create().forPath(path)
+    } catch {
+      case e: Exception => logger.debug(e.getMessage)
+    }
+  }
 }
