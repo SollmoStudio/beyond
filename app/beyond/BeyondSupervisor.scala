@@ -6,6 +6,7 @@ import akka.actor.Props
 import akka.actor.SupervisorStrategy
 import akka.actor.SupervisorStrategy._
 import akka.routing.ConsistentHashingRouter
+import beyond.route.Leader
 import beyond.route.RoutingTableView
 import beyond.route.Worker
 import java.net.InetAddress
@@ -39,6 +40,7 @@ class BeyondSupervisor extends Actor {
     context.actorOf(Props[UserActionActor].withRouter(router), name = "userActionActor")
     context.actorOf(Props[LauncherSupervisor], name = "launcherSupervisor")
     context.actorOf(Props[Worker], name = "routingTableWorker")
+    context.actorOf(Props[Leader], name = "routingTableLeader")
   }
 
   override val supervisorStrategy =
