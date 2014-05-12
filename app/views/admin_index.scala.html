@@ -1,18 +1,11 @@
 @(jsonServerInfo: String)
 
-@admin_main("Admin Home") {
-    <div id="header"></div>
+@admin_main("Home") {
     <div id="content"></div>
     <script type="text/jsx">
     /** @@jsx React.DOM */
-    require(["react", "jsx!header", "jsx!tablepanel"], function (React, Header, TablePanel) {
-        var headerMenus = { "Home" : "#", "Logout" : "/admin/logout" };
+    require(["react", "jsx!tablepanel"], function (React, TablePanel) {
         var data = @Html(jsonServerInfo);
-
-        React.renderComponent(
-            <Header projectName="Beyond Framework" menus={headerMenus} />,
-            document.getElementById('header')
-        );
 
         React.renderComponent(
             <TablePanel heading="Server Information" data={data}>
