@@ -29,7 +29,7 @@ class ZooKeeperLauncher extends Actor with ActorLogging {
   private val config: ServerConfig = new ServerConfig
 
   import play.api.Play.current
-  config.parse(current.configuration.getString("beyond.zookeeper.config-path").getOrElse("zoo.cfg"))
+  config.parse(current.configuration.getString("beyond.zookeeper.config-path").getOrElse("conf/zoo.cfg"))
 
   private val zkServerThread: Thread = new Thread(new Runnable {
     override def run() {
