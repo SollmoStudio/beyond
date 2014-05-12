@@ -49,21 +49,28 @@ object GamePlugin {
     }
   }
 
-  def apply(): GamePlugin = {
-    // FIXME: Don't hardcode plugin source code here.
-    val source = "function handle(req) { return 'Hello ' + req.uri; }"
+  def apply(filename: String): GamePlugin = {
     val cx: Context = contextFactory.enterContext()
     try {
-      // FIXME: Pass the module URI once we load scripts from file path.
-      val scope = new ModuleScope(global, null, null)
-      // FIXME: Cache compiled scripts for faster execution later.
-      val script = cx.compileString(source, "source", 1, null)
-      script.exec(cx, scope)
+      import scala.collection.JavaConverters._
+      import play.api.Play.current
 
+      val defaultModulePaths = List("plugins")
+      val modulePaths = current.configuration.getStringList("beyond.plugin.path").getOrElse(defaultModulePaths.asJava)
+
+      // Sandboxed means that the require function doesn't have the "paths"
+      // property, and also that the modules it loads don't export the
+      // "module.uri" property.
+      val sandboxed = true
+      val require = global.installRequire(cx, modulePaths, sandboxed)
+      val exports = require.requireMain(cx, filename)
       // FIXME: Don't hardcode the name of handler function.
       // FIXME: handler might be Scriptable.NOT_FOUND if there is no function named "handle".
       // Also, it might not be an instance of Function.
-      val handler = scope.get("handle", scope).asInstanceOf[Function]
+      val handler = exports.get("handle", exports).asInstanceOf[Function]
+
+      // FIXME: Pass the module URI once we load scripts from file path.
+      val scope = new ModuleScope(global, null, null)
       new GamePluginImpl(scope, handler)
     } finally {
       Context.exit()
