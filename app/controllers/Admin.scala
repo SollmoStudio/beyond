@@ -68,6 +68,20 @@ object Admin extends Controller with MongoController {
     Redirect(routes.Admin.index).withNewSession
   }
 
+  def userIndex : Action[AnyContent] = Action {
+    Redirect(routes.Admin.userList)
+  }
+
+  def userList : Action[AnyContent] = AuthenticatedAction.async { request =>
+    import play.api.libs.concurrent.Execution.Implicits._
+
+    val cursor: Cursor[AdminUser] = collection.find(Json.obj()).cursor[AdminUser]
+    val result: Future[List[AdminUser]] = cursor.collect[List]()
+    result.map { users =>
+      Ok(views.html.admin_user_list(Json.stringify(Json.toJson(users))))
+    }
+  }
+
   def doLogin : Action[AnyContent] = Action.async { implicit request =>
     loginForm.bindFromRequest.fold(
       formWithErrors => {
