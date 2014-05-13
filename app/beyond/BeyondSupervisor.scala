@@ -9,7 +9,7 @@ import akka.routing.ConsistentHashingRouter
 
 class BeyondSupervisor extends Actor {
   override def preStart() {
-    val numProcessors = Runtime.getRuntime().availableProcessors()
+    val numProcessors = Runtime.getRuntime.availableProcessors()
     // Routers default to a strategy of "always escalate". This is problematic because
     //  a failure in a routee is escalated up to the router's supervisor for handling.
     //  If the router's supervisor decides to restart the child, (which is the default,
