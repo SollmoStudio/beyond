@@ -1,6 +1,5 @@
 package controllers
 
-import beyond.Global
 import play.api.Play
 import play.api.Mode
 import play.api.mvc._
@@ -8,12 +7,14 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.libs.json._
 import play.core.PlayVersion
-import reactivemongo.api.collections.default.BSONCollection
-import reactivemongo.bson.BSONDocument
+import play.modules.reactivemongo.MongoController
+import play.modules.reactivemongo.json.collection.JSONCollection
 import scala.concurrent.Future
 import scala.util.Properties
 
-object Admin extends Controller {
+object Admin extends Controller with MongoController {
+  private def collection: JSONCollection = db.collection[JSONCollection]("admin.password")
+
   private case class LoginData(username: String, password: String)
 
   private val MinUsernameLength = 4
@@ -68,21 +69,14 @@ object Admin extends Controller {
       loginData => {
         import play.api.libs.concurrent.Execution.Implicits._
 
-        val db = Global.mongoConnection.get.db("beyond")
-        val collection = db.collection[BSONCollection]("admin.password")
-        val query = BSONDocument("username" -> loginData.username)
-        val filter = BSONDocument("password" -> 1, "_id" -> 0)
-
-        val cursor = collection.find(query, filter).cursor[BSONDocument]
-        // FIXME: How to handle network errors?
-        val result: Future[List[BSONDocument]] = cursor.collect[List]()
-        result.map[SimpleResult] {
+        val cursor = collection.find(Json.obj("username" -> loginData.username)).cursor[JsObject]
+        val result: Future[List[JsObject]] = cursor.collect[List]()
+        result.map {
           case List() => BadRequest(views.html.admin_login("No such username"))
-          case passwordDoc :: _ =>
-            val password = passwordDoc.getAs[String]("password").get
+          case passwordJsObj :: _ =>
+            val password = (passwordJsObj \ "password").as[String]
             if (password == loginData.password) {
-              val session = "username" -> loginData.username
-              Redirect(routes.Admin.index).withSession(session)
+              Redirect(routes.Admin.index).withSession("username" -> loginData.username)
             } else {
               BadRequest(views.html.admin_login("Invalid password"))
             }

@@ -13,8 +13,6 @@ import play.api.mvc.Results.InternalServerError
 import play.api.mvc.Results.NotFound
 import play.api.mvc.SimpleResult
 import play.api.mvc.WithFilters
-import reactivemongo.api.MongoConnection
-import reactivemongo.api.MongoDriver
 import scala.concurrent.duration._
 import scala.concurrent.Future
 
@@ -34,26 +32,13 @@ private object TimeoutFilter extends Filter {
 }
 
 object Global extends WithFilters(TimeoutFilter) {
-  // MongoDriver and MongoConnection involve creation costs
-  // the driver may create a new ActorSystem, and the connection
-  // will connect to the servers. It is a good idea to store the
-  // driver and the connection to reuse them.
-  private var connection: Option[MongoConnection] = None
-
-  def mongoConnection: Option[MongoConnection] = connection
-
   private var beyondSupervisor: Option[ActorRef] = _
 
   override def onStart(app: Application) {
-    val driver = new MongoDriver(Akka.system(app))
-    connection = Some(driver.connection(List("localhost")))
-
     beyondSupervisor = Some(Akka.system(app).actorOf(Props[BeyondSupervisor], name = "beyondSupervisor"))
   }
 
   override def onStop(app: Application) {
-    connection = None
-
     beyondSupervisor.foreach(Akka.system(app).stop(_))
     beyondSupervisor = None
   }
