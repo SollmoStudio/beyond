@@ -43,14 +43,11 @@ object GamePlugin {
   }.asInstanceOf[GamePlugin]
 
   private class GamePluginImpl(scope: ModuleScope, handler: Function) extends GamePlugin {
-    def handle[A](request: Request[A]): String = {
-      val result = contextFactory.call { cx: Context =>
-        val scriptableRequest: Scriptable = cx.newObject(scope, "Request", Array(request))
-        val args: Array[AnyRef] = Array(scriptableRequest)
-        handler.call(cx, scope, scope, args)
-      }
-      result.toString
-    }
+    def handle[A](request: Request[A]): String = contextFactory.call { cx: Context =>
+      val scriptableRequest: Scriptable = cx.newObject(scope, "Request", Array(request))
+      val args: Array[AnyRef] = Array(scriptableRequest)
+      handler.call(cx, scope, scope, args)
+    }.toString
   }
 }
 
