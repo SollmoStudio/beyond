@@ -1,0 +1,24 @@
+@(users: String)
+
+@admin_user_main("List") {
+    <h1 class="page-header">AdminUser List</h1>
+    <div id="userListTable"></div>
+    <script type="text/jsx">
+    /** @@jsx React.DOM */
+    require(["react", "jsx!listtable"], function (React, ListTable) {
+        var usersData = @Html(users);
+        var usersColumns = [{
+            key: "username",
+            name: "Username"
+        }, {
+            key: "password",
+            name: "Password"
+        }];
+
+        React.renderComponent(
+            <ListTable data={usersData} columns={usersColumns} />,
+            document.getElementById('userListTable')
+        );
+    });
+    </script>
+}
