@@ -19,6 +19,17 @@ object Admin extends Controller with MongoController {
   private case class AdminUser(username: String, password: String)
   private implicit val adminUserFormat = Json.format[AdminUser]
 
+  private class AuthenticatedRequest[A](val username: String, request: Request[A]) extends WrappedRequest[A](request)
+  private object AuthenticatedAction extends ActionBuilder[AuthenticatedRequest] {
+    protected def invokeBlock[A](request: Request[A], block: (AuthenticatedRequest[A]) => Future[SimpleResult]) = {
+      request.session.get("username").map { username =>
+        block(new AuthenticatedRequest(username, request))
+      } getOrElse {
+        Future.successful(Redirect(routes.Admin.login))
+      }
+    }
+  }
+
   private val MinUsernameLength = 4
   private val MaxUsernameLength = 12
 
@@ -40,13 +51,9 @@ object Admin extends Controller with MongoController {
     )
   }
 
-  def index : Action[AnyContent]= Action { request =>
-    request.session.get("username").map { username =>
-      val jsonServerInfo = Json.stringify(Json.toJson(serverInfo))
-      Ok(views.html.admin_index(jsonServerInfo))
-    }.getOrElse {
-      Redirect(routes.Admin.login)
-    }
+  def index : Action[AnyContent]= AuthenticatedAction { request =>
+    val jsonServerInfo = Json.stringify(Json.toJson(serverInfo))
+    Ok(views.html.admin_index(jsonServerInfo))
   }
 
   def login : Action[AnyContent] = Action { request =>
