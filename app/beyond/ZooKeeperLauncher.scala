@@ -1,20 +1,25 @@
 package beyond
 
 import akka.actor.Actor
+import akka.actor.ActorRef
 import akka.actor.ActorLogging
-import java.io.IOException
-import org.apache.zookeeper.client.FourLetterWordMain.send4LetterWord
+import akka.actor.Cancellable
+import akka.io.IO
+import akka.io.Tcp
+import akka.util.ByteString
+import java.net.InetSocketAddress
 import org.apache.zookeeper.server.ServerConfig
 import org.apache.zookeeper.server.ZooKeeperServerMain
-import scala.annotation.tailrec
 import scala.concurrent.duration._
 
 object ZooKeeperLauncher {
-  case object HeartBeat
+  case object Tick
 }
 
 class ZooKeeperLauncher extends Actor with ActorLogging {
+  import play.api.libs.concurrent.Execution.Implicits._
   import ZooKeeperLauncher._
+  import akka.io.Tcp._
 
   class BeyondZooKeeperServerMain extends ZooKeeperServerMain {
     // Make shutdown() public because it is protected in ZooKeeperServerMain.
@@ -37,90 +42,85 @@ class ZooKeeperLauncher extends Actor with ActorLogging {
     }
   })
 
-  private val host = "127.0.0.1"
-  private val port = config.getClientPortAddress.getPort
+  private val ServerNotRespondingTimeout = 30.seconds
+  private val TickInterval = 1.second
 
-  import play.api.libs.concurrent.Execution.Implicits._
-  // FIXME: Check if the scheduler keeps sending messages while the actor is blocking on health check.
-  val tick = context.system.scheduler.schedule(initialDelay = 10 seconds, interval = 1 seconds, self, HeartBeat)
+  private val InitialDelay = 10.seconds
+  private val RetryDelay = 5.seconds
 
-  // Retry until the given block returns true.
-  @tailrec
-  private def retryWithinTimeRange(timeRange: Duration, interval: Duration)(block: => Boolean): Boolean = {
-    val start = System.currentTimeMillis()
-    if (block) {
-      true
-    } else {
-      Thread.sleep(interval.toMillis)
+  private val tickCancellable = context.system.scheduler.schedule(
+    initialDelay = InitialDelay, interval = TickInterval, receiver = self, message = Tick)
 
-      val elapsed = System.currentTimeMillis() - start
-      val newTimeRange = timeRange - elapsed.millis
-      if (newTimeRange > Duration.Zero) {
-        retryWithinTimeRange(newTimeRange, interval)(block)
-      } else {
-        false
-      }
-    }
-  }
-
-  private def waitForServerUp() {
-    val success = retryWithinTimeRange(timeRange = 10 seconds, interval = 250 millis) {
-      try {
-        send4LetterWord(host, port, "stat").contains("Zookeeper version:")
-      } catch {
-        // Ignore. this is expected if server is not up yet.
-        case _: IOException => false
-      }
-    }
-    if (!success) {
-      throw new LauncherInitializationException
-    }
-  }
-
-  private def waitForServerDown() {
-    // FIXME: Log if shutdown fails.
-    retryWithinTimeRange(timeRange = 10 seconds, interval = 250 millis) {
-      try {
-        send4LetterWord(host, port, "stat")
-        false
-      } catch {
-        case _: IOException => true
-      }
-    }
-  }
-
-  private def healthCheck() {
-    // FIXME: Adjust time range and interval.
-    val success = retryWithinTimeRange(timeRange = 30 seconds, interval = 1 seconds) {
-      try {
-        send4LetterWord(host, port, "stat").contains("Zookeeper version:")
-      } catch {
-        case _: IOException =>
-          throw new ServerNotRespondingException
-      }
-    }
-    if (!success) {
-      throw new ServerNotRespondingException
-    }
-  }
+  private var connectCancellable: Cancellable = _
 
   override def preStart() {
     zkServerThread.start()
-    waitForServerUp()
     log.info("ZooKeeper started")
+
+    scheduleConnect(InitialDelay)
   }
 
   override def postStop() {
-    tick.cancel()
+    tickCancellable.cancel()
+    connectCancellable.cancel()
 
     zkServer.shutdown()
     zkServerThread.join()
-    waitForServerDown()
     log.info("ZooKeeper stopped")
   }
 
-  override def receive: Receive = {
-    case HeartBeat => healthCheck()
+  private def scheduleConnect(delay: FiniteDuration) {
+    connectCancellable = context.system.scheduler.scheduleOnce(delay) {
+      import context.system
+      val address = new InetSocketAddress("127.0.0.1", config.getClientPortAddress.getPort)
+      IO(Tcp) ! Tcp.Connect(address)
+    }
+  }
+
+  override def receive: Receive = connecting(ServerNotRespondingTimeout)
+
+  private def connecting(timeout: FiniteDuration): Receive = {
+    case Connected(_, _) =>
+      val connection = sender
+      connection ! Register(self)
+      connection ! Write(ByteString("stat"))
+      context.become(connected(connection, timeout))
+    case CommandFailed(_: Connect) =>
+      scheduleConnect(RetryDelay)
+    case Tick =>
+      val newTimeout = timeout - TickInterval
+      if (newTimeout > Duration.Zero) {
+        context.become(connecting(newTimeout))
+      } else {
+        throw new ServerNotRespondingException
+      }
+  }
+
+  // In case there is a problem, simply close the connection and switch to connecting state
+  // without resetting timeout value.
+  private def connected(connection: ActorRef, timeout: FiniteDuration): Receive = {
+    case CommandFailed(_: Write) =>
+      connection ! Close
+    case Received(data: ByteString) =>
+      // FIXME: We assume that the received data is big enough to hold
+      // "ZooKeeper version:" string. But if this assumption is not true,
+      // we need to accumulate multiple Received messages.
+      val response = data.decodeString("UTF8")
+      if (response.startsWith("Zookeeper version:")) {
+        // The server is well. Reset the timeout.
+        context.become(connected(connection, ServerNotRespondingTimeout))
+      }
+      connection ! Close
+    case _: ConnectionClosed =>
+      scheduleConnect(RetryDelay)
+      context.become(connecting(timeout))
+    case Tick =>
+      val newTimeout = timeout - TickInterval
+      if (newTimeout > Duration.Zero) {
+        context.become(connected(connection, newTimeout))
+      } else {
+        throw new ServerNotRespondingException
+      }
   }
 }
 
