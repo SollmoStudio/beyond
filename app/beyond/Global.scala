@@ -39,7 +39,7 @@ object Global extends WithFilters(TimeoutFilter) {
   }
 
   override def onStop(app: Application) {
-    beyondSupervisor.foreach(Akka.system(app).stop(_))
+    beyondSupervisor.foreach(Akka.system(app).stop)
     beyondSupervisor = None
   }
 
