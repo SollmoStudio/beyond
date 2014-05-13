@@ -2,12 +2,8 @@ package beyond.plugin
 
 import org.mozilla.javascript.commonjs.module.ModuleScope
 import org.mozilla.javascript.Context
-import org.mozilla.javascript.ContextAction
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.ScriptableObject
-import org.mozilla.javascript.tools.shell.Global
-import org.mozilla.javascript.tools.shell.QuitAction
 import play.api.mvc.Request
 
 trait GamePlugin {
@@ -17,37 +13,11 @@ trait GamePlugin {
 
 // FIXME: Handle script errors.
 object GamePlugin {
+  import beyond.plugin.RhinoConversions._
+
   private val contextFactory: BeyondContextFactory = new BeyondContextFactory(new BeyondContextFactoryConfig)
 
-  // FIXME: Need a new class extending org.mozilla.javascript.TopLevel
-  // because we don't need all powers of Global.
-  private val global: Global = new Global
-
-  // FIXME: We don't want to allow plugins to terminate the system.
-  // Delete this once we replace Global with our own global scope.
-  global.initQuitAction {
-    (_: Context, exitCode: Int) => System.exit(exitCode)
-  }
-
-  global.init(contextFactory)
-  ScriptableObject.defineClass(global, classOf[ScriptableRequest[_]])
-
-  // FIXME: Move implicit functions for Rhino interoperability to another package.
-  private implicit def functionToQuitAction(f: (Context, Int) => Unit): QuitAction = {
-    new QuitAction {
-      override def quit(cx: Context, exitCode: Int) {
-        f(cx, exitCode)
-      }
-    }
-  }
-
-  private implicit def functionToContextAction(f: Context => AnyRef): ContextAction = {
-    new ContextAction {
-      override def run(cx: Context): AnyRef = {
-        f(cx)
-      }
-    }
-  }
+  private val global: BeyondGlobal = new BeyondGlobal(contextFactory)
 
   def apply(filename: String): GamePlugin = {
     val cx: Context = contextFactory.enterContext()
@@ -55,8 +25,8 @@ object GamePlugin {
       import scala.collection.JavaConverters._
       import play.api.Play.current
 
-      val defaultModulePaths = List("plugins")
-      val modulePaths = current.configuration.getStringList("beyond.plugin.path").getOrElse(defaultModulePaths.asJava)
+      val defaultModulePaths = Seq("plugins")
+      val modulePaths = current.configuration.getStringList("beyond.plugin.path").map(_.asScala).getOrElse(defaultModulePaths)
 
       // Sandboxed means that the require function doesn't have the "paths"
       // property, and also that the modules it loads don't export the
