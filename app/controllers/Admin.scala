@@ -9,13 +9,15 @@ import play.api.libs.json._
 import play.core.PlayVersion
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
+import reactivemongo.api.Cursor
 import scala.concurrent.Future
 import scala.util.Properties
 
 object Admin extends Controller with MongoController {
   private def collection: JSONCollection = db.collection[JSONCollection]("admin.password")
 
-  private case class LoginData(username: String, password: String)
+  private case class AdminUser(username: String, password: String)
+  private implicit val adminUserFormat = Json.format[AdminUser]
 
   private val MinUsernameLength = 4
   private val MaxUsernameLength = 12
@@ -24,7 +26,7 @@ object Admin extends Controller with MongoController {
     mapping(
       "username" -> nonEmptyText(minLength = MinUsernameLength, maxLength = MaxUsernameLength),
       "password" -> nonEmptyText
-    )(LoginData.apply)(LoginData.unapply)
+    )(AdminUser.apply)(AdminUser.unapply)
   )
 
   private def serverInfo : Map[String, String] = {
@@ -69,13 +71,12 @@ object Admin extends Controller with MongoController {
       loginData => {
         import play.api.libs.concurrent.Execution.Implicits._
 
-        val cursor = collection.find(Json.obj("username" -> loginData.username)).cursor[JsObject]
-        val result: Future[List[JsObject]] = cursor.collect[List]()
+        val cursor: Cursor[AdminUser] = collection.find(Json.obj("username" -> loginData.username)).cursor[AdminUser]
+        val result: Future[List[AdminUser]] = cursor.collect[List]()
         result.map {
           case List() => BadRequest(views.html.admin_login("No such username"))
-          case passwordJsObj :: _ =>
-            val password = (passwordJsObj \ "password").as[String]
-            if (password == loginData.password) {
+          case adminUser :: _ =>
+            if (adminUser.password == loginData.password) {
               Redirect(routes.Admin.index).withSession("username" -> loginData.username)
             } else {
               BadRequest(views.html.admin_login("Invalid password"))
