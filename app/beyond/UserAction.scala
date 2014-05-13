@@ -44,7 +44,7 @@ object UserAction {
     override def apply(request: Request[A]): Future[SimpleResult] = {
       // FIXME: Verify if this request belongs to this server.
       request.session.get("username").map { username =>
-        implicit val timeout = Timeout(1 seconds)
+        implicit val timeout = Timeout(1 second)
         ask(userActionActor, BlockAndRequest(block, new RequestWithUsername(username, request))).asInstanceOf[Future[SimpleResult]]
       } getOrElse {
         Future.successful(Forbidden)
