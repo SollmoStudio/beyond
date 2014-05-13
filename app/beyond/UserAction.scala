@@ -6,6 +6,8 @@ import akka.pattern.ask
 import akka.pattern.pipe
 import akka.routing.ConsistentHashingRouter.ConsistentHashable
 import akka.util.Timeout
+import beyond.route.RoutingTableView.HandleHere
+import beyond.route.RoutingTableView.HandleIn
 import play.api.libs.concurrent.Akka
 import play.api.mvc.Action
 import play.api.mvc.AnyContent
@@ -13,13 +15,17 @@ import play.api.mvc.BodyParser
 import play.api.mvc.BodyParsers
 import play.api.mvc.Request
 import play.api.mvc.Results.Forbidden
+import play.api.mvc.Results.Status
 import play.api.mvc.SimpleResult
 import play.api.mvc.WrappedRequest
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-class RequestWithUsername[A](val username: String, request: Request[A]) extends WrappedRequest[A](request)
+class RequestWithUsername[A](val username: String, request: Request[A]) extends WrappedRequest[A](request) with ConsistentHashable {
+  // FIXME: Use a better hashing algorithm.
+  override def consistentHashKey: Any = username.##
+}
 
 object UserAction {
   import play.api.Play.current
@@ -42,10 +48,16 @@ object UserAction {
     override def parser: BodyParser[A] = bodyParser
 
     override def apply(request: Request[A]): Future[SimpleResult] = {
-      // FIXME: Verify if this request belongs to this server.
+      val RedirectStatusCode = 310
       request.session.get("username").map { username =>
-        implicit val timeout = Timeout(1 second)
-        ask(userActionActor, BlockAndRequest(block, new RequestWithUsername(username, request))).asInstanceOf[Future[SimpleResult]]
+        val req = new RequestWithUsername(username, request)
+        BeyondSupervisor.routingTable.queryServerToHandle(req.consistentHashKey.asInstanceOf[Int]) match {
+          case HandleHere => {
+            implicit val timeout = Timeout(1 second)
+            ask(userActionActor, BlockAndRequest(block, req)).asInstanceOf[Future[SimpleResult]]
+          }
+          case HandleIn(address) => Future.successful(new Status(RedirectStatusCode)(address))
+        }
       } getOrElse {
         Future.successful(Forbidden)
       }
@@ -54,8 +66,7 @@ object UserAction {
 }
 
 private case class BlockAndRequest[A] (block: (RequestWithUsername[A]) => Future[SimpleResult], request: RequestWithUsername[A]) extends ConsistentHashable {
-  // FIXME: Use a better hashing algorithm.
-  override def consistentHashKey: Any = request.username.##
+  override def consistentHashKey: Any = request.consistentHashKey
 }
 
 private class UserActionActor extends Actor {
