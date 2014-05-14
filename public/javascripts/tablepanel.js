@@ -1,8 +1,8 @@
 /** @jsx React.DOM */
-define(["jquery", "react", "bootstrap"], function($, React) {
+define(["jquery", "react", "bootstrap"], function ($, React) {
     var Table = React.createClass({
-        render: function() {
-            var tableRows = $.map(this.props.data, function(value, key) {
+        render: function () {
+            var tableRows = $.map(this.props.data, function (value, key) {
                 return <tr><td>{key}</td><td>{value}</td></tr>;
             });
 
@@ -15,7 +15,7 @@ define(["jquery", "react", "bootstrap"], function($, React) {
     });
 
     var PanelBody = React.createClass({
-        render: function() {
+        render: function () {
             return (
                 <div className="panel-body">
                     <p>{this.props.children}</p>
@@ -25,7 +25,7 @@ define(["jquery", "react", "bootstrap"], function($, React) {
     });
 
     var PanelHeading = React.createClass({
-        render: function() {
+        render: function () {
             return (
                 <div className="panel-heading">{this.props.heading}</div>
                 );
@@ -33,7 +33,7 @@ define(["jquery", "react", "bootstrap"], function($, React) {
     });
 
     var TablePanel = React.createClass({
-        render: function() {
+        render: function () {
             return (
                 <div className="panel panel-default">
                     <PanelHeading heading={this.props.heading} />
