@@ -1,5 +1,5 @@
 /** @jsx React.DOM */
-define(["jquery", "react", "bootstrap"], function($, React) {
+define(["jquery", "react", "bootstrap"], function ($, React) {
     return React.createClass({
         render: function() {
             var liElements = $.map(this.props.menus, function (value, key) {
