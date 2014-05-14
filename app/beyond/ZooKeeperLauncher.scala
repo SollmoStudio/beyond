@@ -31,10 +31,12 @@ class ZooKeeperLauncher extends Actor with ActorLogging {
   // FIXME: Currently, ZooKeeperLauncher launches a standalone ZooKeeper server.
   // Setup a ZooKeeper cluster instead.
   private val zkServer: BeyondZooKeeperServerMain = new BeyondZooKeeperServerMain
-  private val config: ServerConfig = new ServerConfig
-
-  import play.api.Play.current
-  config.parse(current.configuration.getString("beyond.zookeeper.config-path").getOrElse("conf/zoo.cfg"))
+  private val config: ServerConfig = {
+    import play.api.Play.current
+    val config = new ServerConfig
+    config.parse(current.configuration.getString("beyond.zookeeper.config-path").getOrElse("conf/zoo.cfg"))
+    config
+  }
 
   private val zkServerThread: Thread = new Thread(new Runnable {
     override def run() {
