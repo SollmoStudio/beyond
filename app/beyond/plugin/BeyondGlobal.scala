@@ -1,5 +1,8 @@
 package beyond.plugin
 
+import akka.actor.ActorRef
+import akka.actor.Cancellable
+import beyond.plugin.GamePlugin.FunctionCall
 import java.io.File
 import java.net.URI
 import org.mozilla.javascript.commonjs.module.Require
@@ -15,8 +18,61 @@ import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.Wrapper
 import org.mozilla.javascript.tools.ToolErrorReporter
+import play.api.libs.concurrent.Akka
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
 
 object BeyondGlobal {
+  // setTimeout/clearTimeout and setInterval/clearInterval are equivalent to
+  // Node.js timers: http://nodejs.org/api/timers.html
+  def setTimeout(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function): AnyRef = {
+    if (args.length < 2 || !args(0).isInstanceOf[Function]) {
+      throw reportRuntimeError("msg.setTimeout.bad.args")
+    }
+
+    val callback = args(0).asInstanceOf[Function]
+    val callbackArgs = args.drop(2)
+    val delay = Context.toNumber(args(1)).millis
+
+    import play.api.Play.current
+    implicit val ec: ExecutionContext = Akka.system.dispatcher
+    val self: ActorRef = cx.asInstanceOf[BeyondContext].actor
+    Akka.system.scheduler.scheduleOnce(delay, self, FunctionCall(callback, callbackArgs))
+  }
+
+  def clearTimeout(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function) {
+    if (args.length == 0 || !args(0).isInstanceOf[Cancellable]) {
+      throw reportRuntimeError("msg.clearTimeout.bad.args")
+    }
+
+    val id = args(0).asInstanceOf[Cancellable]
+    id.cancel()
+  }
+
+  def setInterval(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function): AnyRef = {
+    if (args.length < 2 || !args(0).isInstanceOf[Function]) {
+      throw reportRuntimeError("msg.setInterval.bad.args")
+    }
+
+    val callback = args(0).asInstanceOf[Function]
+    val callbackArgs = args.drop(2)
+    val delay = Context.toNumber(args(1)).millis
+
+    import play.api.Play.current
+    implicit val ec: ExecutionContext = Akka.system.dispatcher
+    val self: ActorRef = cx.asInstanceOf[BeyondContext].actor
+    Akka.system.scheduler.schedule(initialDelay = delay, interval = delay, self, FunctionCall(callback, callbackArgs))
+  }
+
+  def clearInterval(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function) {
+    if (args.length == 0 || !args(0).isInstanceOf[Cancellable]) {
+      throw reportRuntimeError("msg.clearInterval.bad.args")
+    }
+
+    val id = args(0).asInstanceOf[Cancellable]
+    id.cancel()
+  }
+
   def seal(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function)  {
     args.foreach { arg =>
       if (!(arg.isInstanceOf[ScriptableObject]) || arg == Undefined.instance) {
@@ -89,6 +145,10 @@ class BeyondGlobal(factory: ContextFactory,
   factory.call { cx: Context =>
     initStandardObjects(cx, sealedStdLib)
     val names = Array[String](
+      "setTimeout",
+      "clearTimeout",
+      "setInterval",
+      "clearInterval",
       "defineClass",
       "seal"
     )

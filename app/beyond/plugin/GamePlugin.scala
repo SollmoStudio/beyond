@@ -9,6 +9,7 @@ import play.api.mvc.Request
 
 object GamePlugin {
   case class Handle[A](request: Request[A])
+  case class FunctionCall(function: Function, args: Array[AnyRef])
 }
 
 // FIXME: Handle script errors.
@@ -49,9 +50,17 @@ class GamePlugin(filename: String) extends Actor {
     handler.call(cx, scope, scope, args)
   }.toString
 
+  private def invokeFunction(function: Function, args: Array[AnyRef]) {
+    contextFactory.call { cx: Context =>
+      function.call(cx, scope, scope, args)
+    }
+  }
+
   override def receive: Receive = {
     case Handle(request) =>
       sender ! handle(request)
+    case FunctionCall(function, args) =>
+      invokeFunction(function, args)
   }
 }
 
