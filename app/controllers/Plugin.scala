@@ -1,6 +1,7 @@
 package controllers
 
 import akka.actor.ActorSelection
+import akka.pattern.AskTimeoutException
 import akka.pattern.ask
 import akka.util.Timeout
 import beyond.plugin.GamePlugin.Handle
@@ -20,9 +21,9 @@ object Plugin extends Controller {
     implicit val timeout = Timeout(10 seconds)
     implicit val ec: ExecutionContext = Akka.system.dispatcher
 
-    // FIXME: Handle AskTimeoutException
-    val result = (gamePlugin ? Handle(request)).asInstanceOf[Future[String]]
-    result.map(Ok(_))
+    (gamePlugin ? Handle(request)).asInstanceOf[Future[String]].map(Ok(_)).recover {
+      case _: AskTimeoutException => InternalServerError("Plugin Timeout")
+    }
   }
 }
 
