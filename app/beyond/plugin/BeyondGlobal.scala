@@ -2,7 +2,7 @@ package beyond.plugin
 
 import akka.actor.ActorRef
 import akka.actor.Cancellable
-import beyond.plugin.GamePlugin.FunctionCall
+import beyond.plugin.GamePlugin.InvokeFunction
 import java.io.File
 import java.net.URI
 import org.mozilla.javascript.commonjs.module.Require
@@ -37,7 +37,7 @@ object BeyondGlobal {
     import play.api.Play.current
     implicit val ec: ExecutionContext = Akka.system.dispatcher
     val self: ActorRef = cx.asInstanceOf[BeyondContext].actor
-    Akka.system.scheduler.scheduleOnce(delay, self, FunctionCall(callback, callbackArgs))
+    Akka.system.scheduler.scheduleOnce(delay, self, InvokeFunction(callback, callbackArgs))
   }
 
   def clearTimeout(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function) {
@@ -61,7 +61,7 @@ object BeyondGlobal {
     import play.api.Play.current
     implicit val ec: ExecutionContext = Akka.system.dispatcher
     val self: ActorRef = cx.asInstanceOf[BeyondContext].actor
-    Akka.system.scheduler.schedule(initialDelay = delay, interval = delay, self, FunctionCall(callback, callbackArgs))
+    Akka.system.scheduler.schedule(initialDelay = delay, interval = delay, self, InvokeFunction(callback, callbackArgs))
   }
 
   def clearInterval(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function) {
