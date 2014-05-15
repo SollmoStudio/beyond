@@ -44,7 +44,9 @@ object UserAction {
     override def apply(request: Request[A]): Future[SimpleResult] = {
       // FIXME: Verify if this request belongs to this server.
       request.session.get("username").map { username =>
-        implicit val timeout = Timeout(1 second)
+        import play.api.Play.current
+        val requestTimeoutDuration = Duration(current.configuration.getString("beyond.request-timeout").getOrElse("30s")).asInstanceOf[FiniteDuration]
+        implicit val timeout = Timeout(requestTimeoutDuration)
         ask(userActionActor, BlockAndRequest(block, new RequestWithUsername(username, request))).asInstanceOf[Future[SimpleResult]]
       } getOrElse {
         Future.successful(Forbidden)
