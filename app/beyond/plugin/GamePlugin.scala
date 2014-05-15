@@ -1,25 +1,26 @@
 package beyond.plugin
 
+import akka.actor.Actor
 import org.mozilla.javascript.commonjs.module.ModuleScope
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.Scriptable
 import play.api.mvc.Request
 
-trait GamePlugin {
-  // FIXME: Make it possible to return the result asynchronously.
-  def handle[A](request: Request[A]): String
+object GamePlugin {
+  case class Handle[A](request: Request[A])
 }
 
 // FIXME: Handle script errors.
-object GamePlugin {
+class GamePlugin(filename: String) extends Actor {
   import beyond.plugin.RhinoConversions._
+  import GamePlugin._
 
   private val contextFactory: BeyondContextFactory = new BeyondContextFactory(new BeyondContextFactoryConfig)
 
   private val global: BeyondGlobal = new BeyondGlobal(contextFactory)
 
-  def apply(filename: String): GamePlugin = contextFactory.call { cx: Context =>
+  private val (handler: Function, scope: ModuleScope) =  contextFactory.call { cx: Context =>
     import scala.collection.JavaConverters._
     import play.api.Play.current
 
@@ -39,16 +40,18 @@ object GamePlugin {
 
     // FIXME: Pass the module URI once we load scripts from file path.
     val scope = new ModuleScope(global, null, null)
-    new GamePluginImpl(scope, handler)
-  }.asInstanceOf[GamePlugin]
+    (handler, scope)
+  }
 
-  private class GamePluginImpl(scope: ModuleScope, handler: Function) extends GamePlugin {
-    def handle[A](request: Request[A]): String = contextFactory.call { cx: Context =>
-      val scriptableRequest: Scriptable = cx.newObject(scope, "Request", Array(request))
-      val args: Array[AnyRef] = Array(scriptableRequest)
-      handler.call(cx, scope, scope, args)
-    }.toString
+  private def handle[A](request: Request[A]): String = contextFactory.call { cx: Context =>
+    val scriptableRequest: Scriptable = cx.newObject(scope, "Request", Array(request))
+    val args: Array[AnyRef] = Array(scriptableRequest)
+    handler.call(cx, scope, scope, args)
+  }.toString
+
+  override def receive: Receive = {
+    case Handle(request) =>
+      sender ! handle(request)
   }
 }
-
 
