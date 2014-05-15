@@ -1,10 +1,10 @@
 package beyond.plugin
 
 import akka.actor.Actor
-import org.mozilla.javascript.commonjs.module.ModuleScope
+import akka.actor.Props
+import akka.routing.RoundRobinRouter
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
-import org.mozilla.javascript.Scriptable
 import play.api.mvc.Request
 
 object GamePlugin {
@@ -15,13 +15,12 @@ object GamePlugin {
 // FIXME: Handle script errors.
 class GamePlugin(filename: String) extends Actor {
   import beyond.plugin.RhinoConversions._
-  import GamePlugin._
 
   private val contextFactory: BeyondContextFactory = new BeyondContextFactory(new BeyondContextFactoryConfig)
 
   private val global: BeyondGlobal = new BeyondGlobal(contextFactory)
 
-  private val (handler: Function, scope: ModuleScope) =  contextFactory.call { cx: Context =>
+  private val handler: Function = contextFactory.call { cx: Context =>
     import scala.collection.JavaConverters._
     import play.api.Play.current
 
@@ -37,30 +36,18 @@ class GamePlugin(filename: String) extends Actor {
     // FIXME: Don't hardcode the name of handler function.
     // FIXME: handler might be Scriptable.NOT_FOUND if there is no function named "handle".
     // Also, it might not be an instance of Function.
-    val handler = exports.get("handle", exports).asInstanceOf[Function]
+    exports.get("handle", exports)
+  }.asInstanceOf[Function]
 
-    // FIXME: Pass the module URI once we load scripts from file path.
-    val scope = new ModuleScope(global, null, null)
-    (handler, scope)
-  }
-
-  private def handle[A](request: Request[A]): String = contextFactory.call { cx: Context =>
-    val scriptableRequest: Scriptable = cx.newObject(scope, "Request", Array(request))
-    val args: Array[AnyRef] = Array(scriptableRequest)
-    handler.call(cx, scope, scope, args)
-  }.toString
-
-  private def invokeFunction(function: Function, args: Array[AnyRef]) {
-    contextFactory.call { cx: Context =>
-      function.call(cx, scope, scope, args)
-    }
+  private val workerActor = {
+    val numProcessors = Runtime.getRuntime.availableProcessors()
+    val router = RoundRobinRouter(nrOfInstances = numProcessors)
+    val props = Props(classOf[GamePluginWorker], contextFactory, global, handler).withRouter(router)
+    context.actorOf(props, name = "gamePluginWorker")
   }
 
   override def receive: Receive = {
-    case Handle(request) =>
-      sender ! handle(request)
-    case InvokeFunction(function, args) =>
-      invokeFunction(function, args)
+    case msg => workerActor forward msg
   }
 }
 
