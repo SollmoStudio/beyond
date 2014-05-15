@@ -2,6 +2,7 @@ package beyond
 
 import akka.actor.ActorRef
 import akka.actor.Props
+import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import play.api.Application
 import play.api.libs.concurrent.Akka
 import play.api.Mode
@@ -31,14 +32,16 @@ private object TimeoutFilter extends Filter {
   }
 }
 
-object Global extends WithFilters(TimeoutFilter) {
+object Global extends WithFilters(TimeoutFilter) with Logging {
   private var beyondSupervisor: Option[ActorRef] = _
 
   override def onStart(app: Application) {
+    logger.info("Beyond started")
     beyondSupervisor = Some(Akka.system(app).actorOf(Props[BeyondSupervisor], name = "beyondSupervisor"))
   }
 
   override def onStop(app: Application) {
+    logger.info("Beyond stopped")
     beyondSupervisor.foreach(Akka.system(app).stop)
     beyondSupervisor = None
   }
@@ -66,4 +69,5 @@ object Global extends WithFilters(TimeoutFilter) {
     configuration.getStringList("beyond.plugin.path").map(_.asScala).getOrElse(defaultModulePaths)
   }
 }
+
 
