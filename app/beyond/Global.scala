@@ -50,4 +50,20 @@ object Global extends WithFilters(TimeoutFilter) {
       super.onHandlerNotFound(request)
     }
   }
+
+  def requestTimeout: FiniteDuration =
+    Duration(configuration.getString("beyond.request-timeout").getOrElse("30s")).asInstanceOf[FiniteDuration]
+
+  def mongoDBPath: String =
+    configuration.getString("beyond.mongodb.dbpath").getOrElse("data")
+
+  def zooKeeperConfigPath: String =
+    configuration.getString("beyond.zookeeper.config-path").getOrElse("conf/zoo.cfg")
+
+  def pluginPaths: Seq[String] = {
+    import scala.collection.JavaConverters._
+    val defaultModulePaths = Seq("plugins")
+    configuration.getStringList("beyond.plugin.path").map(_.asScala).getOrElse(defaultModulePaths)
+  }
 }
+

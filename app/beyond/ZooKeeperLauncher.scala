@@ -32,9 +32,8 @@ class ZooKeeperLauncher extends Actor with ActorLogging {
   // Setup a ZooKeeper cluster instead.
   private val zkServer: BeyondZooKeeperServerMain = new BeyondZooKeeperServerMain
   private val config: ServerConfig = {
-    import play.api.Play.current
     val config = new ServerConfig
-    config.parse(current.configuration.getString("beyond.zookeeper.config-path").getOrElse("conf/zoo.cfg"))
+    config.parse(Global.zooKeeperConfigPath)
     config
   }
 
