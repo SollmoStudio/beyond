@@ -13,7 +13,8 @@ class MongoDBLauncher extends Actor with ActorLogging {
   // FIXME: Add more mongod paths.
   private val mongodPaths = Seq(
     "/usr/bin/mongod",
-    "/opt/local/bin/mongod" // Max OS X Port default path
+    "/opt/local/bin/mongod", // Max OS X Port default path
+    "C:/Program Files/MongoDB 2.6 Standard/bin/mongod.exe" //window Port default path
   )
 
   private var process: Option[Process] = _
