@@ -60,6 +60,12 @@ object Global extends WithFilters(TimeoutFilter) with Logging {
   def mongoDBPath: String =
     configuration.getString("beyond.mongodb.dbpath").getOrElse("data")
 
+  def mongoDBdefaultUsername: String =
+    configuration.getString("beyond.mongodb.admin.default.username").getOrElse("admin")
+
+  def mongoDBdefaultPassword: String =
+    configuration.getString("beyond.mongodb.admin.default.password").getOrElse("password")
+
   def zooKeeperConfigPath: String =
     configuration.getString("beyond.zookeeper.config-path").getOrElse("conf/zoo.cfg")
 
