@@ -1,21 +1,10 @@
 package beyond.route
 
 import play.api.libs.Codecs
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import play.api.libs.json.Json
 import scala.collection.mutable
 
 object RoutingTableBuilder {
-  type Address = String
-  type Hash = Int
-
-  implicit val serverWrites: Writes[Server] = (
-    (__ \ "hash").write[Hash] and
-    (__ \ "address").write[Address]
-  )(unlift(Server.unapply))
-
-  case class Server(hash: Hash, address: Address)
-
   type RoutingTableInternal = mutable.HashMap[Hash, Address]
 }
 
