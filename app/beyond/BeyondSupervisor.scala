@@ -5,12 +5,26 @@ import akka.actor.OneForOneStrategy
 import akka.actor.Props
 import akka.actor.SupervisorStrategy
 import akka.actor.SupervisorStrategy._
+import akka.routing.Broadcast
 import akka.routing.ConsistentHashingRouter
+import beyond.UserActionActor.UpdateRoutingTable
 import beyond.plugin.GamePlugin
 import beyond.route.RoutingTableLeader
 import beyond.route.RoutingTableWorker
 
+object BeyondSupervisor {
+  val BeyoundSupervisorBasePath: String = "/user/beyondSupervisor/"
+  val UserActionActorName: String = "userActionActor"
+  val LauncherSupervisorName: String = "launcherSupervisor"
+  val GamePluginName: String = "gamePlugin"
+  val RoutingTableLeaderName: String = "routingTableLeader"
+  val RoutingTableWorkerName: String = "routingTableWorker"
+
+  val UserActionActorPath: String = BeyoundSupervisorBasePath + UserActionActorName
+
+}
 class BeyondSupervisor extends Actor {
+  import BeyondSupervisor._
   override def preStart() {
     val numProcessors = Runtime.getRuntime.availableProcessors()
     // Routers default to a strategy of "always escalate". This is problematic because
@@ -25,12 +39,17 @@ class BeyondSupervisor extends Actor {
     //  http://doc.akka.io/docs/akka/2.2.1/scala/routing.html for further discussions.
     val router = ConsistentHashingRouter(nrOfInstances = numProcessors,
       supervisorStrategy = SupervisorStrategy.defaultStrategy)
-    context.actorOf(Props[UserActionActor].withRouter(router), name = "userActionActor")
-    context.actorOf(Props[LauncherSupervisor], name = "launcherSupervisor")
+    // There is no priority between the routing table update message and other messages.
+    //  So updating the routing table is not immediately applied, but is applied after
+    //  all the requests that are already in the mailbox.
+    //  It's not a problem because Beyond is designed to ensure eventual consistency
+    //  not strong consistency.
+    context.actorOf(Props[UserActionActor].withRouter(router), UserActionActorName)
+    context.actorOf(Props[LauncherSupervisor], LauncherSupervisorName)
     // FIXME: Don't hardcode the plugin filename.
-    context.actorOf(Props(classOf[GamePlugin], "main.js"), name = "gamePlugin")
-    context.actorOf(Props[RoutingTableLeader], name = "routingTableLeader")
-    context.actorOf(Props[RoutingTableWorker], name = "routingTableWorker")
+    context.actorOf(Props(classOf[GamePlugin], "main.js"), GamePluginName)
+    context.actorOf(Props[RoutingTableLeader], RoutingTableLeaderName)
+    context.actorOf(Props[RoutingTableWorker], RoutingTableWorkerName)
   }
 
   override val supervisorStrategy =
@@ -41,6 +60,12 @@ class BeyondSupervisor extends Actor {
     }
 
   override def receive: Receive = {
+    case msg: UpdateRoutingTable =>
+      import play.api.libs.concurrent.Akka
+      import play.api.Play.current
+      import scala.concurrent.ExecutionContext
+      implicit val ec: ExecutionContext = Akka.system.dispatcher
+      Akka.system.actorSelection(UserActionActorPath).tell(Broadcast(msg), sender)
     case _ =>
   }
 }
