@@ -3,6 +3,7 @@ package beyond
 import akka.actor.ActorRef
 import akka.actor.Props
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
+import java.net.InetAddress
 import org.apache.curator.RetryPolicy
 import org.apache.curator.retry.ExponentialBackoffRetry
 import play.api.Application
@@ -86,6 +87,15 @@ object Global extends WithFilters(TimeoutFilter) with Logging {
     val maxRetries = configuration.getInt(curatorPath + "max-retries").getOrElse(defaultMaxRetries)
     val maxSleepMs = Duration(configuration.getString(curatorPath + "max-sleep").getOrElse("1000ms")).toMillis.toInt
     new ExponentialBackoffRetry(baseSleepTimeMs, maxRetries, maxSleepMs)
+  }
+
+  def currentServerAddress: String = {
+    import play.api.Play.current
+    val defaultPort = 9000
+    val hostAddress = current.configuration.getString("http.address").getOrElse(InetAddress.getLocalHost.getHostAddress)
+    val port = current.configuration.getInt("http.port").getOrElse(defaultPort)
+
+    hostAddress + ":" + port.toString
   }
 }
 
