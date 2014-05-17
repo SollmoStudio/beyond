@@ -3,7 +3,7 @@ package beyond.route
 import akka.actor.Actor
 import akka.actor.ActorLogging
 import beyond.CuratorFrameworkFactoryWithDefaultPolicy
-import beyond.route.RoutingTableView.UpdateRoutingTable
+import beyond.UserActionActor.UpdateRoutingTable
 import beyond.route.RoutingTableConfig._
 import java.io.Closeable
 import java.nio.charset.Charset

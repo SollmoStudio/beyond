@@ -11,8 +11,6 @@ object RoutingTableView {
   trait ServerToHandle
   case object HandleHere extends ServerToHandle
   case class HandleIn(address: Address) extends ServerToHandle
-
-  case class UpdateRoutingTable(data: JsArray)
 }
 
 class RoutingTableView(currentServer: Address, data: JsArray = new JsArray) extends Logging {

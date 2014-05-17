@@ -8,6 +8,7 @@ import akka.pattern.pipe
 import akka.routing.ConsistentHashingRouter.ConsistentHashable
 import akka.util.Timeout
 import play.api.libs.concurrent.Akka
+import play.api.libs.json.JsArray
 import play.api.mvc.Action
 import play.api.mvc.AnyContent
 import play.api.mvc.BodyParser
@@ -20,12 +21,11 @@ import play.api.mvc.WrappedRequest
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-class RequestWithUsername[A](val username: String, request: Request[A]) extends WrappedRequest[A](request)
-
 object UserAction {
   import play.api.Play.current
+  import UserActionActor._
 
-  private val userActionActor: ActorSelection = Akka.system.actorSelection("/user/beyondSupervisor/userActionActor")
+  private val userActionActor: ActorSelection = Akka.system.actorSelection(BeyondSupervisor.UserActionActorPath)
 
   def apply(block: => SimpleResult): Action[AnyContent] = apply(_ => block)
 
@@ -60,12 +60,18 @@ object UserAction {
   }
 }
 
-private case class BlockAndRequest[A](block: (RequestWithUsername[A]) => Future[SimpleResult], request: RequestWithUsername[A]) extends ConsistentHashable {
-  // FIXME: Use a better hashing algorithm.
-  override def consistentHashKey: Any = request.username.##
+object UserActionActor {
+  case class RequestWithUsername[A](username: String, request: Request[A]) extends WrappedRequest[A](request)
+  case class BlockAndRequest[A](block: (RequestWithUsername[A]) => Future[SimpleResult], request: RequestWithUsername[A]) extends ConsistentHashable {
+    // FIXME: Use a better hashing algorithm.
+    override def consistentHashKey: Any = request.username.##
+  }
+
+  case class UpdateRoutingTable(data: JsArray)
 }
 
 private class UserActionActor extends Actor {
+  import UserActionActor._
   override def receive: Receive = {
     case BlockAndRequest(block, request) => {
       import play.api.libs.concurrent.Akka
