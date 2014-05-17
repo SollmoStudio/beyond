@@ -54,19 +54,26 @@ object Global extends WithFilters(TimeoutFilter) with Logging {
     }
   }
 
-  def requestTimeout: FiniteDuration =
-    Duration(configuration.getString("beyond.request-timeout").getOrElse("30s")).asInstanceOf[FiniteDuration]
+  def requestTimeout: FiniteDuration = {
+    import play.api.Play.current
+    Duration(current.configuration.getString("beyond.request-timeout").getOrElse("30s")).asInstanceOf[FiniteDuration]
+  }
 
-  def mongoDBPath: String =
-    configuration.getString("beyond.mongodb.dbpath").getOrElse("data")
+  def mongoDBPath: String = {
+    import play.api.Play.current
+    current.configuration.getString("beyond.mongodb.dbpath").getOrElse("data")
+  }
 
-  def zooKeeperConfigPath: String =
-    configuration.getString("beyond.zookeeper.config-path").getOrElse("conf/zoo.cfg")
+  def zooKeeperConfigPath: String = {
+    import play.api.Play.current
+    current.configuration.getString("beyond.zookeeper.config-path").getOrElse("conf/zoo.cfg")
+  }
 
   def pluginPaths: Seq[String] = {
+    import play.api.Play.current
     import scala.collection.JavaConverters._
     val defaultModulePaths = Seq("plugins")
-    configuration.getStringList("beyond.plugin.path").map(_.asScala).getOrElse(defaultModulePaths)
+    current.configuration.getStringList("beyond.plugin.path").map(_.asScala).getOrElse(defaultModulePaths)
   }
 }
 
