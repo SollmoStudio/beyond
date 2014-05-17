@@ -7,6 +7,7 @@ import akka.actor.SupervisorStrategy
 import akka.actor.SupervisorStrategy._
 import akka.routing.ConsistentHashingRouter
 import beyond.plugin.GamePlugin
+import beyond.route.RoutingTableLeader
 
 class BeyondSupervisor extends Actor {
   override def preStart() {
@@ -27,6 +28,7 @@ class BeyondSupervisor extends Actor {
     context.actorOf(Props[LauncherSupervisor], name = "launcherSupervisor")
     // FIXME: Don't hardcode the plugin filename.
     context.actorOf(Props(classOf[GamePlugin], "main.js"), name = "gamePlugin")
+    context.actorOf(Props[RoutingTableLeader], name = "routingTableLeader")
   }
 
   override val supervisorStrategy =
