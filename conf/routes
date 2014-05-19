@@ -21,4 +21,6 @@ GET     /admin/logout               controllers.Admin.logout
 GET     /admin/user                 controllers.Admin.userIndex
 GET     /admin/user/list            controllers.Admin.userList
 
+GET     /admin/cpu/usage            controllers.Admin.cpuUsage
+
 POST    /plugin/*path               controllers.Plugin.route(path)

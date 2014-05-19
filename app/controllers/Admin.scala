@@ -51,6 +51,44 @@ object Admin extends Controller with MongoController {
     )
   }
 
+  private def cpuUsageForMac : Map[String, String] = {
+    import scala.sys.process._
+
+    val process = "top -l 1".!!
+
+    val user = process.split("usage:")(1).split("% user")(0).toDouble.toInt
+    val sys = process.split("user,")(1).split("% sys")(0).toDouble.toInt
+    val cpu = (user + sys).toString
+
+    Map(
+      "CPU" -> cpu
+    )
+  }
+
+  private def cpuUsageForLinux : Map[String, String] = {
+    import scala.sys.process._
+
+    val process = "top -b -n 1".!!
+
+    val user = process.split("Cpu\\(s\\):")(1).split("us")(0).toDouble.toInt
+    val sys = process.split("us,")(1).split("sy")(0).toDouble.toInt
+    val cpu = (user + sys).toString
+
+    Map(
+      "CPU" -> cpu
+    )
+  }
+
+  def cpuUsage : Action[AnyContent]= AuthenticatedAction { request =>
+    if (Properties.osName == "Mac OS X") {
+      val jsonCpuUsage = Json.stringify(Json.toJson(cpuUsageForMac))
+      Ok(views.html.admin_cpu_usage(jsonCpuUsage))
+    } else {
+      val jsonCpuUsage = Json.stringify(Json.toJson(cpuUsageForLinux))
+      Ok(views.html.admin_cpu_usage(jsonCpuUsage))
+    }
+  }
+
   def index : Action[AnyContent]= AuthenticatedAction { request =>
     val jsonServerInfo = Json.stringify(Json.toJson(serverInfo))
     Ok(views.html.admin_index(jsonServerInfo))
