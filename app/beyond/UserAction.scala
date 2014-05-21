@@ -1,31 +1,36 @@
 package beyond
 
 import akka.actor.Actor
+import akka.actor.ActorLogging
 import akka.actor.ActorSelection
 import akka.pattern.AskTimeoutException
 import akka.pattern.ask
 import akka.pattern.pipe
 import akka.routing.ConsistentHashingRouter.ConsistentHashable
 import akka.util.Timeout
+import beyond.route.Address
+import beyond.route.RoutingTableView
+import beyond.route.RoutingTableView._
 import play.api.libs.concurrent.Akka
+import play.api.libs.json.JsArray
 import play.api.mvc.Action
 import play.api.mvc.AnyContent
 import play.api.mvc.BodyParser
 import play.api.mvc.BodyParsers
 import play.api.mvc.Request
-import play.api.mvc.Results.InternalServerError
 import play.api.mvc.Results.Forbidden
+import play.api.mvc.Results.InternalServerError
+import play.api.mvc.Results.Status
 import play.api.mvc.SimpleResult
 import play.api.mvc.WrappedRequest
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-class RequestWithUsername[A](val username: String, request: Request[A]) extends WrappedRequest[A](request)
-
 object UserAction {
   import play.api.Play.current
+  import UserActionActor._
 
-  private val userActionActor: ActorSelection = Akka.system.actorSelection("/user/beyondSupervisor/userActionActor")
+  private val userActionActor: ActorSelection = Akka.system.actorSelection(BeyondSupervisor.UserActionActorPath)
 
   def apply(block: => SimpleResult): Action[AnyContent] = apply(_ => block)
 
@@ -60,18 +65,38 @@ object UserAction {
   }
 }
 
-private case class BlockAndRequest[A](block: (RequestWithUsername[A]) => Future[SimpleResult], request: RequestWithUsername[A]) extends ConsistentHashable {
-  // FIXME: Use a better hashing algorithm.
-  override def consistentHashKey: Any = request.username.##
+object UserActionActor {
+  case class RequestWithUsername[A](username: String, request: Request[A]) extends WrappedRequest[A](request) with ConsistentHashable {
+    // FIXME: Use a better hashing algorithm.
+    override def consistentHashKey: Any = username.##
+  }
+  case class BlockAndRequest[A](block: (RequestWithUsername[A]) => Future[SimpleResult], request: RequestWithUsername[A]) extends ConsistentHashable {
+    override def consistentHashKey: Any = request.consistentHashKey
+  }
+
+  case class UpdateRoutingTable(data: JsArray)
 }
 
-private class UserActionActor extends Actor {
+private class UserActionActor extends Actor with ActorLogging {
+  var routingTable: RoutingTableView = new RoutingTableView(Global.currentServerAddress)
+  import UserActionActor._
   override def receive: Receive = {
     case BlockAndRequest(block, request) => {
-      import play.api.libs.concurrent.Akka
-      import play.api.Play.current
-      implicit val ec: ExecutionContext = Akka.system.dispatcher
-      block(request) pipeTo sender
+      val hash = request.consistentHashKey.asInstanceOf[Int]
+      routingTable.queryServerToHandle(hash) match {
+        case HandleHere =>
+          import play.api.libs.concurrent.Akka
+          import play.api.Play.current
+          implicit val ec: ExecutionContext = Akka.system.dispatcher
+          block(request) pipeTo sender
+        case HandleIn(address: Address) =>
+          val RedirectStatusCode = 310 // This code is just one of a redirection code not used by HTTP. It can be changed.
+          log.info("Request by {} is redirected to {}", request.username, address)
+          sender ! new Status(RedirectStatusCode)(address)
+      }
     }
+    case UpdateRoutingTable(jsRoutingTable) =>
+      log.info("Routing table is updated.")
+      routingTable = new RoutingTableView(Global.currentServerAddress, jsRoutingTable)
   }
 }
