@@ -85,7 +85,7 @@ class ScriptableMap private (scope: Scriptable,
   }
 
   private def getInternal(key: AnyRef): AnyRef = {
-    def value = map.get(key)
+    val value = map.get(key)
     if (value == null) {
       Scriptable.NOT_FOUND
     } else {
