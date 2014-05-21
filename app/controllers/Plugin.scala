@@ -16,7 +16,7 @@ object Plugin extends Controller {
   import play.api.Play.current
   private val gamePlugin: ActorSelection = Akka.system.actorSelection("/user/beyondSupervisor/gamePlugin")
 
-  def route(path: String) : Action[AnyContent] = Action.async { request =>
+  def route(path: String): Action[AnyContent] = Action.async { request =>
     implicit val timeout = Timeout(Global.requestTimeout)
     implicit val ec: ExecutionContext = Akka.system.dispatcher
 
@@ -25,4 +25,3 @@ object Plugin extends Controller {
     }
   }
 }
-

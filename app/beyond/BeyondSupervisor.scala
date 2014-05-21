@@ -22,7 +22,7 @@ class BeyondSupervisor extends Actor {
     // See Routers and Supervision section of
     //  http://doc.akka.io/docs/akka/2.2.1/scala/routing.html for further discussions.
     val router = ConsistentHashingRouter(nrOfInstances = numProcessors,
-                                         supervisorStrategy = SupervisorStrategy.defaultStrategy)
+      supervisorStrategy = SupervisorStrategy.defaultStrategy)
     context.actorOf(Props[UserActionActor].withRouter(router), name = "userActionActor")
     context.actorOf(Props[LauncherSupervisor], name = "launcherSupervisor")
     // FIXME: Don't hardcode the plugin filename.

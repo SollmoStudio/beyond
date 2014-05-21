@@ -8,8 +8,8 @@ import org.mozilla.javascript.Scriptable
 import play.api.mvc.Request
 
 class GamePluginWorker(contextFactory: BeyondContextFactory,
-                       global: BeyondGlobal,
-                       handler: Function) extends Actor {
+    global: BeyondGlobal,
+    handler: Function) extends Actor {
   import beyond.plugin.RhinoConversions._
   import beyond.plugin.GamePlugin._
 

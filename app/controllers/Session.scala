@@ -14,7 +14,7 @@ object Session extends Controller {
     )
   )
 
-  def login : Action[AnyContent] = Action { implicit request =>
+  def login: Action[AnyContent] = Action { implicit request =>
     val data = loginForm.bindFromRequest.data
     // FIXME: Check password
 
@@ -22,7 +22,7 @@ object Session extends Controller {
     Ok("Hello " + username).withSession("username" -> username)
   }
 
-  def logout : Action[AnyContent] = UserAction { request =>
+  def logout: Action[AnyContent] = UserAction { request =>
     Ok("Goodbye " + request.username).withNewSession
   }
 }

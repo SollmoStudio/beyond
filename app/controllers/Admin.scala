@@ -40,7 +40,7 @@ object Admin extends Controller with MongoController {
     )(AdminUser.apply)(AdminUser.unapply)
   )
 
-  private def serverInfo : Map[String, String] = {
+  private def serverInfo: Map[String, String] = {
     import Play.current
     Map(
       "OS Name" -> Properties.osName,
@@ -51,12 +51,12 @@ object Admin extends Controller with MongoController {
     )
   }
 
-  def index : Action[AnyContent]= AuthenticatedAction { request =>
+  def index: Action[AnyContent] = AuthenticatedAction { request =>
     val jsonServerInfo = Json.stringify(Json.toJson(serverInfo))
     Ok(views.html.admin_index(jsonServerInfo))
   }
 
-  def login : Action[AnyContent] = Action { request =>
+  def login: Action[AnyContent] = Action { request =>
     request.session.get("username").map { username =>
       Redirect(routes.Admin.index)
     }.getOrElse {
@@ -64,15 +64,15 @@ object Admin extends Controller with MongoController {
     }
   }
 
-  def logout : Action[AnyContent] = Action {
+  def logout: Action[AnyContent] = Action {
     Redirect(routes.Admin.index).withNewSession
   }
 
-  def userIndex : Action[AnyContent] = Action {
+  def userIndex: Action[AnyContent] = Action {
     Redirect(routes.Admin.userList)
   }
 
-  def userList : Action[AnyContent] = AuthenticatedAction.async { request =>
+  def userList: Action[AnyContent] = AuthenticatedAction.async { request =>
     import play.api.libs.concurrent.Execution.Implicits._
 
     val cursor: Cursor[AdminUser] = collection.find(Json.obj()).cursor[AdminUser]
@@ -82,7 +82,7 @@ object Admin extends Controller with MongoController {
     }
   }
 
-  def doLogin : Action[AnyContent] = Action.async { implicit request =>
+  def doLogin: Action[AnyContent] = Action.async { implicit request =>
     loginForm.bindFromRequest.fold(
       formWithErrors => {
         // FIXME: Create an error type instead of passing String.

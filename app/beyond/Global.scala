@@ -77,4 +77,3 @@ object Global extends WithFilters(TimeoutFilter) with Logging {
   }
 }
 
-

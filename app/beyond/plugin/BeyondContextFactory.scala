@@ -6,9 +6,9 @@ import org.mozilla.javascript.ContextFactory
 import scala.annotation.switch
 
 case class BeyondContextFactoryConfig(strictMode: Boolean = false,
-                                      strictVars: Boolean = true,
-                                      warningAsError: Boolean = false,
-                                      parentProtoProperties: Boolean = true)
+  strictVars: Boolean = true,
+  warningAsError: Boolean = false,
+  parentProtoProperties: Boolean = true)
 
 class BeyondContextFactory(config: BeyondContextFactoryConfig)(implicit actor: ActorRef) extends ContextFactory {
   override def onContextCreated(cx: Context) {

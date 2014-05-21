@@ -73,7 +73,7 @@ object BeyondGlobal {
     id.cancel()
   }
 
-  def seal(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function)  {
+  def seal(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function) {
     args.foreach { arg =>
       if (!(arg.isInstanceOf[ScriptableObject]) || arg == Undefined.instance) {
         if (!(arg.isInstanceOf[Scriptable]) || arg == Undefined.instance) {
@@ -137,7 +137,7 @@ object BeyondGlobal {
 }
 
 class BeyondGlobal(factory: ContextFactory,
-                   sealedStdLib: Boolean = false) extends ImporterTopLevel {
+    sealedStdLib: Boolean = false) extends ImporterTopLevel {
   import beyond.plugin.RhinoConversions._
 
   // Define some global functions particular to the beyond. Note
