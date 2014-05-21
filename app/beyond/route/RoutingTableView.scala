@@ -6,7 +6,6 @@ import play.api.libs.json.Json
 
 object RoutingTableView {
   type RoutingTableInternal = Seq[Server]
-  def emptyRoutingTable: RoutingTableInternal = Seq[Server]()
 
   sealed trait ServerToHandle
   case object HandleHere extends ServerToHandle
