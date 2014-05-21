@@ -8,7 +8,7 @@ object RoutingTableView {
   type RoutingTableInternal = Seq[Server]
   def emptyRoutingTable: RoutingTableInternal = Seq[Server]()
 
-  trait ServerToHandle
+  sealed trait ServerToHandle
   case object HandleHere extends ServerToHandle
   case class HandleIn(address: Address) extends ServerToHandle
 }
