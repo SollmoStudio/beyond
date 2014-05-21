@@ -1,0 +1,14 @@
+@(errorMessage: String = "")
+
+@admin_common("createUser") {
+    <div id="content"></div>
+    <script type="text/jsx">
+        /** @@jsx React.DOM */
+        require(["react", "jsx!createuserform"], function (React, CreateUserForm) {
+            React.renderComponent(
+                <CreateUserForm postUrl="@routes.Admin.doCreateUser" heading="Create User" errorMessage="@errorMessage" />,
+                document.getElementById('content')
+            );
+        });
+    </script>
+}

@@ -18,6 +18,9 @@ GET     /admin/login                controllers.Admin.login
 POST    /admin/login                controllers.Admin.doLogin
 GET     /admin/logout               controllers.Admin.logout
 
+GET     /admin/createUser        controllers.Admin.createUser
+POST    /admin/createUser        controllers.Admin.doCreateUser
+
 GET     /admin/user                 controllers.Admin.userIndex
 GET     /admin/user/list            controllers.Admin.userList
 

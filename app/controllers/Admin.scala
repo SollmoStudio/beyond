@@ -17,9 +17,13 @@ object Admin extends Controller with MongoController {
   private def collection: JSONCollection = db.collection[JSONCollection]("admin.password")
 
   private case class AdminUser(username: String, password: String)
+
+  private case class CreateUser(username: String, password: String, mail: String)
+
   private implicit val adminUserFormat = Json.format[AdminUser]
 
   private class AuthenticatedRequest[A](val username: String, request: Request[A]) extends WrappedRequest[A](request)
+
   private object AuthenticatedAction extends ActionBuilder[AuthenticatedRequest] {
     protected def invokeBlock[A](request: Request[A], block: (AuthenticatedRequest[A]) => Future[SimpleResult]) = {
       request.session.get("username").map { username =>
@@ -38,6 +42,14 @@ object Admin extends Controller with MongoController {
       "username" -> nonEmptyText(minLength = MinUsernameLength, maxLength = MaxUsernameLength),
       "password" -> nonEmptyText
     )(AdminUser.apply)(AdminUser.unapply)
+  )
+
+  private val createUserForm = Form(
+    mapping(
+      "username" -> nonEmptyText(minLength = MinUsernameLength, maxLength = MaxUsernameLength),
+      "password" -> nonEmptyText,
+      "mail" -> nonEmptyText
+    )(CreateUser.apply)(CreateUser.unapply)
   )
 
   private def serverInfo : Map[String, String] = {
@@ -102,6 +114,32 @@ object Admin extends Controller with MongoController {
             } else {
               BadRequest(views.html.admin_login("Invalid password"))
             }
+        }
+      }
+    )
+  }
+
+  def createUser : Action[AnyContent] = Action { request =>
+    request.session.get("username").map { username =>
+      Redirect(routes.Admin.index)
+    }.getOrElse {
+      Ok(views.html.admin_create_user())
+    }
+  }
+
+  def doCreateUser : Action[AnyContent] = Action.async { implicit request =>
+    createUserForm.bindFromRequest.fold(
+      formWithErrors => {
+        // FIXME: Create an error type instead of passing String.
+        val result = BadRequest(views.html.admin_create_user("Invalid username"))
+        Future.successful(result)
+      },
+      CreateUser => {
+        import play.api.libs.concurrent.Execution.Implicits._
+
+        val result = collection.insert(Json.obj("username" -> CreateUser.username, "password" -> CreateUser.password, "mail" -> CreateUser.mail))
+        result.map { request =>
+          Redirect(routes.Admin.login)
         }
       }
     )
