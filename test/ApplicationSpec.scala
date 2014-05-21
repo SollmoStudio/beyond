@@ -15,16 +15,16 @@ class ApplicationSpec extends Specification {
 
   "Application" should {
 
-    "send 404 on a bad request" in new WithApplication{
+    "send 404 on a bad request" in new WithApplication {
       route(FakeRequest(GET, "/boum")) must beNone
     }
 
-    "render the index page" in new WithApplication{
+    "render the index page" in new WithApplication {
       val home = route(FakeRequest(GET, "/")).get
 
       status(home) must equalTo(OK)
       contentType(home) must beSome.which(_ == "text/html")
-      contentAsString(home) must contain ("Your new application is ready.")
+      contentAsString(home) must contain("Your new application is ready.")
     }
 
     "respond to ping with pong" in new WithApplication {
@@ -32,7 +32,7 @@ class ApplicationSpec extends Specification {
 
       status(ping) must equalTo(OK)
       contentType(ping) must beSome.which(_ == "text/plain")
-      contentAsString(ping) must equalTo ("pong")
+      contentAsString(ping) must equalTo("pong")
     }
 
     "login" in new WithApplication {
@@ -50,7 +50,7 @@ class ApplicationSpec extends Specification {
       status(logout) must equalTo(OK)
       contentType(logout) must beSome.which(_ == "text/plain")
       contentAsString(logout) must equalTo("Goodbye myname")
-      session(logout).isEmpty must equalTo (true)
+      session(logout).isEmpty must equalTo(true)
     }
 
     "logout without login" in new WithApplication {
