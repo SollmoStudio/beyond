@@ -1,0 +1,18 @@
+@(jsonCpuUsage: String)
+
+@admin_main("CpuUsage") {
+<div id="content"></div>
+<script type="text/jsx">
+    /** @@jsx React.DOM */
+    require(["react", "jsx!tablepanel"], function (React, TablePanel) {
+        var data = @Html(jsonCpuUsage);
+
+        React.renderComponent(
+            <TablePanel heading="Cpu Usage" data={data}>
+                Display the cpu usage for the local server
+            </TablePanel>,
+            document.getElementById('content')
+        );
+    });
+    </script>
+}
