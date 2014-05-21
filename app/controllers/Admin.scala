@@ -10,6 +10,7 @@ import play.core.PlayVersion
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
 import reactivemongo.api.Cursor
+import reactivemongo.core.commands.Count
 import scala.concurrent.Future
 import scala.util.Properties
 
@@ -68,11 +69,18 @@ object Admin extends Controller with MongoController {
     Ok(views.html.admin_index(jsonServerInfo))
   }
 
-  def login : Action[AnyContent] = Action { request =>
-    request.session.get("username").map { username =>
-      Redirect(routes.Admin.index)
-    }.getOrElse {
-      Ok(views.html.admin_login())
+  def login: Action[AnyContent] = Action.async { request =>
+    request.session.get("username").fold({
+      import play.api.libs.concurrent.Execution.Implicits._
+
+      val numberOfAdminAccount = db.command(new Count("admin.password"))
+
+      numberOfAdminAccount.map {
+        case 0 => Redirect(routes.Admin.createUser())
+        case _ => Ok(views.html.admin_login())
+      }
+    }) { _ =>
+      Future.successful(Redirect(routes.Admin.index))
     }
   }
 
