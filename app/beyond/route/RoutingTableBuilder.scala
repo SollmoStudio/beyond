@@ -2,6 +2,7 @@ package beyond.route
 
 import play.api.libs.Codecs
 import play.api.libs.json.Json
+import play.api.libs.json.JsValue
 import play.api.libs.json.Writes
 import scala.collection.mutable
 
@@ -9,7 +10,7 @@ object RoutingTableBuilder {
   type RoutingTableInternal = mutable.HashMap[Hash, Address]
 
   implicit val routingTableBuilderWrites = new Writes[RoutingTableBuilder] {
-    def writes(builder: RoutingTableBuilder) =
+    def writes(builder: RoutingTableBuilder): JsValue =
       Json.toJson(builder.routingTable.map { case (hash, address) => Server(hash, address) })
   }
 }
