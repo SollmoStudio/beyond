@@ -13,6 +13,7 @@ import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener
 import org.apache.curator.framework.recipes.leader.LeaderSelector
 import org.apache.curator.framework.recipes.leader.LeaderSelectorListenerAdapter
+import play.api.libs.json.Json
 import scala.collection.mutable
 
 class RoutingTableLeader extends LeaderSelectorListenerAdapter with Actor with ActorLogging {
@@ -62,7 +63,7 @@ class RoutingTableLeader extends LeaderSelectorListenerAdapter with Actor with A
       cache.getListenable.addListener(new PathChildrenCacheListener() {
         override def childEvent(framework: CuratorFramework, event: PathChildrenCacheEvent) {
           def saveRoutingTableToServer(routingTableBuilder: RoutingTableBuilder) {
-            val routingTableToSave: Array[Byte] = routingTableBuilder.serialize()
+            val routingTableToSave: Array[Byte] = Json.stringify(Json.toJson(routingTableBuilder)).getBytes("UTF-8")
             framework.setData().inBackground().forPath(RoutingTablePath, routingTableToSave)
           }
           event.getType match {

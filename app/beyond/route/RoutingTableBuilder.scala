@@ -2,10 +2,16 @@ package beyond.route
 
 import play.api.libs.Codecs
 import play.api.libs.json.Json
+import play.api.libs.json.Writes
 import scala.collection.mutable
 
 object RoutingTableBuilder {
   type RoutingTableInternal = mutable.HashMap[Hash, Address]
+
+  implicit val routingTableBuilderWrites = new Writes[RoutingTableBuilder] {
+    def writes(builder: RoutingTableBuilder) =
+      Json.toJson(builder.routingTable.map { case (hash, address) => Server(hash, address) })
+  }
 }
 
 class RoutingTableBuilder {
@@ -30,9 +36,5 @@ class RoutingTableBuilder {
 
   def remove(address: Address) {
     routingTable - hash(address)
-  }
-
-  def serialize(): Array[Byte] = {
-    Json.stringify(Json.toJson(routingTable.map { case (hash, address) => Server(hash, address) })).getBytes("UTF-8")
   }
 }
