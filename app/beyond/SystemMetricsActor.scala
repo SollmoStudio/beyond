@@ -6,6 +6,8 @@ import com.sun.tools.attach.VirtualMachine
 import java.io.Closeable
 import java.io.File
 import java.lang.management.ManagementFactory
+import java.lang.management.MemoryMXBean
+import java.lang.management.MemoryUsage
 import java.lang.management.OperatingSystemMXBean
 import java.lang.management.RuntimeMXBean
 import javax.management.MBeanServerConnection
@@ -17,9 +19,13 @@ import scala.collection.mutable
 object SystemMetricsActor {
   sealed trait SystemMetricsRequest
   case object SystemLoadAverageRequest extends SystemMetricsRequest
+  case object HeapMemoryUsageRequest extends SystemMetricsRequest
+  case object NonHeapMemoryUsageRequest extends SystemMetricsRequest
 
   sealed trait SystemMetricsReply
   case class SystemLoadAverageReply(loadAverage: Double) extends SystemMetricsReply
+  case class HeapMemoryUsageReply(usage: MemoryUsage) extends SystemMetricsReply
+  case class NonHeapMemoryUsageReply(usage: MemoryUsage) extends SystemMetricsReply
 }
 
 class SystemMetricsActor extends Actor with ActorLogging {
@@ -56,9 +62,12 @@ class SystemMetricsActor extends Actor with ActorLogging {
       jmxResources.push(jmxc)
       val mbsc: MBeanServerConnection = jmxc.getMBeanServerConnection()
 
-      val bean: OperatingSystemMXBean = ManagementFactory.newPlatformMXBeanProxy(
+      val osMXBean: OperatingSystemMXBean = ManagementFactory.newPlatformMXBeanProxy(
         mbsc, ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, classOf[OperatingSystemMXBean])
-      context.become(receiveWithOperatingSystemMXBean(bean))
+      val memoryMXBean: MemoryMXBean = ManagementFactory.newPlatformMXBeanProxy(
+        mbsc, ManagementFactory.MEMORY_MXBEAN_NAME, classOf[MemoryMXBean])
+
+      context.become(receiveWithOperatingSystemMXBean(osMXBean, memoryMXBean))
 
     } catch {
       case ex: Throwable =>
@@ -84,9 +93,13 @@ class SystemMetricsActor extends Actor with ActorLogging {
     case _ =>
   }
 
-  private def receiveWithOperatingSystemMXBean(bean: OperatingSystemMXBean): Receive = {
+  private def receiveWithOperatingSystemMXBean(osMXBean: OperatingSystemMXBean, memoryMXBean: MemoryMXBean): Receive = {
     case SystemLoadAverageRequest =>
-      sender ! SystemLoadAverageReply(bean.getSystemLoadAverage)
+      sender ! SystemLoadAverageReply(osMXBean.getSystemLoadAverage)
+    case HeapMemoryUsageRequest =>
+      sender ! HeapMemoryUsageReply(memoryMXBean.getHeapMemoryUsage)
+    case NonHeapMemoryUsageReply =>
+      sender ! NonHeapMemoryUsageReply(memoryMXBean.getNonHeapMemoryUsage)
   }
 }
 
