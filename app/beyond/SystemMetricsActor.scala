@@ -11,9 +11,12 @@ import java.lang.management.MemoryUsage
 import java.lang.management.OperatingSystemMXBean
 import java.lang.management.RuntimeMXBean
 import javax.management.MBeanServerConnection
+import javax.management.MBeanServer
+import javax.management.ObjectName
 import javax.management.remote.JMXConnector
 import javax.management.remote.JMXConnectorFactory
 import javax.management.remote.JMXServiceURL
+import org.hyperic.sigar.jmx.SigarRegistry
 import scala.collection.mutable
 
 object SystemMetricsActor {
@@ -21,11 +24,13 @@ object SystemMetricsActor {
   case object SystemLoadAverageRequest extends SystemMetricsRequest
   case object HeapMemoryUsageRequest extends SystemMetricsRequest
   case object NonHeapMemoryUsageRequest extends SystemMetricsRequest
+  case object SwapMemoryUsageRequest extends SystemMetricsRequest
 
   sealed trait SystemMetricsReply
   case class SystemLoadAverageReply(loadAverage: Double) extends SystemMetricsReply
   case class HeapMemoryUsageReply(usage: MemoryUsage) extends SystemMetricsReply
   case class NonHeapMemoryUsageReply(usage: MemoryUsage) extends SystemMetricsReply
+  case class SwapMemoryUsageReply(free: Long, total: Long, used: Long) extends SystemMetricsReply
 }
 
 class SystemMetricsActor extends Actor with ActorLogging {
@@ -44,6 +49,9 @@ class SystemMetricsActor extends Actor with ActorLogging {
       // bean.getName() method.
       jvmName.split("@")(0)
     }
+
+    val server: MBeanServer = ManagementFactory.getPlatformMBeanServer
+    server.registerMBean(new SigarRegistry, null)
 
     try {
       val vm = VirtualMachine.attach(getProcessID)
@@ -66,8 +74,9 @@ class SystemMetricsActor extends Actor with ActorLogging {
         mbsc, ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, classOf[OperatingSystemMXBean])
       val memoryMXBean: MemoryMXBean = ManagementFactory.newPlatformMXBeanProxy(
         mbsc, ManagementFactory.MEMORY_MXBEAN_NAME, classOf[MemoryMXBean])
+      val sigarSwap = new ObjectName("sigar:type=Swap")
 
-      context.become(receiveWithOperatingSystemMXBean(osMXBean, memoryMXBean))
+      context.become(receiveWithOperatingSystemMXBean(mbsc, osMXBean, memoryMXBean, sigarSwap))
 
     } catch {
       case ex: Throwable =>
@@ -93,13 +102,19 @@ class SystemMetricsActor extends Actor with ActorLogging {
     case _ =>
   }
 
-  private def receiveWithOperatingSystemMXBean(osMXBean: OperatingSystemMXBean, memoryMXBean: MemoryMXBean): Receive = {
+  private def receiveWithOperatingSystemMXBean(mbsc: MBeanServerConnection,
+    osMXBean: OperatingSystemMXBean, memoryMXBean: MemoryMXBean, sigarSwap: ObjectName): Receive = {
     case SystemLoadAverageRequest =>
       sender ! SystemLoadAverageReply(osMXBean.getSystemLoadAverage)
     case HeapMemoryUsageRequest =>
       sender ! HeapMemoryUsageReply(memoryMXBean.getHeapMemoryUsage)
     case NonHeapMemoryUsageReply =>
       sender ! NonHeapMemoryUsageReply(memoryMXBean.getNonHeapMemoryUsage)
+    case SwapMemoryUsageRequest =>
+      val free = mbsc.getAttribute(sigarSwap, "Free").asInstanceOf[Long]
+      val total = mbsc.getAttribute(sigarSwap, "Total").asInstanceOf[Long]
+      val used = mbsc.getAttribute(sigarSwap, "Used").asInstanceOf[Long]
+      sender ! SwapMemoryUsageReply(free, total, used)
   }
 }
 
