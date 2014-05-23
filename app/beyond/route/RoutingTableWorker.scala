@@ -34,7 +34,7 @@ class RoutingTableWorker extends Actor with ActorLogging {
 
       val workerNode = new PersistentEphemeralNode(
         curatorFramework, PersistentEphemeralNode.Mode.PROTECTED_EPHEMERAL_SEQUENTIAL, WorkersPath + "/w-",
-        beyond.Global.currentServerAddress.getBytes(Charset.forName("UTF-8")))
+        beyond.BeyondConfiguration.currentServerAddress.getBytes(Charset.forName("UTF-8")))
       workerNode.start()
       curatorResources.push(workerNode)
 

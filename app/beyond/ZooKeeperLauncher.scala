@@ -33,7 +33,7 @@ class ZooKeeperLauncher extends Actor with ActorLogging {
   private val zkServer: BeyondZooKeeperServerMain = new BeyondZooKeeperServerMain
   private val config: ServerConfig = {
     val config = new ServerConfig
-    config.parse(Global.zooKeeperConfigPath)
+    config.parse(BeyondConfiguration.zooKeeperConfigPath)
     config
   }
 

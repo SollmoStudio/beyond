@@ -4,7 +4,7 @@ import akka.actor.ActorSelection
 import akka.pattern.AskTimeoutException
 import akka.pattern.ask
 import akka.util.Timeout
-import beyond.Global
+import beyond.BeyondConfiguration
 import beyond.plugin.GamePlugin.Handle
 import play.api._
 import play.api.libs.concurrent.Akka
@@ -17,7 +17,7 @@ object Plugin extends Controller {
   private val gamePlugin: ActorSelection = Akka.system.actorSelection("/user/beyondSupervisor/gamePlugin")
 
   def route(path: String): Action[AnyContent] = Action.async { request =>
-    implicit val timeout = Timeout(Global.requestTimeout)
+    implicit val timeout = Timeout(BeyondConfiguration.requestTimeout)
     implicit val ec: ExecutionContext = Akka.system.dispatcher
 
     (gamePlugin ? Handle(request)).asInstanceOf[Future[String]].map(Ok(_)).recover {

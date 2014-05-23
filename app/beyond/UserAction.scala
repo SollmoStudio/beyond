@@ -53,7 +53,7 @@ object UserAction {
         import play.api.libs.concurrent.Akka
         import play.api.Play.current
         implicit val ec: ExecutionContext = Akka.system.dispatcher
-        implicit val timeout = Timeout(Global.requestTimeout)
+        implicit val timeout = Timeout(BeyondConfiguration.requestTimeout)
         val blockAndRequest = BlockAndRequest(block, new RequestWithUsername(username, request))
         (userActionActor ? blockAndRequest).asInstanceOf[Future[SimpleResult]].recover {
           case _: AskTimeoutException => InternalServerError("UserAction Timeout")
@@ -78,7 +78,7 @@ object UserActionActor {
 }
 
 private class UserActionActor extends Actor with ActorLogging {
-  var routingTable: RoutingTableView = new RoutingTableView(Global.currentServerAddress)
+  var routingTable: RoutingTableView = new RoutingTableView(BeyondConfiguration.currentServerAddress)
   import UserActionActor._
   override def receive: Receive = {
     case BlockAndRequest(block, request) => {
@@ -97,6 +97,6 @@ private class UserActionActor extends Actor with ActorLogging {
     }
     case UpdateRoutingTable(jsRoutingTable) =>
       log.info("Routing table is updated.")
-      routingTable = new RoutingTableView(Global.currentServerAddress, jsRoutingTable)
+      routingTable = new RoutingTableView(BeyondConfiguration.currentServerAddress, jsRoutingTable)
   }
 }

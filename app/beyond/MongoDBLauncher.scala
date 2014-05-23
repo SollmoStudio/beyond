@@ -20,7 +20,7 @@ class MongoDBLauncher extends Actor with ActorLogging {
   private var process: Option[Process] = _
 
   override def preStart() {
-    val dbPath = new File(Global.mongoDBPath)
+    val dbPath = new File(BeyondConfiguration.mongoDBPath)
     if (!dbPath.exists()) {
       dbPath.mkdirs()
     }
