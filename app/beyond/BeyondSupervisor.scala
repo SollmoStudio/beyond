@@ -17,6 +17,7 @@ object BeyondSupervisor {
   val UserActionActorName: String = "userActionActor"
   val LauncherSupervisorName: String = "launcherSupervisor"
   val GamePluginName: String = "gamePlugin"
+  val SystemMetricsActorName: String = "systemMetricsActor"
   val RoutingTableLeaderName: String = "routingTableLeader"
   val RoutingTableWorkerName: String = "routingTableWorker"
 
@@ -48,6 +49,7 @@ class BeyondSupervisor extends Actor {
     context.actorOf(Props[LauncherSupervisor], LauncherSupervisorName)
     // FIXME: Don't hardcode the plugin filename.
     context.actorOf(Props(classOf[GamePlugin], "main.js"), GamePluginName)
+    context.actorOf(Props[SystemMetricsActor], SystemMetricsActorName)
     context.actorOf(Props[RoutingTableLeader], RoutingTableLeaderName)
     context.actorOf(Props[RoutingTableWorker], RoutingTableWorkerName)
   }
