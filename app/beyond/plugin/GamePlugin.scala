@@ -3,7 +3,7 @@ package beyond.plugin
 import akka.actor.Actor
 import akka.actor.Props
 import akka.routing.RoundRobinRouter
-import beyond.Global
+import beyond.BeyondConfiguration
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import play.api.mvc.Request
@@ -26,7 +26,7 @@ class GamePlugin(filename: String) extends Actor {
     // property, and also that the modules it loads don't export the
     // "module.uri" property.
     val sandboxed = true
-    val require = global.installRequire(cx, Global.pluginPaths, sandboxed)
+    val require = global.installRequire(cx, BeyondConfiguration.pluginPaths, sandboxed)
     val exports = require.requireMain(cx, filename)
     // FIXME: Don't hardcode the name of handler function.
     // FIXME: handler might be Scriptable.NOT_FOUND if there is no function named "handle".

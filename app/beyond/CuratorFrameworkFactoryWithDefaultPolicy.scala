@@ -7,6 +7,6 @@ import org.apache.curator.framework.CuratorFrameworkFactory
 object CuratorFrameworkFactoryWithDefaultPolicy extends Logging {
   def apply(serversToConnect: String): CuratorFramework = {
     logger.info("Create a connection to {} .", serversToConnect)
-    CuratorFrameworkFactory.newClient(serversToConnect, Global.curatorConnectionPolicy)
+    CuratorFrameworkFactory.newClient(serversToConnect, BeyondConfiguration.curatorConnectionPolicy)
   }
 }

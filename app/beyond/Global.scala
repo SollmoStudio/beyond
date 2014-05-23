@@ -5,9 +5,6 @@ import akka.actor.Props
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import java.io.File
-import java.net.InetAddress
-import org.apache.curator.RetryPolicy
-import org.apache.curator.retry.ExponentialBackoffRetry
 import play.api.Application
 import play.api.Configuration
 import play.api.Mode
@@ -20,7 +17,6 @@ import play.api.mvc.Results.InternalServerError
 import play.api.mvc.Results.NotFound
 import play.api.mvc.SimpleResult
 import play.api.mvc.WithFilters
-import scala.concurrent.duration._
 import scala.concurrent.Future
 
 private object TimeoutFilter extends Filter {
@@ -28,7 +24,7 @@ private object TimeoutFilter extends Filter {
     import play.api.libs.concurrent.Execution.Implicits.defaultContext
     import play.api.Play.current
 
-    val timeout = Duration(current.configuration.getString("beyond.request-timeout").get)
+    val timeout = BeyondConfiguration.requestTimeout
     val timeoutFuture = Promise.timeout("Timeout", timeout)
     val resultFuture = next(request)
     Future.firstCompletedOf(Seq(resultFuture, timeoutFuture)).map {
@@ -74,44 +70,6 @@ object Global extends WithFilters(TimeoutFilter) with Logging {
     } getOrElse {
       super.onHandlerNotFound(request)
     }
-  }
-
-  def requestTimeout: FiniteDuration = {
-    import play.api.Play.current
-    Duration(current.configuration.getString("beyond.request-timeout").get).asInstanceOf[FiniteDuration]
-  }
-
-  def mongoDBPath: String = {
-    import play.api.Play.current
-    current.configuration.getString("beyond.mongodb.dbpath").get
-  }
-
-  def zooKeeperConfigPath: String = {
-    import play.api.Play.current
-    current.configuration.getString("beyond.zookeeper.config-path").get
-  }
-
-  def pluginPaths: Seq[String] = {
-    import play.api.Play.current
-    import scala.collection.JavaConverters._
-    current.configuration.getStringList("beyond.plugin.path").map(_.asScala).get
-  }
-
-  def curatorConnectionPolicy: RetryPolicy = {
-    val configuration = play.api.Play.current.configuration
-    val curatorPath = "beyond.curator.connection."
-    val baseSleepTimeMs = Duration(configuration.getString(curatorPath + "base-sleep-time").get).toMillis.toInt
-    val maxRetries = configuration.getInt(curatorPath + "max-retries").get
-    val maxSleepMs = Duration(configuration.getString(curatorPath + "max-sleep").get).toMillis.toInt
-    new ExponentialBackoffRetry(baseSleepTimeMs, maxRetries, maxSleepMs)
-  }
-
-  def currentServerAddress: String = {
-    import play.api.Play.current
-    val hostAddress = current.configuration.getString("http.address").get
-    val port = current.configuration.getInt("http.port").get
-
-    hostAddress + ":" + port.toString
   }
 }
 
