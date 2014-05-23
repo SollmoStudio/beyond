@@ -28,7 +28,7 @@ private object TimeoutFilter extends Filter {
     import play.api.libs.concurrent.Execution.Implicits.defaultContext
     import play.api.Play.current
 
-    val timeout = Duration(current.configuration.getString("beyond.request-timeout").getOrElse("30s"))
+    val timeout = Duration(current.configuration.getString("beyond.request-timeout").get)
     val timeoutFuture = Promise.timeout("Timeout", timeout)
     val resultFuture = next(request)
     Future.firstCompletedOf(Seq(resultFuture, timeoutFuture)).map {
@@ -78,41 +78,38 @@ object Global extends WithFilters(TimeoutFilter) with Logging {
 
   def requestTimeout: FiniteDuration = {
     import play.api.Play.current
-    Duration(current.configuration.getString("beyond.request-timeout").getOrElse("30s")).asInstanceOf[FiniteDuration]
+    Duration(current.configuration.getString("beyond.request-timeout").get).asInstanceOf[FiniteDuration]
   }
 
   def mongoDBPath: String = {
     import play.api.Play.current
-    current.configuration.getString("beyond.mongodb.dbpath").getOrElse("data")
+    current.configuration.getString("beyond.mongodb.dbpath").get
   }
 
   def zooKeeperConfigPath: String = {
     import play.api.Play.current
-    current.configuration.getString("beyond.zookeeper.config-path").getOrElse("conf/zoo.cfg")
+    current.configuration.getString("beyond.zookeeper.config-path").get
   }
 
   def pluginPaths: Seq[String] = {
     import play.api.Play.current
     import scala.collection.JavaConverters._
-    val defaultModulePaths = Seq("plugins")
-    current.configuration.getStringList("beyond.plugin.path").map(_.asScala).getOrElse(defaultModulePaths)
+    current.configuration.getStringList("beyond.plugin.path").map(_.asScala).get
   }
 
   def curatorConnectionPolicy: RetryPolicy = {
     val configuration = play.api.Play.current.configuration
-    val defaultMaxRetries = 10
     val curatorPath = "beyond.curator.connection."
-    val baseSleepTimeMs = Duration(configuration.getString(curatorPath + "base-sleep-time").getOrElse("1000ms")).toMillis.toInt
-    val maxRetries = configuration.getInt(curatorPath + "max-retries").getOrElse(defaultMaxRetries)
-    val maxSleepMs = Duration(configuration.getString(curatorPath + "max-sleep").getOrElse("1000ms")).toMillis.toInt
+    val baseSleepTimeMs = Duration(configuration.getString(curatorPath + "base-sleep-time").get).toMillis.toInt
+    val maxRetries = configuration.getInt(curatorPath + "max-retries").get
+    val maxSleepMs = Duration(configuration.getString(curatorPath + "max-sleep").get).toMillis.toInt
     new ExponentialBackoffRetry(baseSleepTimeMs, maxRetries, maxSleepMs)
   }
 
   def currentServerAddress: String = {
     import play.api.Play.current
-    val defaultPort = 9000
-    val hostAddress = current.configuration.getString("http.address").getOrElse(InetAddress.getLocalHost.getHostAddress)
-    val port = current.configuration.getInt("http.port").getOrElse(defaultPort)
+    val hostAddress = current.configuration.getString("http.address").get
+    val port = current.configuration.getInt("http.port").get
 
     hostAddress + ":" + port.toString
   }
