@@ -30,8 +30,11 @@ class RoutingTableLeader extends LeaderSelectorListenerAdapter with Actor with A
       curatorFramework.start()
       curatorResources.push(curatorFramework)
 
-      Seq(WorkersPath, RoutingTablePath, LeaderPath)
-        .foreach(curatorFramework.create().inBackground().forPath)
+      def ensurePath(path: String, data: Array[Byte] = Array[Byte](0)) {
+        curatorFramework.create().inBackground().forPath(path, data)
+      }
+      Seq(WorkersPath, LeaderPath).foreach(ensurePath(_))
+      ensurePath(RoutingTablePath, "[]".getBytes("UTF-8"))
 
       val leaderSelector = new LeaderSelector(curatorFramework, LeaderPath, this)
       leaderSelector.autoRequeue()

@@ -26,7 +26,11 @@ class RoutingTableWorker extends Actor with ActorLogging {
       curatorFramework.start()
       curatorResources.push(curatorFramework)
 
-      Seq(WorkersPath, RoutingTablePath).foreach(curatorFramework.create().inBackground().forPath)
+      def ensurePath(path: String, data: Array[Byte] = Array[Byte](0)) {
+        curatorFramework.create().inBackground().forPath(path, data)
+      }
+      ensurePath(WorkersPath)
+      ensurePath(RoutingTablePath, "[]".getBytes("UTF-8"))
 
       val workerNode = new PersistentEphemeralNode(
         curatorFramework, PersistentEphemeralNode.Mode.PROTECTED_EPHEMERAL_SEQUENTIAL, WorkersPath + "/w-",
@@ -37,9 +41,8 @@ class RoutingTableWorker extends Actor with ActorLogging {
       val routingTableWatcher = new NodeCache(curatorFramework, RoutingTablePath)
       routingTableWatcher.getListenable.addListener(new NodeCacheListener {
         override def nodeChanged() {
-          val changedData = Option(routingTableWatcher.getCurrentData.getData).fold("[]")(new String(_))
-          val updateMessage = UpdateRoutingTable(Json.parse(changedData).as[JsArray])
-          context.parent ! updateMessage
+          val changedData = routingTableWatcher.getCurrentData.getData
+          context.parent ! UpdateRoutingTable(Json.parse(changedData).as[JsArray])
         }
       })
       routingTableWatcher.start()
