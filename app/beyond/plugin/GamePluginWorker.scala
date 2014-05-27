@@ -10,7 +10,7 @@ import play.api.mvc.Request
 class GamePluginWorker(contextFactory: BeyondContextFactory,
     global: BeyondGlobal,
     handler: Function) extends Actor {
-  import beyond.plugin.RhinoConversions._
+  import com.beyondframework.rhino.RhinoConversions._
   import beyond.plugin.GamePlugin._
 
   // FIXME: Pass the module URI once we load scripts from file path.

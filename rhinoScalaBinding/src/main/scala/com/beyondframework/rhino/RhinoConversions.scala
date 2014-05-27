@@ -1,4 +1,4 @@
-package beyond.plugin
+package com.beyondframework.rhino
 
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextAction

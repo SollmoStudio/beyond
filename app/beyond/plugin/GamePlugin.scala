@@ -15,7 +15,7 @@ object GamePlugin {
 
 // FIXME: Handle script errors.
 class GamePlugin(filename: String) extends Actor {
-  import beyond.plugin.RhinoConversions._
+  import com.beyondframework.rhino.RhinoConversions._
 
   private val contextFactory: BeyondContextFactory = new BeyondContextFactory(new BeyondContextFactoryConfig)
 

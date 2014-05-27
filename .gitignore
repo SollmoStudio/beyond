@@ -32,3 +32,6 @@ project/activator-sbt-eclipse-shim.sbt
 project/activator-sbt-idea-shim.sbt
 # MongoDB database path
 data
+# RhinoScalaBinding
+/rhinoScalaBinding/project
+/rhinoScalaBinding/target

@@ -1,6 +1,6 @@
-package beyond.plugin
+package com.beyondframework.rhino
 
-import beyond.plugin.RhinoConversions._
+import com.beyondframework.rhino.RhinoConversions._
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.EvaluatorException

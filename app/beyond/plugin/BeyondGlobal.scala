@@ -138,7 +138,7 @@ object BeyondGlobal {
 
 class BeyondGlobal(factory: ContextFactory,
     sealedStdLib: Boolean = false) extends ImporterTopLevel {
-  import beyond.plugin.RhinoConversions._
+  import com.beyondframework.rhino.RhinoConversions._
 
   // Define some global functions particular to the beyond. Note
   // that these functions are not part of ECMA.

@@ -2,6 +2,12 @@ name := "beyond"
 
 version := "1.0-SNAPSHOT"
 
+lazy val beyond = project.in(file("."))
+  .aggregate(rhinoScalaBinding)
+  .dependsOn(rhinoScalaBinding)
+
+lazy val rhinoScalaBinding = project
+
 libraryDependencies ++= Seq(
   jdbc,
   anorm,
