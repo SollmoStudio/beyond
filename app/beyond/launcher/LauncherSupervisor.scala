@@ -1,9 +1,10 @@
-package beyond
+package beyond.launcher
 
 import akka.actor.Actor
 import akka.actor.OneForOneStrategy
 import akka.actor.Props
 import akka.actor.SupervisorStrategy._
+import beyond.launcher.ZooKeeperLauncher
 
 class LauncherInitializationException extends RuntimeException
 class ServerNotRespondingException extends RuntimeException

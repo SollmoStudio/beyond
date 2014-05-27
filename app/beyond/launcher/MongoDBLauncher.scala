@@ -1,7 +1,8 @@
-package beyond
+package beyond.launcher
 
 import akka.actor.Actor
 import akka.actor.ActorLogging
+import beyond.BeyondConfiguration
 import java.io.File
 import scala.sys.process.Process
 

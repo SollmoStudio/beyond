@@ -1,12 +1,13 @@
-package beyond
+package beyond.launcher
 
 import akka.actor.Actor
-import akka.actor.ActorRef
 import akka.actor.ActorLogging
+import akka.actor.ActorRef
 import akka.actor.Cancellable
 import akka.io.IO
 import akka.io.Tcp
 import akka.util.ByteString
+import beyond.BeyondConfiguration
 import java.net.InetSocketAddress
 import org.apache.zookeeper.server.ServerConfig
 import org.apache.zookeeper.server.ZooKeeperServerMain
@@ -17,9 +18,10 @@ object ZooKeeperLauncher {
 }
 
 class ZooKeeperLauncher extends Actor with ActorLogging {
-  import play.api.libs.concurrent.Execution.Implicits._
+
   import ZooKeeperLauncher._
   import akka.io.Tcp._
+  import play.api.libs.concurrent.Execution.Implicits._
 
   class BeyondZooKeeperServerMain extends ZooKeeperServerMain {
     // Make shutdown() public because it is protected in ZooKeeperServerMain.
