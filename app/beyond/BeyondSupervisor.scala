@@ -14,16 +14,10 @@ import beyond.route.RoutingTableWorker
 
 object BeyondSupervisor {
   val BeyoundSupervisorBasePath: String = "/user/beyondSupervisor/"
-  val UserActionActorName: String = "userActionActor"
-  val LauncherSupervisorName: String = "launcherSupervisor"
-  val GamePluginName: String = "gamePlugin"
-  val SystemMetricsActorName: String = "systemMetricsActor"
-  val RoutingTableLeaderName: String = "routingTableLeader"
-  val RoutingTableWorkerName: String = "routingTableWorker"
 
-  val UserActionActorPath: String = BeyoundSupervisorBasePath + UserActionActorName
-
+  val UserActionActorPath: String = BeyoundSupervisorBasePath + UserActionActor.Name
 }
+
 class BeyondSupervisor extends Actor {
   import BeyondSupervisor._
   override def preStart() {
@@ -45,13 +39,13 @@ class BeyondSupervisor extends Actor {
     //  all the requests that are already in the mailbox.
     //  It's not a problem because Beyond is designed to ensure eventual consistency
     //  not strong consistency.
-    context.actorOf(Props[UserActionActor].withRouter(router), UserActionActorName)
-    context.actorOf(Props[LauncherSupervisor], LauncherSupervisorName)
+    context.actorOf(Props[UserActionActor].withRouter(router), UserActionActor.Name)
+    context.actorOf(Props[LauncherSupervisor], LauncherSupervisor.Name)
     // FIXME: Don't hardcode the plugin filename.
-    context.actorOf(Props(classOf[GamePlugin], "main.js"), GamePluginName)
-    context.actorOf(Props[SystemMetricsActor], SystemMetricsActorName)
-    context.actorOf(Props[RoutingTableLeader], RoutingTableLeaderName)
-    context.actorOf(Props[RoutingTableWorker], RoutingTableWorkerName)
+    context.actorOf(Props(classOf[GamePlugin], "main.js"), GamePlugin.Name)
+    context.actorOf(Props[SystemMetricsActor], SystemMetricsActor.Name)
+    context.actorOf(Props[RoutingTableLeader], RoutingTableLeader.Name)
+    context.actorOf(Props[RoutingTableWorker], RoutingTableWorker.Name)
   }
 
   override val supervisorStrategy =

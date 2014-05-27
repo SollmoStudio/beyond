@@ -14,6 +14,10 @@ import play.api.libs.json.JsArray
 import play.api.libs.json.Json
 import scala.collection.mutable
 
+object RoutingTableWorker {
+  val Name: String = "routingTableWorker"
+}
+
 class RoutingTableWorker extends Actor with ActorLogging {
   private val curatorResources: mutable.Stack[Closeable] = mutable.Stack()
 

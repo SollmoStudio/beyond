@@ -9,6 +9,8 @@ import org.mozilla.javascript.Function
 import play.api.mvc.Request
 
 object GamePlugin {
+  val Name: String = "gamePlugin"
+
   case class Handle[A](request: Request[A])
   case class InvokeFunction(function: Function, args: Array[AnyRef])
 }

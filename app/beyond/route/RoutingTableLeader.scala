@@ -16,6 +16,10 @@ import org.apache.curator.framework.recipes.leader.LeaderSelectorListenerAdapter
 import play.api.libs.json.Json
 import scala.collection.mutable
 
+object RoutingTableLeader {
+  val Name: String = "routingTableLeader"
+}
+
 class RoutingTableLeader extends LeaderSelectorListenerAdapter with Actor with ActorLogging {
   private val routingTableBuilder: RoutingTableBuilder = new RoutingTableBuilder
 

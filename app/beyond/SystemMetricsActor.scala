@@ -20,6 +20,8 @@ import org.hyperic.sigar.jmx.SigarRegistry
 import scala.collection.mutable
 
 object SystemMetricsActor {
+  val Name: String = "systemMetricsActor"
+
   sealed trait SystemMetricsRequest
   case object SystemLoadAverageRequest extends SystemMetricsRequest
   case object HeapMemoryUsageRequest extends SystemMetricsRequest

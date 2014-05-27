@@ -66,6 +66,8 @@ object UserAction {
 }
 
 object UserActionActor {
+  val Name: String = "userActionActor"
+
   case class RequestWithUsername[A](username: String, request: Request[A]) extends WrappedRequest[A](request) with ConsistentHashable {
     // FIXME: Use a better hashing algorithm.
     override def consistentHashKey: Any = username.##
