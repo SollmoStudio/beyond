@@ -3,8 +3,10 @@ name := "beyond"
 version := "1.0-SNAPSHOT"
 
 lazy val beyond = project.in(file("."))
-  .aggregate(rhinoScalaBinding)
-  .dependsOn(rhinoScalaBinding)
+  .aggregate(rhinoScalaBinding, beyondAdmin)
+  .dependsOn(rhinoScalaBinding, beyondAdmin)
+
+lazy val beyondAdmin = project
 
 lazy val rhinoScalaBinding = project
 

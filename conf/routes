@@ -13,12 +13,6 @@ POST    /ping                       controllers.Application.ping
 POST    /session/login              controllers.Session.login
 POST    /session/logout             controllers.Session.logout
 
-GET     /admin/                     controllers.Admin.index
-GET     /admin/login                controllers.Admin.login
-POST    /admin/login                controllers.Admin.doLogin
-GET     /admin/logout               controllers.Admin.logout
-
-GET     /admin/user                 controllers.Admin.userIndex
-GET     /admin/user/list            controllers.Admin.userList
-
 POST    /plugin/*path               controllers.Plugin.route(path)
+
+->  /admin admin.Routes

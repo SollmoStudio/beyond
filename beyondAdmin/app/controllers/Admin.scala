@@ -1,4 +1,4 @@
-package controllers
+package controllers.admin
 
 import play.api.Play
 import play.api.Mode

@@ -1,13 +1,13 @@
 @(errorMessage: String = "")
 
 @admin_common("Login") {
-    <img class="center" src="@routes.Assets.at("images/logo2.png")" />
+    <img class="center" src="@admin.routes.Assets.at("images/logo2.png")" />
     <div id="content"></div>
     <script type="text/jsx">
         /** @@jsx React.DOM */
         require(["react", "jsx!loginform"], function (React, LoginForm) {
             React.renderComponent(
-                <LoginForm postUrl="@routes.Admin.doLogin" heading="Welcome to Beyond" errorMessage="@errorMessage" />,
+                <LoginForm postUrl="@admin.routes.Admin.doLogin" heading="Welcome to Beyond" errorMessage="@errorMessage" />,
                 document.getElementById('content')
             );
         });
