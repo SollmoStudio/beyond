@@ -8,4 +8,6 @@ libraryDependencies ++= Seq(
 
 org.scalastyle.sbt.ScalastylePlugin.Settings
 
+org.scalastyle.sbt.PluginKeys.config := file("rhinoScalaBinding/scalastyle-config.xml")
+
 scalariformSettings
