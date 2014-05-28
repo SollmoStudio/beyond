@@ -1,7 +1,5 @@
 name := "beyondAdmin"
 
-version := "1.0-SNAPSHOT"
-
 libraryDependencies ++= Seq(
   jdbc,
   anorm,
@@ -16,3 +14,5 @@ play.Project.playScalaSettings
 org.scalastyle.sbt.ScalastylePlugin.Settings
 
 scalariformSettings
+
+Common.settings

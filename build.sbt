@@ -1,7 +1,5 @@
 name := "beyond"
 
-version := "1.0-SNAPSHOT"
-
 lazy val beyond = project.in(file("."))
   .aggregate(rhinoScalaBinding, beyondAdmin)
   .dependsOn(rhinoScalaBinding, beyondAdmin)
@@ -50,4 +48,6 @@ play.Project.playScalaSettings
 org.scalastyle.sbt.ScalastylePlugin.Settings
 
 scalariformSettings
+
+Common.settings
 
