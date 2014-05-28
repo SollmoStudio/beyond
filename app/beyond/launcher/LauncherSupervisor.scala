@@ -6,7 +6,6 @@ import akka.actor.OneForOneStrategy
 import akka.actor.Props
 import akka.actor.SupervisorStrategy._
 import beyond.BeyondConfiguration
-import beyond.launcher.ZooKeeperLauncher
 import java.net.InetAddress
 import java.net.NetworkInterface
 
