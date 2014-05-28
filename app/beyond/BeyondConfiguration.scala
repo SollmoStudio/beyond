@@ -15,6 +15,11 @@ object BeyondConfiguration {
 
   def zooKeeperConfigPath: String = configuration.getString("beyond.zookeeper.config-path").get
 
+  def zooKeeperServers: Set[String] = {
+    import scala.collection.JavaConverters._
+    configuration.getStringList("beyond.zookeeper.servers").map(_.asScala).get.toSet
+  }
+
   def pluginPaths: Seq[String] = {
     import scala.collection.JavaConverters._
     configuration.getStringList("beyond.plugin.path").map(_.asScala).get
