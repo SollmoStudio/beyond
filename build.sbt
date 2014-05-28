@@ -34,6 +34,8 @@ copyNativeLibraries := {
 
 run <<= (run in Runtime) dependsOn copyNativeLibraries
 
+(test in Test) <<= (test in Test) dependsOn copyNativeLibraries
+
 val toolsJar = if (System.getProperty("os.name") != "Mac OS X") {
   Seq(Attributed.blank(file(System.getProperty("java.home").dropRight(3) + "lib/tools.jar")))
 } else {
