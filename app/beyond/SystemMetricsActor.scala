@@ -78,7 +78,7 @@ class SystemMetricsActor extends Actor with ActorLogging {
         mbsc, ManagementFactory.MEMORY_MXBEAN_NAME, classOf[MemoryMXBean])
       val sigarSwap = new ObjectName("sigar:type=Swap")
 
-      context.become(receiveWithOperatingSystemMXBean(mbsc, osMXBean, memoryMXBean, sigarSwap))
+      context.become(receiveWithMBeans(mbsc, osMXBean, memoryMXBean, sigarSwap))
 
     } catch {
       case ex: Throwable =>
@@ -104,7 +104,7 @@ class SystemMetricsActor extends Actor with ActorLogging {
     case _ =>
   }
 
-  private def receiveWithOperatingSystemMXBean(mbsc: MBeanServerConnection,
+  private def receiveWithMBeans(mbsc: MBeanServerConnection,
     osMXBean: OperatingSystemMXBean, memoryMXBean: MemoryMXBean, sigarSwap: ObjectName): Receive = {
     case SystemLoadAverageRequest =>
       sender ! SystemLoadAverageReply(osMXBean.getSystemLoadAverage)
