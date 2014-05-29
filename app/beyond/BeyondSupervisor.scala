@@ -14,9 +14,9 @@ import beyond.route.RoutingTableWorker
 import beyond.launcher.LauncherSupervisor
 
 object BeyondSupervisor {
-  val BeyoundSupervisorBasePath: String = "/user/beyondSupervisor/"
+  val BeyondSupervisorBasePath: String = "/user/beyondSupervisor/"
 
-  val UserActionActorPath: String = BeyoundSupervisorBasePath + UserActionActor.Name
+  val UserActionActorPath: String = BeyondSupervisorBasePath + UserActionActor.Name
 }
 
 class BeyondSupervisor extends Actor {
