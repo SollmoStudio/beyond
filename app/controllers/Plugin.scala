@@ -6,7 +6,6 @@ import akka.pattern.ask
 import akka.util.Timeout
 import beyond.BeyondConfiguration
 import beyond.plugin.GamePlugin.Handle
-import play.api._
 import play.api.libs.concurrent.Akka
 import play.api.mvc._
 import scala.concurrent.ExecutionContext
