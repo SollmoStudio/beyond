@@ -31,7 +31,7 @@ object UserActionActor {
 }
 
 private class UserActionActor extends Actor with ActorLogging {
-  var routingTable: RoutingTableView = new RoutingTableView(BeyondConfiguration.currentServerAddress)
+  private var routingTable: RoutingTableView = new RoutingTableView(BeyondConfiguration.currentServerAddress)
   private val userActionSupervisor = {
     import play.api.libs.concurrent.Akka
     import play.api.Play.current
