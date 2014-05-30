@@ -6,12 +6,17 @@ import akka.actor.SupervisorStrategy
 import akka.routing.Broadcast
 import akka.routing.ConsistentHashingRouter
 import beyond.UserActionActor.UpdateRoutingTable
+import play.api.libs.json.JsArray
 
 object UserActionSupervisor {
   val Name: String = "userActionSupervisor"
+
+  case object RequestRoutingTable
 }
 
 class UserActionSupervisor extends Actor {
+  import UserActionSupervisor._
+  private var routingTableData: JsArray = JsArray()
   private val userActionActor = {
     val numProcessors = Runtime.getRuntime.availableProcessors()
     // Routers default to a strategy of "always escalate". This is problematic because
@@ -36,6 +41,9 @@ class UserActionSupervisor extends Actor {
 
   override def receive: Receive = {
     case msg: UpdateRoutingTable =>
+      routingTableData = msg.data
       userActionActor.tell(Broadcast(msg), sender)
+    case RequestRoutingTable =>
+      sender ! UpdateRoutingTable(routingTableData)
   }
 }
