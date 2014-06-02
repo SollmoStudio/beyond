@@ -2,6 +2,7 @@ package beyond.route
 
 import akka.actor.Actor
 import akka.actor.ActorLogging
+import beyond.BeyondSupervisor.UserActionSupervisorPath
 import beyond.UserActionActor.UpdateRoutingTable
 import beyond.route.RoutingTableConfig._
 import java.io.Closeable
@@ -20,6 +21,13 @@ object RoutingTableWorker {
 
 class RoutingTableWorker(curatorFramework: CuratorFramework) extends Actor with ActorLogging {
   private val curatorResources: mutable.Stack[Closeable] = mutable.Stack()
+  private val userActionSupervisor = {
+    import play.api.libs.concurrent.Akka
+    import play.api.Play.current
+    import scala.concurrent.ExecutionContext
+    implicit val ec: ExecutionContext = Akka.system.dispatcher
+    Akka.system.actorSelection(UserActionSupervisorPath)
+  }
 
   override def preStart() {
     try {
@@ -41,7 +49,7 @@ class RoutingTableWorker(curatorFramework: CuratorFramework) extends Actor with 
       routingTableWatcher.getListenable.addListener(new NodeCacheListener {
         override def nodeChanged() {
           val changedData = routingTableWatcher.getCurrentData.getData
-          context.parent ! UpdateRoutingTable(Json.parse(changedData).as[JsArray])
+          userActionSupervisor.tell(UpdateRoutingTable(Json.parse(changedData).as[JsArray]), sender)
         }
       })
       routingTableWatcher.start()
