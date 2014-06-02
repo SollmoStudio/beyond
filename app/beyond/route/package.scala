@@ -4,21 +4,22 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 package object route {
-  type Address = String
-  type Hash = Int
+  // RouteAddress is like "127.0.0.1:8080"
+  type RouteAddress = String
+  type RouteHash = Int
 
-  implicit val serverWrites: Writes[Server] = (
-    (__ \ "hash").write[Hash] and
-    (__ \ "address").write[Address]
-  )(unlift(Server.unapply))
+  implicit val routeWrites: Writes[RouteHashAndAddress] = (
+    (__ \ "hash").write[RouteHash] and
+    (__ \ "address").write[RouteAddress]
+  )(unlift(RouteHashAndAddress.unapply))
 
-  implicit val serverReads: Reads[Server] = (
-    (__ \ "hash").read[Hash] and
-    (__ \ "address").read[Address]
-  )(Server)
+  implicit val routeReads: Reads[RouteHashAndAddress] = (
+    (__ \ "hash").read[RouteHash] and
+    (__ \ "address").read[RouteAddress]
+  )(RouteHashAndAddress)
 
-  implicit val locationFormat: Format[Server] =
-    Format(serverReads, serverWrites)
+  implicit val routeFormat: Format[RouteHashAndAddress] =
+    Format(routeReads, routeWrites)
 
-  case class Server(hash: Hash, address: Address)
+  case class RouteHashAndAddress(hash: RouteHash, address: RouteAddress)
 }

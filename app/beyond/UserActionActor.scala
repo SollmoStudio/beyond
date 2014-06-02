@@ -5,7 +5,7 @@ import akka.actor.ActorLogging
 import akka.pattern.pipe
 import akka.routing.ConsistentHashingRouter.ConsistentHashable
 import beyond.UserActionSupervisor.RequestRoutingTable
-import beyond.route.Address
+import beyond.route.RouteAddress
 import beyond.route.RoutingTableView
 import beyond.route.RoutingTableView._
 import play.api.libs.json.JsArray
@@ -48,7 +48,7 @@ private class UserActionActor extends Actor with ActorLogging {
           import play.api.Play.current
           implicit val ec: ExecutionContext = Akka.system.dispatcher
           block(request) pipeTo sender
-        case HandleIn(address: Address) =>
+        case HandleIn(address: RouteAddress) =>
           val RedirectStatusCode = 310 // This code is just one of a redirection code not used by HTTP. It can be changed.
           log.info("Request by {} is redirected to {}", request.username, address)
           sender ! new Status(RedirectStatusCode)(address)

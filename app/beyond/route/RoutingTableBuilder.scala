@@ -7,11 +7,11 @@ import play.api.libs.json.Writes
 import scala.collection.mutable
 
 object RoutingTableBuilder {
-  type RoutingTableInternal = mutable.HashMap[Hash, Address]
+  type RoutingTableInternal = mutable.HashMap[RouteHash, RouteAddress]
 
   implicit val routingTableBuilderWrites = new Writes[RoutingTableBuilder] {
     def writes(builder: RoutingTableBuilder): JsValue =
-      Json.toJson(builder.routingTable.map { case (hash, address) => Server(hash, address) })
+      Json.toJson(builder.routingTable.map { case (hash, address) => RouteHashAndAddress(hash, address) })
   }
 }
 
@@ -20,7 +20,7 @@ class RoutingTableBuilder {
   private val routingTable: RoutingTableInternal = new RoutingTableInternal
 
   // This hash result will be used in consistent hashing for load balancing.
-  private def hash(address: Address): Hash = {
+  private def hash(address: RouteAddress): RouteHash = {
     // FIXME: Make maximumHash configurable
     val maximumHash = 1000
     // FIXME: Use a better hashing algorithm.
@@ -31,11 +31,11 @@ class RoutingTableBuilder {
     Integer.parseInt(Codecs.md5(address.getBytes("UTF-8")).substring(startIndex, endIndex), digits) % maximumHash
   }
 
-  def add(address: Address) {
+  def add(address: RouteAddress) {
     routingTable += ((hash(address), address))
   }
 
-  def remove(address: Address) {
+  def remove(address: RouteAddress) {
     routingTable - hash(address)
   }
 }
