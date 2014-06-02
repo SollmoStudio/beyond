@@ -20,14 +20,8 @@ class PathChildrenCacheActor(curatorFramework: CuratorFramework, path: String) e
   val cache = new PathChildrenCache(curatorFramework, path, true)
 
   override def preStart() {
-    try {
-      cache.start()
-      cache.getListenable.addListener(this)
-    } catch {
-      case ex: Throwable =>
-        cache.close()
-        throw ex
-    }
+    cache.start()
+    cache.getListenable.addListener(this)
     log.info(s"PathChildrenCacheActor started: path=$path")
   }
 
