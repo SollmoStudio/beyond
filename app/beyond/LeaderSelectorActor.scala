@@ -21,33 +21,19 @@ object LeaderSelectorActor {
 class LeaderSelectorActor(curatorFramework: CuratorFramework) extends LeaderSelectorListenerAdapter with Actor with ActorLogging {
   import LeaderSelectorActor._
 
-  private val curatorResources: mutable.Stack[Closeable] = mutable.Stack()
+  private val leaderSelector = new LeaderSelector(curatorFramework, LeaderPath, this)
 
   override def preStart() {
-    try {
-      log.info("LeaderSelectorActor started")
+    curatorFramework.create().inBackground().forPath(LeaderPath, Array[Byte](0))
 
-      curatorFramework.create().inBackground().forPath(LeaderPath, Array[Byte](0))
-
-      val leaderSelector = new LeaderSelector(curatorFramework, LeaderPath, this)
-      leaderSelector.autoRequeue()
-      leaderSelector.start()
-      curatorResources.push(leaderSelector)
-    } catch {
-      case ex: Throwable =>
-        closeAllCuratorResources()
-        throw ex
-    }
+    leaderSelector.autoRequeue()
+    leaderSelector.start()
+    log.info("LeaderSelectorActor started")
   }
 
   override def postStop() {
-    closeAllCuratorResources()
-
+    leaderSelector.close()
     log.info("LeaderSelectorActor stopped")
-  }
-
-  private def closeAllCuratorResources() {
-    curatorResources.foreach(_.close())
   }
 
   // takeLeadership is called by an internal Curator thread.
