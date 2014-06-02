@@ -16,7 +16,7 @@ object RoutingTableLeader {
   val Name: String = "routingTableLeader"
 }
 
-class RoutingTableLeader extends PathChildrenCacheListener with Actor with ActorLogging {
+class RoutingTableLeader(curatorFramework: CuratorFramework) extends PathChildrenCacheListener with Actor with ActorLogging {
   private val routingTableBuilder: RoutingTableBuilder = new RoutingTableBuilder
 
   override def preStart() {
@@ -48,8 +48,8 @@ class RoutingTableLeader extends PathChildrenCacheListener with Actor with Actor
   }
 
   private def receiveWithoutLeadership: Receive = {
-    case LeadershipTaken(framework) =>
-      val cache = new PathChildrenCache(framework, WorkersPath, true)
+    case LeadershipTaken =>
+      val cache = new PathChildrenCache(curatorFramework, WorkersPath, true)
       try {
         cache.start()
         cache.getListenable.addListener(this)

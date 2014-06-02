@@ -2,11 +2,11 @@ package beyond.route
 
 import akka.actor.Actor
 import akka.actor.ActorLogging
-import beyond.CuratorFrameworkFactoryWithDefaultPolicy
 import beyond.UserActionActor.UpdateRoutingTable
 import beyond.route.RoutingTableConfig._
 import java.io.Closeable
 import java.nio.charset.Charset
+import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.NodeCache
 import org.apache.curator.framework.recipes.cache.NodeCacheListener
 import org.apache.curator.framework.recipes.nodes.PersistentEphemeralNode
@@ -18,17 +18,12 @@ object RoutingTableWorker {
   val Name: String = "routingTableWorker"
 }
 
-class RoutingTableWorker extends Actor with ActorLogging {
+class RoutingTableWorker(curatorFramework: CuratorFramework) extends Actor with ActorLogging {
   private val curatorResources: mutable.Stack[Closeable] = mutable.Stack()
 
   override def preStart() {
     try {
       log.info("RoutingTableWorker started")
-
-      // FIXME: Make connection string configurable.
-      val curatorFramework = CuratorFrameworkFactoryWithDefaultPolicy("localhost:2181")
-      curatorFramework.start()
-      curatorResources.push(curatorFramework)
 
       def ensurePath(path: String, data: Array[Byte] = Array[Byte](0)) {
         curatorFramework.create().inBackground().forPath(path, data)

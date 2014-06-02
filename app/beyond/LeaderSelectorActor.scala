@@ -14,11 +14,11 @@ object LeaderSelectorActor {
   val LeaderPath: String = "/leader"
 
   sealed trait LeadershipMessage
-  case class LeadershipTaken(framework: CuratorFramework) extends LeadershipMessage
+  case object LeadershipTaken extends LeadershipMessage
   case object LeadershipLost extends LeadershipMessage
 }
 
-class LeaderSelectorActor extends LeaderSelectorListenerAdapter with Actor with ActorLogging {
+class LeaderSelectorActor(curatorFramework: CuratorFramework) extends LeaderSelectorListenerAdapter with Actor with ActorLogging {
   import LeaderSelectorActor._
 
   private val curatorResources: mutable.Stack[Closeable] = mutable.Stack()
@@ -26,11 +26,6 @@ class LeaderSelectorActor extends LeaderSelectorListenerAdapter with Actor with 
   override def preStart() {
     try {
       log.info("LeaderSelectorActor started")
-
-      // FIXME: Make connection string configurable.
-      val curatorFramework = CuratorFrameworkFactoryWithDefaultPolicy("localhost:2181")
-      curatorFramework.start()
-      curatorResources.push(curatorFramework)
 
       curatorFramework.create().inBackground().forPath(LeaderPath, Array[Byte](0))
 
@@ -60,7 +55,7 @@ class LeaderSelectorActor extends LeaderSelectorListenerAdapter with Actor with 
     import play.api.Play.current
 
     log.info("Leadership is taken")
-    Akka.system.eventStream.publish(LeadershipTaken(framework))
+    Akka.system.eventStream.publish(LeadershipTaken)
 
     try {
       while (!Thread.currentThread.isInterrupted) {
