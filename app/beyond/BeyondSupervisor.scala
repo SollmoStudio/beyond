@@ -6,8 +6,6 @@ import akka.actor.Props
 import akka.actor.SupervisorStrategy._
 import beyond.UserActionActor.UpdateRoutingTable
 import beyond.plugin.GamePlugin
-import beyond.route.RoutingTableLeader
-import beyond.route.RoutingTableWorker
 import beyond.launcher.LauncherSupervisor
 
 object BeyondSupervisor {
