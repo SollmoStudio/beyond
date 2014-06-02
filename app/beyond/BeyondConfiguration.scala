@@ -1,5 +1,6 @@
 package beyond
 
+import beyond.route.RouteAddress
 import org.apache.curator.RetryPolicy
 import org.apache.curator.retry.ExponentialBackoffRetry
 import scala.concurrent.duration.Duration
@@ -33,10 +34,10 @@ object BeyondConfiguration {
     new ExponentialBackoffRetry(baseSleepTimeMs, maxRetries, maxSleepMs)
   }
 
-  def currentServerAddress: String = {
+  def currentServerAddress: RouteAddress = {
     val hostAddress = configuration.getString("http.address").get
     val port = configuration.getInt("http.port").get
 
-    hostAddress + ":" + port.toString
+    RouteAddress(hostAddress, port.toString)
   }
 }
