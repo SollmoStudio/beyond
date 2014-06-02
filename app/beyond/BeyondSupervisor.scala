@@ -21,7 +21,7 @@ class BeyondSupervisor extends Actor {
   context.actorOf(Props(classOf[GamePlugin], "main.js"), GamePlugin.Name)
   context.actorOf(Props[SystemMetricsActor], SystemMetricsActor.Name)
   context.actorOf(Props[CuratorSupervisor], CuratorSupervisor.Name)
-  private val userActionSupervisor = context.actorOf(Props[UserActionSupervisor], UserActionSupervisor.Name)
+  context.actorOf(Props[UserActionSupervisor], UserActionSupervisor.Name)
 
   override val supervisorStrategy =
     OneForOneStrategy() {
@@ -31,12 +31,6 @@ class BeyondSupervisor extends Actor {
     }
 
   override def receive: Receive = {
-    case msg: UpdateRoutingTable =>
-      import play.api.libs.concurrent.Akka
-      import play.api.Play.current
-      import scala.concurrent.ExecutionContext
-      implicit val ec: ExecutionContext = Akka.system.dispatcher
-      userActionSupervisor.tell(msg, sender)
     case _ =>
   }
 }
