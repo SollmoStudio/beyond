@@ -27,7 +27,7 @@ object UserActionActor {
     override def consistentHashKey: Any = request.consistentHashKey
   }
 
-  case class UpdateRoutingTable(data: JsArray)
+  case class NewRoutingTable(data: JsArray)
 }
 
 private class UserActionActor extends Actor with ActorLogging {
@@ -53,7 +53,7 @@ private class UserActionActor extends Actor with ActorLogging {
           log.info("Request by {} is redirected to {}", request.username, address)
           sender ! new Status(RedirectStatusCode)(address)
       }
-    case UpdateRoutingTable(jsRoutingTable) =>
+    case NewRoutingTable(jsRoutingTable) =>
       log.info("Routing table is updated.")
       routingTable = new RoutingTableView(BeyondConfiguration.currentServerAddress, jsRoutingTable)
   }
