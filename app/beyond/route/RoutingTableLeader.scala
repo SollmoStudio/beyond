@@ -15,6 +15,7 @@ object RoutingTableLeader {
 }
 
 class RoutingTableLeader(curatorFramework: CuratorFramework) extends Actor with ActorLogging {
+  import beyond.WorkerRegistrationActor._
   import PathChildrenCacheActor._
 
   private val routingTableBuilder: RoutingTableBuilder = new RoutingTableBuilder

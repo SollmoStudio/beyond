@@ -4,7 +4,7 @@ import akka.actor.Actor
 import akka.actor.ActorLogging
 import akka.actor.Props
 import beyond.route.RoutingTableLeader
-import beyond.route.RoutingTableWorker
+import beyond.route.RoutingTableUpdateActor
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.CuratorFrameworkFactory
@@ -29,8 +29,10 @@ class CuratorSupervisor extends Actor with ActorLogging {
   }
 
   context.actorOf(Props(classOf[LeaderSelectorActor], curatorFramework), LeaderSelectorActor.Name)
+  context.actorOf(Props(classOf[WorkerRegistrationActor], curatorFramework), WorkerRegistrationActor.Name)
+
   context.actorOf(Props(classOf[RoutingTableLeader], curatorFramework), RoutingTableLeader.Name)
-  context.actorOf(Props(classOf[RoutingTableWorker], curatorFramework), RoutingTableWorker.Name)
+  context.actorOf(Props(classOf[RoutingTableUpdateActor], curatorFramework), RoutingTableUpdateActor.Name)
 
   override def postStop() {
     curatorFramework.close()
