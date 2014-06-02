@@ -3,18 +3,18 @@ package beyond.route
 import akka.actor.Actor
 import akka.actor.ActorLogging
 import beyond.BeyondSupervisor.UserActionSupervisorPath
-import beyond.UserActionActor.UpdateRoutingTable
+import beyond.UserActionActor.SyncRoutingTable
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.NodeCache
 import org.apache.curator.framework.recipes.cache.NodeCacheListener
 import play.api.libs.json.JsArray
 import play.api.libs.json.Json
 
-object RoutingTableUpdateActor {
-  val Name: String = "routingTableUpdateActor"
+object RoutingTableWatcher {
+  val Name: String = "routingTableWatcher"
 }
 
-class RoutingTableUpdateActor(curatorFramework: CuratorFramework) extends NodeCacheListener with Actor with ActorLogging {
+class RoutingTableWatcher(curatorFramework: CuratorFramework) extends NodeCacheListener with Actor with ActorLogging {
   import beyond.route.RoutingTableConfig._
 
   private val userActionSupervisor = {
@@ -33,7 +33,7 @@ class RoutingTableUpdateActor(curatorFramework: CuratorFramework) extends NodeCa
 
   override def nodeChanged() {
     val changedData = routingTableWatcher.getCurrentData.getData
-    userActionSupervisor.tell(UpdateRoutingTable(Json.parse(changedData).as[JsArray]), sender)
+    userActionSupervisor.tell(SyncRoutingTable(Json.parse(changedData).as[JsArray]), sender)
   }
 
   override def preStart() {

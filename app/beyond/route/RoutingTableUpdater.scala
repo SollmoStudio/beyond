@@ -10,11 +10,11 @@ import beyond.route.RoutingTableConfig._
 import org.apache.curator.framework.CuratorFramework
 import play.api.libs.json.Json
 
-object RoutingTableLeader {
-  val Name: String = "routingTableLeader"
+object RoutingTableUpdater {
+  val Name: String = "routingTableUpdater"
 }
 
-class RoutingTableLeader(curatorFramework: CuratorFramework) extends Actor with ActorLogging {
+class RoutingTableUpdater(curatorFramework: CuratorFramework) extends Actor with ActorLogging {
   import beyond.WorkerRegistrationActor._
   import PathChildrenCacheActor._
 

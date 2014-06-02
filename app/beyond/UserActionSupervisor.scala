@@ -5,7 +5,7 @@ import akka.actor.Props
 import akka.actor.SupervisorStrategy
 import akka.routing.Broadcast
 import akka.routing.ConsistentHashingRouter
-import beyond.UserActionActor.UpdateRoutingTable
+import beyond.UserActionActor.SyncRoutingTable
 import play.api.libs.json.JsArray
 
 object UserActionSupervisor {
@@ -40,10 +40,10 @@ class UserActionSupervisor extends Actor {
   }
 
   override def receive: Receive = {
-    case msg: UpdateRoutingTable =>
+    case msg: SyncRoutingTable =>
       routingTableData = msg.data
       userActionActor.tell(Broadcast(msg), sender)
     case RequestRoutingTable =>
-      sender ! UpdateRoutingTable(routingTableData)
+      sender ! SyncRoutingTable(routingTableData)
   }
 }
