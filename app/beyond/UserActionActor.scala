@@ -31,7 +31,7 @@ object UserActionActor {
 }
 
 private class UserActionActor extends Actor with ActorLogging {
-  private var routingTable: RoutingTableView = new RoutingTableView(BeyondConfiguration.currentServerAddress)
+  private var routingTable: RoutingTableView = new RoutingTableView(BeyondConfiguration.currentServerRouteAddress)
   private val userActionSupervisor = {
     import play.api.libs.concurrent.Akka
     import play.api.Play.current
@@ -55,7 +55,7 @@ private class UserActionActor extends Actor with ActorLogging {
       }
     case SyncRoutingTable(jsRoutingTable) =>
       log.info("Routing table is updated.")
-      routingTable = new RoutingTableView(BeyondConfiguration.currentServerAddress, jsRoutingTable)
+      routingTable = new RoutingTableView(BeyondConfiguration.currentServerRouteAddress, jsRoutingTable)
   }
 
   override def preStart() {

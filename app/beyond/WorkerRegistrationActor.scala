@@ -16,7 +16,7 @@ class WorkerRegistrationActor(curatorFramework: CuratorFramework) extends Actor 
 
   private val workerNode = new PersistentEphemeralNode(
     curatorFramework, PersistentEphemeralNode.Mode.PROTECTED_EPHEMERAL_SEQUENTIAL, WorkersPath + "/w-",
-    beyond.BeyondConfiguration.currentServerAddress.getBytes(Charset.forName("UTF-8")))
+    beyond.BeyondConfiguration.currentServerRouteAddress.getBytes(Charset.forName("UTF-8")))
 
   override def preStart() {
     curatorFramework.create().inBackground().forPath(WorkersPath, Array[Byte](0))
