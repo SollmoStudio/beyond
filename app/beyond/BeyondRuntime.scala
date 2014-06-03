@@ -3,6 +3,7 @@ package beyond
 import java.io.File
 import java.net.URLClassLoader
 import play.api.Mode
+import scalax.file.Path
 
 object BeyondRuntime {
   lazy val classPath: String = {
@@ -17,4 +18,7 @@ object BeyondRuntime {
     }
     urls.mkString(File.pathSeparator)
   }
+
+  val javaPath: String =
+    (Path.fromString(System.getProperty("java.home")) / "bin" / "java").path
 }
