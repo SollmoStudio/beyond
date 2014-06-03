@@ -19,7 +19,7 @@ class BeyondSupervisor extends Actor {
   context.actorOf(Props[LauncherSupervisor], LauncherSupervisor.Name)
   // FIXME: Don't hardcode the plugin filename.
   context.actorOf(Props(classOf[GamePlugin], "main.js"), GamePlugin.Name)
-  context.actorOf(Props[SystemMetricsMonitor], SystemMetricsMonitor.Name)
+  context.actorOf(Props[SystemMetricsSupervisor], SystemMetricsSupervisor.Name)
   context.actorOf(Props[CuratorSupervisor], CuratorSupervisor.Name)
   context.actorOf(Props[UserActionSupervisor], UserActionSupervisor.Name)
 
