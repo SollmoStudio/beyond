@@ -14,11 +14,16 @@ import org.apache.zookeeper.server.ZooKeeperServerMain
 import scala.concurrent.duration._
 
 object ZooKeeperLauncher {
+  val ServerNotRespondingTimeout = 30.seconds
+  val TickInterval = 1.second
+
+  val InitialDelay = 10.seconds
+  val RetryDelay = 5.seconds
+
   case object Tick
 }
 
 class ZooKeeperLauncher extends Actor with ActorLogging {
-
   import ZooKeeperLauncher._
   import akka.io.Tcp._
   import play.api.libs.concurrent.Execution.Implicits._
@@ -44,12 +49,6 @@ class ZooKeeperLauncher extends Actor with ActorLogging {
       zkServer.runFromConfig(config)
     }
   })
-
-  private val ServerNotRespondingTimeout = 30.seconds
-  private val TickInterval = 1.second
-
-  private val InitialDelay = 10.seconds
-  private val RetryDelay = 5.seconds
 
   private val tickCancellable = context.system.scheduler.schedule(
     initialDelay = InitialDelay, interval = TickInterval, receiver = self, message = Tick)
