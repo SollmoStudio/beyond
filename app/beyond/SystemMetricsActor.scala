@@ -110,7 +110,7 @@ class SystemMetricsActor extends Actor with ActorLogging {
       sender ! SystemLoadAverageReply(osMXBean.getSystemLoadAverage)
     case HeapMemoryUsageRequest =>
       sender ! HeapMemoryUsageReply(memoryMXBean.getHeapMemoryUsage)
-    case NonHeapMemoryUsageReply =>
+    case NonHeapMemoryUsageRequest =>
       sender ! NonHeapMemoryUsageReply(memoryMXBean.getNonHeapMemoryUsage)
     case SwapMemoryUsageRequest =>
       val free = mbsc.getAttribute(sigarSwap, "Free").asInstanceOf[Long]
