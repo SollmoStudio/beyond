@@ -25,8 +25,8 @@ object Session extends Controller with GameEvent {
     Ok("Hello " + username).withSession("username" -> username)
   }
 
-  def logout: Action[AnyContent] = UserAction { request =>
-    track("User Logout", Json.obj("username" -> request.username))
+  def logout: Action[AnyContent] = UserAction { implicit request =>
+    trackUser("User Logout")
     Ok("Goodbye " + request.username).withNewSession
   }
 }
