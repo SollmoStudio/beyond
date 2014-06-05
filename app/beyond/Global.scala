@@ -55,7 +55,7 @@ object Global extends WithFilters(TimeoutFilter) with Logging {
 
   override def onStart(app: Application) {
     logger.info("Beyond started")
-    beyondSupervisor = Some(Akka.system(app).actorOf(Props[BeyondSupervisor], name = "beyondSupervisor"))
+    beyondSupervisor = Some(Akka.system(app).actorOf(Props[BeyondSupervisor], name = BeyondSupervisor.Name))
   }
 
   override def onStop(app: Application) {

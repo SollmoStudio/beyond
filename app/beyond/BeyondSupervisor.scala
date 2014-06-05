@@ -12,8 +12,10 @@ import beyond.plugin.GamePlugin
 import beyond.launcher.LauncherSupervisor
 
 object BeyondSupervisor {
+  val Name: String = "beyondSupervisor"
+
   val RootActorPath: ActorPath = new RootActorPath(Address("akka", "application"))
-  val BeyondSupervisorPath: ActorPath = RootActorPath / "user" / "beyondSupervisor"
+  val BeyondSupervisorPath: ActorPath = RootActorPath / "user" / BeyondSupervisor.Name
   val UserActionSupervisorPath: ActorPath = BeyondSupervisorPath / UserActionSupervisor.Name
   val UserActionActorPath: ActorPath = UserActionSupervisorPath / UserActionActor.Name
 }
