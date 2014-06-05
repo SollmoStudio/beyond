@@ -42,8 +42,6 @@ class MongoDBLauncher extends Actor with ActorLogging {
     log.info("MongoDB stopped")
   }
 
-  override def receive: Receive = {
-    case _ =>
-  }
+  override def receive: Receive = Map.empty
 }
 

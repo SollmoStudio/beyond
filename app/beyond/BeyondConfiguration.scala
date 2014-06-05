@@ -34,6 +34,8 @@ object BeyondConfiguration {
     new ExponentialBackoffRetry(baseSleepTimeMs, maxRetries, maxSleepMs)
   }
 
+  def currentServerAddress: String = configuration.getString("http.address").get
+
   def currentServerRouteAddress: RouteAddress = {
     val hostAddress = configuration.getString("http.address").get
     val port = configuration.getInt("http.port").get

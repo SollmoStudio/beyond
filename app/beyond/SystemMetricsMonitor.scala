@@ -19,8 +19,8 @@ import javax.management.remote.JMXServiceURL
 import org.hyperic.sigar.jmx.SigarRegistry
 import scala.collection.mutable
 
-object SystemMetricsActor {
-  val Name: String = "systemMetricsActor"
+object SystemMetricsMonitor {
+  val Name: String = "systemMetricsMonitor"
 
   sealed trait SystemMetricsRequest
   case object SystemLoadAverageRequest extends SystemMetricsRequest
@@ -35,8 +35,8 @@ object SystemMetricsActor {
   case class SwapMemoryUsageReply(free: Long, total: Long, used: Long) extends SystemMetricsReply
 }
 
-class SystemMetricsActor extends Actor with ActorLogging {
-  import SystemMetricsActor._
+class SystemMetricsMonitor extends Actor with ActorLogging {
+  import SystemMetricsMonitor._
 
   private val jmxResources: mutable.Stack[Closeable] = mutable.Stack()
 
@@ -86,23 +86,20 @@ class SystemMetricsActor extends Actor with ActorLogging {
         throw ex
     }
 
-    log.info("SystemMetricsActor started")
+    log.info("SystemMetricsMonitor started")
   }
 
   override def postStop() {
     closeAllJMXResources()
 
-    log.info("SystemMetricsActor stopped")
+    log.info("SystemMetricsMonitor stopped")
   }
 
   private def closeAllJMXResources() {
     jmxResources.foreach(_.close())
   }
 
-  override def receive: Receive = {
-    // Does nothing when this actor is not yet initialized.
-    case _ =>
-  }
+  override def receive: Receive = Map.empty
 
   private def receiveWithMBeans(mbsc: MBeanServerConnection,
     osMXBean: OperatingSystemMXBean, memoryMXBean: MemoryMXBean, sigarSwap: ObjectName): Receive = {
@@ -110,7 +107,7 @@ class SystemMetricsActor extends Actor with ActorLogging {
       sender ! SystemLoadAverageReply(osMXBean.getSystemLoadAverage)
     case HeapMemoryUsageRequest =>
       sender ! HeapMemoryUsageReply(memoryMXBean.getHeapMemoryUsage)
-    case NonHeapMemoryUsageReply =>
+    case NonHeapMemoryUsageRequest =>
       sender ! NonHeapMemoryUsageReply(memoryMXBean.getNonHeapMemoryUsage)
     case SwapMemoryUsageRequest =>
       val free = mbsc.getAttribute(sigarSwap, "Free").asInstanceOf[Long]
