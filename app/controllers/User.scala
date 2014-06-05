@@ -20,7 +20,7 @@ object User extends Controller with MongoController {
     )
   )
 
-  private case class Account(username: String, password: String)
+  private case class Account(username: String, password: String, created: String)
   private implicit val accountFormat = Json.format[Account]
 
   def create: Action[AnyContent] = Action.async { implicit request =>
@@ -32,16 +32,14 @@ object User extends Controller with MongoController {
 
     result.map {
       case List() =>
-        val newAccount = Json.obj(
-          "username" -> data("username"),
-          "password" -> data("password"),
-          "created" -> new Date().toLocaleString
-        )
+
+        val newAccount = Account(data("username"), data("password"), new Date().toLocaleString)
+
         collection.save(newAccount)
         Ok("Welcome to " + data("username")).withSession("username" -> data("username"))
       case account :: _ =>
         if (account.password == data("password")) {
-          Ok("Already created session account " + data("username")).withSession("username" -> data("username"))
+          Ok("Already created account " + data("username")).withSession("username" -> data("username"))
         } else {
           Ok("Invalid password " + data("username"))
         }
