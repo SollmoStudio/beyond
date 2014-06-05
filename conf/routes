@@ -10,7 +10,8 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 POST    /ping                       controllers.Application.ping
 
-POST    /session/create             controllers.Session.create
+POST    /user/create                controllers.User.create
+
 POST    /session/login              controllers.Session.login
 POST    /session/logout             controllers.Session.logout
 
