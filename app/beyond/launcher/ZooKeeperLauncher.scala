@@ -30,15 +30,20 @@ class ZooKeeperLauncher extends Actor with ActorLogging {
   import akka.io.Tcp._
   import play.api.libs.concurrent.Execution.Implicits._
 
+  private val pidFilePath: Path = Path.fromString(BeyondConfiguration.pidDirectory) / "zookeeper.pid"
   private val tickCancellable = context.system.scheduler.schedule(
     initialDelay = InitialDelay, interval = TickInterval, receiver = self, message = Tick)
 
   private var connectCancellable: Cancellable = _
 
+  override def preRestart(reason: Throwable, message: Option[Any]) {
+    super.preRestart(reason, message)
+    terminateProcessIfExists(pidFilePath)
+  }
+
   override def preStart() {
-    log.info("ZooKeeper started")
-    val pidPath = Path.fromString(BeyondConfiguration.pidDirectory) / "zookeeper.pid"
-    if (!pidPath.exists) {
+    log.info("ZooKeeperLauncher started")
+    if (!pidFilePath.exists) {
       // FIXME: Currently, ZooKeeperLauncher launches a standalone ZooKeeper server.
       // Setup a ZooKeeper cluster instead.
       val mainClassOfZooKeeperServer = classOf[beyond.launcher.ZooKeeperServerMainWithPIDFile].getCanonicalName
@@ -46,11 +51,12 @@ class ZooKeeperLauncher extends Actor with ActorLogging {
         Seq(
           BeyondRuntime.javaPath,
           mainClassOfZooKeeperServer,
-          pidPath.path,
+          pidFilePath.path,
           BeyondConfiguration.zooKeeperConfigPath),
         cwd = None,
         extraEnv = "CLASSPATH" -> BeyondRuntime.classPath)
       zooKeeperServer.run()
+      log.info("ZooKeeperServer started")
     }
     scheduleConnect(InitialDelay)
   }
@@ -59,7 +65,7 @@ class ZooKeeperLauncher extends Actor with ActorLogging {
     tickCancellable.cancel()
     connectCancellable.cancel()
 
-    log.info("ZooKeeper stopped")
+    log.info("ZooKeeperLauncher stopped")
   }
 
   private def scheduleConnect(delay: FiniteDuration) {
