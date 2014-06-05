@@ -55,8 +55,6 @@ class LeaderSelectorActor(curatorFramework: CuratorFramework) extends LeaderSele
     }
   }
 
-  override def receive: Receive = {
-    case _ =>
-  }
+  override def receive: Receive = Map.empty
 }
 

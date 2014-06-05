@@ -30,8 +30,6 @@ class BeyondSupervisor extends Actor {
         super.supervisorStrategy.decider.applyOrElse(t, (_: Any) => Escalate)
     }
 
-  override def receive: Receive = {
-    case _ =>
-  }
+  override def receive: Receive = Map.empty
 }
 
