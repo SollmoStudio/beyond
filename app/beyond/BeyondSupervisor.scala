@@ -7,7 +7,6 @@ import akka.actor.OneForOneStrategy
 import akka.actor.Props
 import akka.actor.RootActorPath
 import akka.actor.SupervisorStrategy._
-import beyond.UserActionActor.SyncRoutingTable
 import beyond.plugin.GamePlugin
 import beyond.launcher.LauncherSupervisor
 
