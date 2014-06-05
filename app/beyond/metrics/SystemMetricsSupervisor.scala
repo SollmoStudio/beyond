@@ -1,4 +1,4 @@
-package beyond
+package beyond.metrics
 
 import akka.actor.Actor
 import akka.actor.ActorLogging
@@ -6,6 +6,7 @@ import akka.actor.Props
 import akka.pattern.ask
 import akka.pattern.pipe
 import akka.util.Timeout
+import beyond.BeyondConfiguration
 import java.util.Date
 import scala.concurrent.duration._
 
@@ -20,10 +21,11 @@ object SystemMetricsSupervisor {
 }
 
 class SystemMetricsSupervisor extends Actor with ActorLogging {
-  import play.api.libs.concurrent.Execution.Implicits._
-  import SystemMetricsSupervisor._
+
   import SystemMetricsMonitor._
+  import SystemMetricsSupervisor._
   import SystemMetricsWriter._
+  import play.api.libs.concurrent.Execution.Implicits._
 
   val monitor = context.actorOf(Props[SystemMetricsMonitor], SystemMetricsMonitor.Name)
   val writer = context.actorOf(Props[SystemMetricsWriter], SystemMetricsWriter.Name)

@@ -1,4 +1,4 @@
-package beyond
+package beyond.metrics
 
 import akka.actor.Actor
 import akka.actor.ActorLogging
@@ -10,8 +10,8 @@ import java.lang.management.MemoryMXBean
 import java.lang.management.MemoryUsage
 import java.lang.management.OperatingSystemMXBean
 import java.lang.management.RuntimeMXBean
-import javax.management.MBeanServerConnection
 import javax.management.MBeanServer
+import javax.management.MBeanServerConnection
 import javax.management.ObjectName
 import javax.management.remote.JMXConnector
 import javax.management.remote.JMXConnectorFactory
@@ -36,6 +36,7 @@ object SystemMetricsMonitor {
 }
 
 class SystemMetricsMonitor extends Actor with ActorLogging {
+
   import SystemMetricsMonitor._
 
   private val jmxResources: mutable.Stack[Closeable] = mutable.Stack()
