@@ -1,18 +1,21 @@
 package beyond
 
 import akka.actor.Actor
+import akka.actor.ActorPath
+import akka.actor.Address
 import akka.actor.OneForOneStrategy
 import akka.actor.Props
+import akka.actor.RootActorPath
 import akka.actor.SupervisorStrategy._
 import beyond.UserActionActor.SyncRoutingTable
 import beyond.plugin.GamePlugin
 import beyond.launcher.LauncherSupervisor
 
 object BeyondSupervisor {
-  val BeyondSupervisorBasePath: String = "/user/beyondSupervisor/"
-
-  val UserActionSupervisorPath: String = BeyondSupervisorBasePath + UserActionSupervisor.Name
-  val UserActionActorPath: String = s"$UserActionSupervisorPath/${UserActionActor.Name}"
+  val RootActorPath: ActorPath = new RootActorPath(Address("akka", "application"))
+  val BeyondSupervisorPath: ActorPath = RootActorPath / "user" / "beyondSupervisor"
+  val UserActionSupervisorPath: ActorPath = BeyondSupervisorPath / UserActionSupervisor.Name
+  val UserActionActorPath: ActorPath = UserActionSupervisorPath / UserActionActor.Name
 }
 
 class BeyondSupervisor extends Actor {
