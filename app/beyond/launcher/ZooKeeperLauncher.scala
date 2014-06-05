@@ -8,10 +8,12 @@ import akka.io.IO
 import akka.io.Tcp
 import akka.util.ByteString
 import beyond.BeyondConfiguration
+import beyond.BeyondRuntime
 import java.net.InetSocketAddress
 import org.apache.zookeeper.server.ServerConfig
-import org.apache.zookeeper.server.ZooKeeperServerMain
 import scala.concurrent.duration._
+import scala.sys.process.Process
+import scalax.file.Path
 
 object ZooKeeperLauncher {
   val ServerNotRespondingTimeout = 30.seconds
@@ -28,37 +30,28 @@ class ZooKeeperLauncher extends Actor with ActorLogging {
   import akka.io.Tcp._
   import play.api.libs.concurrent.Execution.Implicits._
 
-  class BeyondZooKeeperServerMain extends ZooKeeperServerMain {
-    // Make shutdown() public because it is protected in ZooKeeperServerMain.
-    override def shutdown() {
-      super.shutdown()
-    }
-  }
-
-  // FIXME: Currently, ZooKeeperLauncher launches a standalone ZooKeeper server.
-  // Setup a ZooKeeper cluster instead.
-  private val zkServer: BeyondZooKeeperServerMain = new BeyondZooKeeperServerMain
-  private val config: ServerConfig = {
-    val config = new ServerConfig
-    config.parse(BeyondConfiguration.zooKeeperConfigPath)
-    config
-  }
-
-  private val zkServerThread: Thread = new Thread(new Runnable {
-    override def run() {
-      zkServer.runFromConfig(config)
-    }
-  })
-
   private val tickCancellable = context.system.scheduler.schedule(
     initialDelay = InitialDelay, interval = TickInterval, receiver = self, message = Tick)
 
   private var connectCancellable: Cancellable = _
 
   override def preStart() {
-    zkServerThread.start()
     log.info("ZooKeeper started")
-
+    val pidPath = Path.fromString(BeyondConfiguration.pidDirectory) / "zookeeper.pid"
+    if (!pidPath.exists) {
+      // FIXME: Currently, ZooKeeperLauncher launches a standalone ZooKeeper server.
+      // Setup a ZooKeeper cluster instead.
+      val mainClassOfZooKeeperServer = classOf[beyond.launcher.ZooKeeperServerMainWithPIDFile].getCanonicalName
+      val zooKeeperServer = Process(
+        Seq(
+          BeyondRuntime.javaPath,
+          mainClassOfZooKeeperServer,
+          pidPath.path,
+          BeyondConfiguration.zooKeeperConfigPath),
+        cwd = None,
+        extraEnv = "CLASSPATH" -> BeyondRuntime.classPath)
+      zooKeeperServer.run()
+    }
     scheduleConnect(InitialDelay)
   }
 
@@ -66,14 +59,18 @@ class ZooKeeperLauncher extends Actor with ActorLogging {
     tickCancellable.cancel()
     connectCancellable.cancel()
 
-    zkServer.shutdown()
-    zkServerThread.join()
     log.info("ZooKeeper stopped")
   }
 
   private def scheduleConnect(delay: FiniteDuration) {
     connectCancellable = context.system.scheduler.scheduleOnce(delay) {
       import context.system
+      val config: ServerConfig = {
+        val config = new ServerConfig
+        config.parse(BeyondConfiguration.zooKeeperConfigPath)
+        config
+      }
+
       val address = new InetSocketAddress("127.0.0.1", config.getClientPortAddress.getPort)
       IO(Tcp) ! Tcp.Connect(address)
     }
