@@ -1,12 +1,13 @@
 package beyond.launcher
 
+import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import beyond.BeyondRuntime
 import org.apache.zookeeper.server.ZooKeeperServerMain
 import scalax.file.Path
 import scalax.io.Codec
 import scalax.io.Resource
 
-object ZooKeeperServerMainWithPIDFile extends ZooKeeperServerMain {
+object ZooKeeperServerMainWithPIDFile extends ZooKeeperServerMain with Logging {
   def main(args: Array[String]) {
     val pidPath = Path.fromString(args(0))
     for { file <- pidPath.createFile(createParents = true).fileOption } {
@@ -16,6 +17,7 @@ object ZooKeeperServerMainWithPIDFile extends ZooKeeperServerMain {
     Runtime.getRuntime.addShutdownHook(new Thread() {
       override def run() {
         pidPath.delete(force = true)
+        logger.info("ZooKeeperServer stopped")
       }
     })
 
