@@ -1,12 +1,15 @@
 package controllers
 
 import beyond.UserAction
+import beyond.GameEvent
+import java.util.Date
 import play.api.data.Form
 import play.api.data.Forms.text
 import play.api.data.Forms.tuple
+import play.api.libs.json._
 import play.api.mvc._
 
-object Session extends Controller {
+object Session extends Controller with GameEvent {
   private val loginForm = Form(
     tuple(
       "username" -> text,
@@ -19,10 +22,12 @@ object Session extends Controller {
     // FIXME: Check password
 
     val username = data("username")
+    track("User Login", Json.obj("username" -> username))
     Ok("Hello " + username).withSession("username" -> username)
   }
 
   def logout: Action[AnyContent] = UserAction { request =>
+    track("User Logout", Json.obj("username" -> request.username))
     Ok("Goodbye " + request.username).withNewSession
   }
 }
