@@ -16,6 +16,8 @@ object BeyondConfiguration {
 
   def zooKeeperConfigPath: String = configuration.getString("beyond.zookeeper.config-path").get
 
+  def pidDirectory: String = configuration.getString("beyond.pid-dir").get
+
   def zooKeeperServers: Set[String] = {
     import scala.collection.JavaConverters._
     configuration.getStringList("beyond.zookeeper.servers").map(_.asScala).get.toSet
