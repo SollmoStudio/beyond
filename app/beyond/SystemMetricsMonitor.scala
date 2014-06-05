@@ -99,10 +99,7 @@ class SystemMetricsMonitor extends Actor with ActorLogging {
     jmxResources.foreach(_.close())
   }
 
-  override def receive: Receive = {
-    // Does nothing when this actor is not yet initialized.
-    case _ =>
-  }
+  override def receive: Receive = Map.empty
 
   private def receiveWithMBeans(mbsc: MBeanServerConnection,
     osMXBean: OperatingSystemMXBean, memoryMXBean: MemoryMXBean, sigarSwap: ObjectName): Receive = {

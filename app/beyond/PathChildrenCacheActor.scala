@@ -43,8 +43,6 @@ class PathChildrenCacheActor(curatorFramework: CuratorFramework, path: String) e
     }
   }
 
-  override def receive: Receive = {
-    case _ =>
-  }
+  override def receive: Receive = Map.empty
 }
 

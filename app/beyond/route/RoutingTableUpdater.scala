@@ -53,8 +53,6 @@ class RoutingTableUpdater(curatorFramework: CuratorFramework) extends Actor with
       context.become(receiveWithoutLeadership)
   }
 
-  override def receive: Receive = {
-    case _ =>
-  }
+  override def receive: Receive = Map.empty
 }
 
