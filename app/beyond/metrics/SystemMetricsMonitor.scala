@@ -1,7 +1,8 @@
-package beyond
+package beyond.metrics
 
 import akka.actor.Actor
 import akka.actor.ActorLogging
+import beyond.BeyondRuntime
 import com.sun.tools.attach.VirtualMachine
 import java.io.Closeable
 import java.io.File
@@ -9,9 +10,8 @@ import java.lang.management.ManagementFactory
 import java.lang.management.MemoryMXBean
 import java.lang.management.MemoryUsage
 import java.lang.management.OperatingSystemMXBean
-import java.lang.management.RuntimeMXBean
-import javax.management.MBeanServerConnection
 import javax.management.MBeanServer
+import javax.management.MBeanServerConnection
 import javax.management.ObjectName
 import javax.management.remote.JMXConnector
 import javax.management.remote.JMXConnectorFactory
@@ -36,27 +36,17 @@ object SystemMetricsMonitor {
 }
 
 class SystemMetricsMonitor extends Actor with ActorLogging {
+
   import SystemMetricsMonitor._
 
   private val jmxResources: mutable.Stack[Closeable] = mutable.Stack()
 
   override def preStart() {
-    def getProcessID: String = {
-      val bean: RuntimeMXBean = ManagementFactory.getRuntimeMXBean
-      // Get the name representing the running Java virtual machine.
-      // It returns something like 6460@AURORA. Where the value
-      // before the @ symbol is the PID.
-      val jvmName = bean.getName
-      // Extract the PID by splitting the string returned by the
-      // bean.getName() method.
-      jvmName.split("@")(0)
-    }
-
     val server: MBeanServer = ManagementFactory.getPlatformMBeanServer
     server.registerMBean(new SigarRegistry, null)
 
     try {
-      val vm = VirtualMachine.attach(getProcessID)
+      val vm = VirtualMachine.attach(BeyondRuntime.processID)
       val ConnectorAddress = "com.sun.management.jmxremote.localConnectorAddress"
       val urlString = Option(vm.getAgentProperties.getProperty(ConnectorAddress)).getOrElse {
         val agent = vm.getSystemProperties.getProperty("java.home") +

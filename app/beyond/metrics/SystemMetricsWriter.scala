@@ -1,11 +1,12 @@
-package beyond
+package beyond.metrics
 
 import akka.actor.Actor
 import akka.actor.ActorLogging
+import beyond.Mongo
 import java.lang.management.MemoryUsage
 import java.util.Date
-import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
 import play.modules.reactivemongo.json.collection.JSONCollection
 import scala.concurrent.ExecutionContext
 
@@ -19,6 +20,7 @@ private object OWritesOps {
 }
 
 object SystemMetricsWriter {
+
   import OWritesOps._
 
   val Name: String = "systemMetricsWriter"
@@ -66,9 +68,11 @@ object SystemMetricsWriter {
 }
 
 class SystemMetricsWriter extends Actor with ActorLogging with Mongo {
-  import play.api.libs.concurrent.Akka
-  import play.api.Play.current
+
   import SystemMetricsWriter._
+  import play.api.Play.current
+  import play.api.libs.concurrent.Akka
+
   implicit val ec: ExecutionContext = Akka.system.dispatcher
 
   private def collection: JSONCollection = db.collection[JSONCollection]("admin.metrics")
