@@ -4,6 +4,7 @@ import akka.actor.Actor
 import akka.actor.ActorLogging
 import beyond.BeyondConfiguration
 import beyond.MongoMixin
+import beyond.TickGenerator
 import java.io.File
 import play.api.libs.concurrent.Akka
 import reactivemongo.core.commands.Status
@@ -17,19 +18,17 @@ import scalax.file.Path
 
 object MongoDBLauncher {
   val ServerNotRespondingTimeout = 30.seconds
-  val TickInterval = 1.second
-
-  val InitialDelay = 10.seconds
   val RetryDelay = 5.seconds
 
   val RetryDelayAtInitialization = 3.seconds
-
-  case object Tick
 }
 
 // FIXME: Extract ProcessLauncher trait from MongoDBLauncher and reuse it
 // once we have more than one process launchers.
-class MongoDBLauncher extends Actor with ActorLogging with MongoMixin {
+class MongoDBLauncher extends {
+  override protected val initialDelay = 10.seconds
+  override protected val tickInterval = 1.second
+} with Actor with TickGenerator with ActorLogging with MongoMixin {
   private val pidFilePath: Path = Path.fromString(BeyondConfiguration.pidDirectory) / "mongo.pid"
   // FIXME: Add more mongod paths.
   private val mongodPaths = Seq(
@@ -44,12 +43,6 @@ class MongoDBLauncher extends Actor with ActorLogging with MongoMixin {
   }
 
   import MongoDBLauncher._
-  private val tickCancellable = {
-    import play.api.Play.current
-    implicit val ec: ExecutionContext = Akka.system.dispatcher
-    context.system.scheduler.schedule(
-      initialDelay = InitialDelay, interval = TickInterval, receiver = self, message = Tick)
-  }
 
   private def healthCheck(delay: FiniteDuration) {
     import play.api.Play.current
@@ -81,7 +74,7 @@ class MongoDBLauncher extends Actor with ActorLogging with MongoMixin {
   }
 
   override def postStop() {
-    tickCancellable.cancel()
+    super.postStop()
     log.info("MongoDBLauncher stopped")
   }
 
@@ -93,7 +86,7 @@ class MongoDBLauncher extends Actor with ActorLogging with MongoMixin {
       context.become(initialized(ServerNotRespondingTimeout))
     case Failure(_) =>
       throw new ServerNotRespondingException
-    case Tick => // Ignore Tick on initializing.
+    case TickGenerator.Tick => // Ignore Tick on initializing.
   }
 
   private def initialized(timeout: FiniteDuration): Receive = {
@@ -102,8 +95,8 @@ class MongoDBLauncher extends Actor with ActorLogging with MongoMixin {
       context.become(initialized(ServerNotRespondingTimeout))
     case Failure(_) =>
       healthCheck(RetryDelay)
-    case Tick =>
-      val newTimeout = timeout - TickInterval
+    case TickGenerator.Tick =>
+      val newTimeout = timeout - tickInterval
       if (newTimeout > Duration.Zero) {
         context.become(initialized(newTimeout))
       } else {
