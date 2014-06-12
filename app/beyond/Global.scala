@@ -2,6 +2,7 @@ package beyond
 
 import akka.actor.ActorRef
 import akka.actor.Props
+import beyond.metrics.RequestsCountFilter
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import java.io.File
@@ -16,7 +17,7 @@ import play.api.mvc.SimpleResult
 import play.api.mvc.WithFilters
 import scala.concurrent.Future
 
-object Global extends WithFilters(TimeoutFilter) with Logging {
+object Global extends WithFilters(RequestsCountFilter, TimeoutFilter) with Logging {
   private var beyondSupervisor: Option[ActorRef] = _
 
   override def onLoadConfig(defaultConfig: Configuration, path: File, classLoader: ClassLoader, mode: Mode.Mode): Configuration = {
