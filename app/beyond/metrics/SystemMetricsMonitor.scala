@@ -6,6 +6,7 @@ import java.lang.management.ManagementFactory
 import java.lang.management.MemoryMXBean
 import java.lang.management.MemoryUsage
 import java.lang.management.OperatingSystemMXBean
+import javax.management.JMX
 import javax.management.MBeanServerConnection
 import javax.management.ObjectName
 
@@ -17,12 +18,14 @@ object SystemMetricsMonitor {
   case object HeapMemoryUsageRequest extends SystemMetricsRequest
   case object NonHeapMemoryUsageRequest extends SystemMetricsRequest
   case object SwapMemoryUsageRequest extends SystemMetricsRequest
+  case object NumberOfRequestsPerSecondRequest extends SystemMetricsRequest
 
   sealed trait SystemMetricsReply
   case class SystemLoadAverageReply(loadAverage: Double) extends SystemMetricsReply
   case class HeapMemoryUsageReply(usage: MemoryUsage) extends SystemMetricsReply
   case class NonHeapMemoryUsageReply(usage: MemoryUsage) extends SystemMetricsReply
   case class SwapMemoryUsageReply(free: Long, total: Long, used: Long) extends SystemMetricsReply
+  case class NumberOfRequestsPerSecondReply(count: Int) extends SystemMetricsReply
 }
 
 class SystemMetricsMonitor extends Actor with ActorLogging with JMXConnectorMixin {
@@ -33,6 +36,8 @@ class SystemMetricsMonitor extends Actor with ActorLogging with JMXConnectorMixi
     mbsc, ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, classOf[OperatingSystemMXBean])
   private val memoryMXBean: MemoryMXBean = ManagementFactory.newPlatformMXBeanProxy(
     mbsc, ManagementFactory.MEMORY_MXBEAN_NAME, classOf[MemoryMXBean])
+  private val numberOfReqeuestsPerSecond: NumberOfRequestsPerSecondMBean =
+    JMX.newMBeanProxy(mbsc, NumberOfRequestsPerSecond.ObjectName, classOf[NumberOfRequestsPerSecondMBean])
 
   override def preStart() {
     log.info("SystemMetricsMonitor started")
@@ -56,6 +61,9 @@ class SystemMetricsMonitor extends Actor with ActorLogging with JMXConnectorMixi
       val total = mbsc.getAttribute(sigarSwap, "Total").asInstanceOf[Long]
       val used = mbsc.getAttribute(sigarSwap, "Used").asInstanceOf[Long]
       sender ! SwapMemoryUsageReply(free, total, used)
+    case NumberOfRequestsPerSecondRequest =>
+      val numberOfRequests = numberOfReqeuestsPerSecond.getNumberOfRequestsPerSecond
+      sender ! NumberOfRequestsPerSecondReply(numberOfRequests)
   }
 }
 
