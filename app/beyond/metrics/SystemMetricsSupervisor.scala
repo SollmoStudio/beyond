@@ -62,6 +62,11 @@ class SystemMetricsSupervisor extends {
         SwapMemoryUsageReply(swapMemoryFree, swapMemoryTotal, swapMemoryUsed) <- monitor ? SwapMemoryUsageRequest
       } yield SwapMemoryUsage(hostname, now, swapMemoryFree, swapMemoryTotal, swapMemoryUsed)
       swapMemoryUsage pipeTo writer
+
+      val requestsPerSecond = for {
+        NumberOfRequestsPerSecondReply(count) <- monitor ? NumberOfRequestsPerSecondRequest
+      } yield NumberOfRequestsPerSecond(hostname, now, count)
+      requestsPerSecond pipeTo writer
   }
 }
 
