@@ -9,30 +9,28 @@ import akka.io.Tcp
 import akka.util.ByteString
 import beyond.BeyondConfiguration
 import beyond.BeyondRuntime
+import beyond.TickGenerator
 import java.net.InetSocketAddress
 import org.apache.zookeeper.server.ServerConfig
+import play.api.libs.concurrent.Akka
 import scala.concurrent.duration._
 import scala.sys.process.Process
 import scalax.file.Path
 
 object ZooKeeperLauncher {
   val ServerNotRespondingTimeout = 30.seconds
-  val TickInterval = 1.second
-
-  val InitialDelay = 10.seconds
   val RetryDelay = 5.seconds
-
-  case object Tick
 }
 
-class ZooKeeperLauncher extends Actor with ActorLogging {
+class ZooKeeperLauncher extends {
+  override protected val initialDelay = 10.seconds
+  override protected val tickInterval = 1.second
+} with Actor with TickGenerator with ActorLogging {
   import ZooKeeperLauncher._
   import akka.io.Tcp._
   import play.api.libs.concurrent.Execution.Implicits._
 
   private val pidFilePath: Path = Path.fromString(BeyondConfiguration.pidDirectory) / "zookeeper.pid"
-  private val tickCancellable = context.system.scheduler.schedule(
-    initialDelay = InitialDelay, interval = TickInterval, receiver = self, message = Tick)
 
   private var connectCancellable: Cancellable = _
 
@@ -58,13 +56,12 @@ class ZooKeeperLauncher extends Actor with ActorLogging {
       zooKeeperServer.run()
       log.info("ZooKeeperServer started")
     }
-    scheduleConnect(InitialDelay)
+    scheduleConnect(initialDelay)
   }
 
   override def postStop() {
-    tickCancellable.cancel()
     connectCancellable.cancel()
-
+    super.postStop()
     log.info("ZooKeeperLauncher stopped")
   }
 
@@ -92,8 +89,8 @@ class ZooKeeperLauncher extends Actor with ActorLogging {
       context.become(connected(connection, timeout))
     case CommandFailed(_: Connect) =>
       scheduleConnect(RetryDelay)
-    case Tick =>
-      val newTimeout = timeout - TickInterval
+    case TickGenerator.Tick =>
+      val newTimeout = timeout - tickInterval
       if (newTimeout > Duration.Zero) {
         context.become(connecting(newTimeout))
       } else {
@@ -119,8 +116,8 @@ class ZooKeeperLauncher extends Actor with ActorLogging {
     case _: ConnectionClosed =>
       scheduleConnect(RetryDelay)
       context.become(connecting(timeout))
-    case Tick =>
-      val newTimeout = timeout - TickInterval
+    case TickGenerator.Tick =>
+      val newTimeout = timeout - tickInterval
       if (newTimeout > Duration.Zero) {
         context.become(connected(connection, newTimeout))
       } else {
