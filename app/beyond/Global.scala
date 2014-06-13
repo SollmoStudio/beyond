@@ -47,6 +47,7 @@ object Global extends WithFilters(TimeoutFilter) with Logging {
 
   override def onStart(app: Application) {
     logger.info("Beyond started")
+    BeyondMBean.register()
     beyondSupervisor = Some(Akka.system(app).actorOf(Props[BeyondSupervisor], name = BeyondSupervisor.Name))
   }
 
@@ -54,6 +55,7 @@ object Global extends WithFilters(TimeoutFilter) with Logging {
     logger.info("Beyond stopped")
     beyondSupervisor.foreach(Akka.system(app).stop)
     beyondSupervisor = None
+    BeyondMBean.unregister()
   }
 
   override def onHandlerNotFound(request: RequestHeader): Future[SimpleResult] = {
