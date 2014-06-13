@@ -2,20 +2,12 @@ package beyond.metrics
 
 import akka.actor.Actor
 import akka.actor.ActorLogging
-import beyond.BeyondRuntime
-import com.sun.tools.attach.VirtualMachine
-import java.io.Closeable
-import java.io.File
 import java.lang.management.ManagementFactory
 import java.lang.management.MemoryMXBean
 import java.lang.management.MemoryUsage
 import java.lang.management.OperatingSystemMXBean
 import javax.management.MBeanServerConnection
 import javax.management.ObjectName
-import javax.management.remote.JMXConnector
-import javax.management.remote.JMXConnectorFactory
-import javax.management.remote.JMXServiceURL
-import scala.collection.mutable
 
 object SystemMetricsMonitor {
   val Name: String = "systemMetricsMonitor"
@@ -33,55 +25,26 @@ object SystemMetricsMonitor {
   case class SwapMemoryUsageReply(free: Long, total: Long, used: Long) extends SystemMetricsReply
 }
 
-class SystemMetricsMonitor extends Actor with ActorLogging {
-
+class SystemMetricsMonitor extends Actor with ActorLogging with JMXConnectorMixin {
   import SystemMetricsMonitor._
 
-  private val jmxResources: mutable.Stack[Closeable] = mutable.Stack()
-
   override def preStart() {
-    try {
-      val vm = VirtualMachine.attach(BeyondRuntime.processID)
-      val ConnectorAddress = "com.sun.management.jmxremote.localConnectorAddress"
-      val urlString = Option(vm.getAgentProperties.getProperty(ConnectorAddress)).getOrElse {
-        val agent = vm.getSystemProperties.getProperty("java.home") +
-          File.separator + "lib" + File.separator + "management-agent.jar"
-        vm.loadAgent(agent)
+    val mbsc: MBeanServerConnection = jmxConnector.getMBeanServerConnection
 
-        // agent is started, get the connector address again
-        vm.getAgentProperties.getProperty(ConnectorAddress)
-      }
+    val osMXBean: OperatingSystemMXBean = ManagementFactory.newPlatformMXBeanProxy(
+      mbsc, ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, classOf[OperatingSystemMXBean])
+    val memoryMXBean: MemoryMXBean = ManagementFactory.newPlatformMXBeanProxy(
+      mbsc, ManagementFactory.MEMORY_MXBEAN_NAME, classOf[MemoryMXBean])
+    val sigarSwap = new ObjectName("sigar:type=Swap")
 
-      val url = new JMXServiceURL(urlString)
-      val jmxc: JMXConnector = JMXConnectorFactory.connect(url)
-      jmxResources.push(jmxc)
-      val mbsc: MBeanServerConnection = jmxc.getMBeanServerConnection()
-
-      val osMXBean: OperatingSystemMXBean = ManagementFactory.newPlatformMXBeanProxy(
-        mbsc, ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, classOf[OperatingSystemMXBean])
-      val memoryMXBean: MemoryMXBean = ManagementFactory.newPlatformMXBeanProxy(
-        mbsc, ManagementFactory.MEMORY_MXBEAN_NAME, classOf[MemoryMXBean])
-      val sigarSwap = new ObjectName("sigar:type=Swap")
-
-      context.become(receiveWithMBeans(mbsc, osMXBean, memoryMXBean, sigarSwap))
-
-    } catch {
-      case ex: Throwable =>
-        closeAllJMXResources()
-        throw ex
-    }
+    context.become(receiveWithMBeans(mbsc, osMXBean, memoryMXBean, sigarSwap))
 
     log.info("SystemMetricsMonitor started")
   }
 
   override def postStop() {
-    closeAllJMXResources()
-
+    super.postStop()
     log.info("SystemMetricsMonitor stopped")
-  }
-
-  private def closeAllJMXResources() {
-    jmxResources.foreach(_.close())
   }
 
   override def receive: Receive = Map.empty
