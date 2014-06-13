@@ -43,7 +43,11 @@ class SystemMetricsMonitor extends Actor with ActorLogging {
 
   override def preStart() {
     val server: MBeanServer = ManagementFactory.getPlatformMBeanServer
-    server.registerMBean(new SigarRegistry, null)
+    val sigar = new SigarRegistry
+    val sigarName = new ObjectName(sigar.getObjectName)
+    if (!server.isRegistered(sigarName)) {
+      server.registerMBean(sigar, sigarName)
+    }
 
     try {
       val vm = VirtualMachine.attach(BeyondRuntime.processID)
