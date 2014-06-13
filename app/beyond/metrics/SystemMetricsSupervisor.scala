@@ -7,46 +7,42 @@ import akka.pattern.ask
 import akka.pattern.pipe
 import akka.util.Timeout
 import beyond.BeyondConfiguration
+import beyond.TickGenerator
 import java.util.Date
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object SystemMetricsSupervisor {
   val Name: String = "systemMetricsSupervisor"
-
-  val TickInterval = 10.seconds
-  val InitialDelay = 10.seconds
   implicit val QueryTimeout = Timeout(10.seconds)
-
-  case object Tick
 }
 
-class SystemMetricsSupervisor extends Actor with ActorLogging {
+class SystemMetricsSupervisor extends {
+  override protected val initialDelay = 10.seconds
+  override protected val tickInterval = 10.seconds
+} with Actor with TickGenerator with ActorLogging {
 
   import SystemMetricsMonitor._
-  import SystemMetricsSupervisor._
   import SystemMetricsWriter._
   val monitor = context.actorOf(Props[SystemMetricsMonitor], SystemMetricsMonitor.Name)
   val writer = context.actorOf(Props[SystemMetricsWriter], SystemMetricsWriter.Name)
-
-  private implicit val ec: ExecutionContext = context.dispatcher
-  private val tickCancellable = context.system.scheduler.schedule(
-    initialDelay = InitialDelay, interval = TickInterval, receiver = self, message = Tick)
 
   override def preStart() {
     log.info("SystemMetricsSupervisor started")
   }
 
   override def postStop() {
-    tickCancellable.cancel()
+    super.postStop()
     log.info("SystemMetricsSupervisor stopped")
   }
 
   override def receive: Receive = {
-    case Tick =>
+    case TickGenerator.Tick =>
       val hostname = BeyondConfiguration.currentServerAddress
       val now = new Date()
 
+      implicit val ec: ExecutionContext = context.dispatcher
+      import SystemMetricsSupervisor.QueryTimeout
       val systemLoadAverage = for {
         SystemLoadAverageReply(loadAverage) <- monitor ? SystemLoadAverageRequest
       } yield SystemLoadAverage(hostname, now, loadAverage)
