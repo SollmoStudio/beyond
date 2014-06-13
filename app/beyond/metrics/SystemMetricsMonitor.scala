@@ -10,13 +10,11 @@ import java.lang.management.ManagementFactory
 import java.lang.management.MemoryMXBean
 import java.lang.management.MemoryUsage
 import java.lang.management.OperatingSystemMXBean
-import javax.management.MBeanServer
 import javax.management.MBeanServerConnection
 import javax.management.ObjectName
 import javax.management.remote.JMXConnector
 import javax.management.remote.JMXConnectorFactory
 import javax.management.remote.JMXServiceURL
-import org.hyperic.sigar.jmx.SigarRegistry
 import scala.collection.mutable
 
 object SystemMetricsMonitor {
@@ -42,13 +40,6 @@ class SystemMetricsMonitor extends Actor with ActorLogging {
   private val jmxResources: mutable.Stack[Closeable] = mutable.Stack()
 
   override def preStart() {
-    val server: MBeanServer = ManagementFactory.getPlatformMBeanServer
-    val sigar = new SigarRegistry
-    val sigarName = new ObjectName(sigar.getObjectName)
-    if (!server.isRegistered(sigarName)) {
-      server.registerMBean(sigar, sigarName)
-    }
-
     try {
       val vm = VirtualMachine.attach(BeyondRuntime.processID)
       val ConnectorAddress = "com.sun.management.jmxremote.localConnectorAddress"
