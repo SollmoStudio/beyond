@@ -1,10 +1,10 @@
 package beyond.plugin
 
 import akka.actor.Actor
-import org.mozilla.javascript.commonjs.module.ModuleScope
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.commonjs.module.ModuleScope
 import play.api.mvc.Request
 
 class GamePluginWorker(contextFactory: BeyondContextFactory,

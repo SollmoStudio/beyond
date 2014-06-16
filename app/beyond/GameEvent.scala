@@ -1,7 +1,7 @@
 package beyond
 
-import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import beyond.UserActionActor.RequestWithUsername
+import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import play.api.libs.json._
 
 // FIXME: Write events to HDFS for analysis.

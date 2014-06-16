@@ -5,10 +5,6 @@ import akka.actor.Cancellable
 import beyond.plugin.GamePlugin.InvokeFunction
 import java.io.File
 import java.net.URI
-import org.mozilla.javascript.commonjs.module.Require
-import org.mozilla.javascript.commonjs.module.RequireBuilder
-import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
-import org.mozilla.javascript.commonjs.module.provider.UrlModuleSourceProvider
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.Function
@@ -17,10 +13,14 @@ import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.Wrapper
+import org.mozilla.javascript.commonjs.module.Require
+import org.mozilla.javascript.commonjs.module.RequireBuilder
+import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
+import org.mozilla.javascript.commonjs.module.provider.UrlModuleSourceProvider
 import org.mozilla.javascript.tools.ToolErrorReporter
 import play.api.libs.concurrent.Akka
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
 
 object BeyondGlobal {
   // setTimeout/clearTimeout and setInterval/clearInterval are equivalent to
