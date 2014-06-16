@@ -1,7 +1,7 @@
 package beyond.launcher
 
-import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import beyond.BeyondRuntime
+import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import org.apache.zookeeper.server.ZooKeeperServerMain
 import scalax.file.Path
 import scalax.io.Codec

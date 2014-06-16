@@ -7,9 +7,9 @@ import akka.actor.OneForOneStrategy
 import akka.actor.Props
 import akka.actor.RootActorPath
 import akka.actor.SupervisorStrategy._
-import beyond.plugin.GamePlugin
 import beyond.launcher.LauncherSupervisor
 import beyond.metrics.SystemMetricsSupervisor
+import beyond.plugin.GamePlugin
 
 object BeyondSupervisor {
   val Name: String = "beyondSupervisor"

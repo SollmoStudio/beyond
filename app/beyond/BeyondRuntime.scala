@@ -1,11 +1,11 @@
 package beyond
 
 import java.io.File
+import java.lang.management.ManagementFactory
+import java.lang.management.RuntimeMXBean
 import java.net.URLClassLoader
 import play.api.Mode
 import scalax.file.Path
-import java.lang.management.ManagementFactory
-import java.lang.management.RuntimeMXBean
 
 object BeyondRuntime {
   lazy val classPath: String = {
