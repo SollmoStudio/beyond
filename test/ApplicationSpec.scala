@@ -2,6 +2,7 @@ import org.specs2.mutable._
 import org.specs2.runner._
 import org.junit.runner._
 
+import play.api.libs.json._
 import play.api.test._
 import play.api.test.Helpers._
 
@@ -35,13 +36,61 @@ class ApplicationSpec extends Specification {
       contentAsString(ping) must equalTo("pong")
     }
 
+    "create an account" in new WithApplication {
+      val create = route(FakeRequest(POST, "/user/create")
+        .withFormUrlEncodedBody("username" -> "myname", "password" -> "mypass")).get
+
+      status(create) must equalTo(OK)
+      contentType(create) must beSome.which(_ == "application/json")
+      val resJson = Json.parse(contentAsString(create))
+      (resJson \ "result").asOpt[String].get must contain("OK")
+      (resJson \ "message").asOpt[String].get must contain("Account created")
+      (resJson \ "username").asOpt[String].get must contain("myname")
+    }
+
+    "already exists account" in new WithApplication {
+      val create = route(FakeRequest(POST, "/user/create")
+        .withFormUrlEncodedBody("username" -> "myname", "password" -> "mypass")).get
+
+      status(create) must equalTo(OK)
+      contentType(create) must beSome.which(_ == "application/json")
+      val resJson = Json.parse(contentAsString(create))
+      (resJson \ "result").asOpt[String].get must contain("Error")
+      (resJson \ "message").asOpt[String].get must contain("Already exists account")
+    }
+
+    "login when access to invalid username" in new WithApplication {
+      val login = route(FakeRequest(POST, "/session/login")
+        .withFormUrlEncodedBody("username" -> "invalidname", "password" -> "invalidpass")).get
+
+      status(login) must equalTo(OK)
+      contentType(login) must beSome.which(_ == "application/json")
+      val resJson = Json.parse(contentAsString(login))
+      (resJson \ "result").asOpt[String].get must contain("Error")
+      (resJson \ "message").asOpt[String].get must contain("Cannot find an account")
+      (resJson \ "username").asOpt[String].get must contain("invalidname")
+    }
+
+    "login when access to invalid password" in new WithApplication {
+      val login = route(FakeRequest(POST, "/session/login")
+        .withFormUrlEncodedBody("username" -> "myname", "password" -> "invalidpassword")).get
+
+      status(login) must equalTo(OK)
+      contentType(login) must beSome.which(_ == "application/json")
+      val resJson = Json.parse(contentAsString(login))
+      (resJson \ "result").asOpt[String].get must contain("Error")
+      (resJson \ "message").asOpt[String].get must contain("Invalid password")
+    }
+
     "login" in new WithApplication {
       val login = route(FakeRequest(POST, "/session/login")
         .withFormUrlEncodedBody("username" -> "myname", "password" -> "mypass")).get
 
       status(login) must equalTo(OK)
-      contentType(login) must beSome.which(_ == "text/plain")
-      contentAsString(login) must equalTo("Hello myname")
+      contentType(login) must beSome.which(_ == "application/json")
+      val resJson = Json.parse(contentAsString(login))
+      (resJson \ "result").asOpt[String].get must contain("OK")
+      (resJson \ "message").asOpt[String].get must contain("Hello myname")
     }
 
     "logout when username exists in session" in new WithApplication {
