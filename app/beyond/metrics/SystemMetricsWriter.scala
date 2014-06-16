@@ -2,7 +2,7 @@ package beyond.metrics
 
 import akka.actor.Actor
 import akka.actor.ActorLogging
-import beyond.Mongo
+import beyond.MongoMixin
 import java.lang.management.MemoryUsage
 import java.util.Date
 import play.api.libs.functional.syntax._
@@ -67,7 +67,7 @@ object SystemMetricsWriter {
   )(unlift(SwapMemoryUsage.unapply)).addTag("SwapMemoryUsage")
 }
 
-class SystemMetricsWriter extends Actor with ActorLogging with Mongo {
+class SystemMetricsWriter extends Actor with ActorLogging with MongoMixin {
 
   import SystemMetricsWriter._
   import play.api.Play.current

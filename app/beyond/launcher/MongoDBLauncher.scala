@@ -3,7 +3,7 @@ package beyond.launcher
 import akka.actor.Actor
 import akka.actor.ActorLogging
 import beyond.BeyondConfiguration
-import beyond.Mongo
+import beyond.MongoMixin
 import java.io.File
 import play.api.libs.concurrent.Akka
 import reactivemongo.core.commands.Status
@@ -29,7 +29,7 @@ object MongoDBLauncher {
 
 // FIXME: Extract ProcessLauncher trait from MongoDBLauncher and reuse it
 // once we have more than one process launchers.
-class MongoDBLauncher extends Actor with ActorLogging with Mongo {
+class MongoDBLauncher extends Actor with ActorLogging with MongoMixin {
   private val pidFilePath: Path = Path.fromString(BeyondConfiguration.pidDirectory) / "mongo.pid"
   // FIXME: Add more mongod paths.
   private val mongodPaths = Seq(

@@ -5,7 +5,7 @@ import reactivemongo.api.DB
 import reactivemongo.api.MongoConnection
 import reactivemongo.api.MongoDriver
 
-trait Mongo {
+trait MongoMixin {
   import play.api.Play.current
 
   /** Returns the current instance of the driver. */
