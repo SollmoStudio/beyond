@@ -28,17 +28,13 @@ object SystemMetricsMonitor {
 class SystemMetricsMonitor extends Actor with ActorLogging with JMXConnectorMixin {
   import SystemMetricsMonitor._
 
+  private val mbsc: MBeanServerConnection = jmxConnector.getMBeanServerConnection
+  private val osMXBean: OperatingSystemMXBean = ManagementFactory.newPlatformMXBeanProxy(
+    mbsc, ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, classOf[OperatingSystemMXBean])
+  private val memoryMXBean: MemoryMXBean = ManagementFactory.newPlatformMXBeanProxy(
+    mbsc, ManagementFactory.MEMORY_MXBEAN_NAME, classOf[MemoryMXBean])
+
   override def preStart() {
-    val mbsc: MBeanServerConnection = jmxConnector.getMBeanServerConnection
-
-    val osMXBean: OperatingSystemMXBean = ManagementFactory.newPlatformMXBeanProxy(
-      mbsc, ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, classOf[OperatingSystemMXBean])
-    val memoryMXBean: MemoryMXBean = ManagementFactory.newPlatformMXBeanProxy(
-      mbsc, ManagementFactory.MEMORY_MXBEAN_NAME, classOf[MemoryMXBean])
-    val sigarSwap = new ObjectName("sigar:type=Swap")
-
-    context.become(receiveWithMBeans(mbsc, osMXBean, memoryMXBean, sigarSwap))
-
     log.info("SystemMetricsMonitor started")
   }
 
@@ -47,10 +43,7 @@ class SystemMetricsMonitor extends Actor with ActorLogging with JMXConnectorMixi
     log.info("SystemMetricsMonitor stopped")
   }
 
-  override def receive: Receive = Map.empty
-
-  private def receiveWithMBeans(mbsc: MBeanServerConnection,
-    osMXBean: OperatingSystemMXBean, memoryMXBean: MemoryMXBean, sigarSwap: ObjectName): Receive = {
+  override def receive: Receive = {
     case SystemLoadAverageRequest =>
       sender ! SystemLoadAverageReply(osMXBean.getSystemLoadAverage)
     case HeapMemoryUsageRequest =>
@@ -58,6 +51,7 @@ class SystemMetricsMonitor extends Actor with ActorLogging with JMXConnectorMixi
     case NonHeapMemoryUsageRequest =>
       sender ! NonHeapMemoryUsageReply(memoryMXBean.getNonHeapMemoryUsage)
     case SwapMemoryUsageRequest =>
+      val sigarSwap = new ObjectName("sigar:type=Swap")
       val free = mbsc.getAttribute(sigarSwap, "Free").asInstanceOf[Long]
       val total = mbsc.getAttribute(sigarSwap, "Total").asInstanceOf[Long]
       val used = mbsc.getAttribute(sigarSwap, "Used").asInstanceOf[Long]
