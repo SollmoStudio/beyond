@@ -14,7 +14,7 @@ object RequestsCounter {
 class RequestsCounter extends Actor with ActorLogging with JMXConnectorMixin {
   private val numberOfRequestsPerSecond: NumberOfRequestsPerSecondMBean = {
     val mbsc: MBeanServerConnection = jmxConnector.getMBeanServerConnection
-    JMX.newMBeanProxy(mbsc, NumberOfRequestsPerSecond.ObjectName, classOf[NumberOfRequestsPerSecondMBean])
+    JMX.newMBeanProxy(mbsc, NumberOfRequestsPerSecond.objectName, classOf[NumberOfRequestsPerSecondMBean])
   }
 
   override def receive: Receive = {
