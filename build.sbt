@@ -8,12 +8,17 @@ lazy val beyondAdmin = project
 
 lazy val rhinoScalaBinding = project
 
+resolvers += "spray repo" at "http://repo.spray.io"
+
 libraryDependencies ++= Seq(
   jdbc,
   anorm,
   cache,
   "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.2",
+  "com.typesafe.akka" %% "akka-actor" % "2.2.4",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.2.4",
   "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
+  "io.spray" % "spray-client" % "1.2.1",
   "org.apache.curator" % "curator-recipes" % "2.4.2",
   "org.apache.zookeeper" % "zookeeper" % "3.4.6",
   "org.fusesource" % "sigar" % "1.6.4" classifier "native" classifier "",
