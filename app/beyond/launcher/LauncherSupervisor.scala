@@ -9,8 +9,8 @@ import beyond.BeyondConfiguration
 import java.net.InetAddress
 import java.net.NetworkInterface
 
-class LauncherInitializationException extends RuntimeException
-class ServerNotRespondingException extends RuntimeException
+class LauncherInitializationException extends Exception
+class ServerNotRespondingException extends Exception
 
 object LauncherSupervisor {
   val Name: String = "launcherSupervisor"
