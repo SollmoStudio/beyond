@@ -1,6 +1,7 @@
 package beyond
 
 import akka.actor.Actor
+import akka.actor.ActorInitializationException
 import akka.actor.ActorPath
 import akka.actor.Address
 import akka.actor.OneForOneStrategy
@@ -10,6 +11,7 @@ import akka.actor.SupervisorStrategy._
 import beyond.launcher.LauncherSupervisor
 import beyond.metrics.SystemMetricsSupervisor
 import beyond.plugin.GamePlugin
+import beyond.plugin.NoHandlerFunctionFoundException
 
 object BeyondSupervisor {
   val Name: String = "beyondSupervisor"
@@ -21,6 +23,8 @@ object BeyondSupervisor {
 }
 
 class BeyondSupervisor extends Actor {
+  import beyond.ThrowableOps._
+
   context.actorOf(Props[LauncherSupervisor], LauncherSupervisor.Name)
   // FIXME: Don't hardcode the plugin filename.
   context.actorOf(Props(classOf[GamePlugin], "main.js"), GamePlugin.Name)
@@ -30,7 +34,11 @@ class BeyondSupervisor extends Actor {
 
   override val supervisorStrategy =
     OneForOneStrategy() {
-      // FIXME: Need policy for all exceptions escalated by Beyond actors.
+      case ex: ActorInitializationException =>
+        ex.getRootCause match {
+          case _: NoHandlerFunctionFoundException => Escalate
+          case _ => Stop
+        }
       case t =>
         super.supervisorStrategy.decider.applyOrElse(t, (_: Any) => Escalate)
     }

@@ -1,6 +1,7 @@
 package beyond.plugin
 
 import akka.actor.Actor
+import akka.actor.ActorLogging
 import akka.actor.Props
 import akka.routing.RoundRobinRouter
 import beyond.BeyondConfiguration
@@ -15,8 +16,10 @@ object GamePlugin {
   case class InvokeFunction(function: Function, args: Array[AnyRef])
 }
 
+class NoHandlerFunctionFoundException extends Exception
+
 // FIXME: Handle script errors.
-class GamePlugin(filename: String) extends Actor {
+class GamePlugin(filename: String) extends Actor with ActorLogging {
   import com.beyondframework.rhino.RhinoConversions._
 
   private val contextFactory: BeyondContextFactory = new BeyondContextFactory(new BeyondContextFactoryConfig)
@@ -31,9 +34,14 @@ class GamePlugin(filename: String) extends Actor {
     val require = global.installRequire(cx, BeyondConfiguration.pluginPaths, sandboxed)
     val exports = require.requireMain(cx, filename)
     // FIXME: Don't hardcode the name of handler function.
-    // FIXME: handler might be Scriptable.NOT_FOUND if there is no function named "handle".
-    // Also, it might not be an instance of Function.
-    exports.get("handle", exports)
+    val handler = exports.get("handle", exports)
+    handler match {
+      case _: Function =>
+        handler
+      case _ /* Scriptable.NOT_FOUND */ =>
+        log.error("No handler function is found")
+        throw new NoHandlerFunctionFoundException
+    }
   }.asInstanceOf[Function]
 
   private val workerActor = {
