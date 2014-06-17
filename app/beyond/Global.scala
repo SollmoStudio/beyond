@@ -18,6 +18,7 @@ import play.api.mvc.Results.NotFound
 import play.api.mvc.SimpleResult
 import play.api.mvc.WithFilters
 import scala.concurrent.Future
+import scalax.file.Path
 
 private object TimeoutFilter extends Filter {
   def apply(next: (RequestHeader) => Future[SimpleResult])(request: RequestHeader): Future[SimpleResult] = {
@@ -51,6 +52,15 @@ object Global extends WithFilters(TimeoutFilter) with Logging {
 
     val finalConfiguration = defaultConfig ++ modeSpecificConfiguration
     super.onLoadConfig(finalConfiguration, path, classLoader, mode)
+  }
+
+  override def beforeStart(app: Application) {
+    super.beforeStart(app)
+
+    val nativeLib = Path.fromString(app.path.getAbsolutePath) / "target" / "native_libraries" / (System.getProperty("sun.arch.data.model") + "bits")
+    val defaultLibPath = System.getProperty("java.library.path")
+    val newLibPath = defaultLibPath + File.pathSeparator + nativeLib.path
+    System.setProperty("java.library.path", newLibPath)
   }
 
   override def onStart(app: Application) {
