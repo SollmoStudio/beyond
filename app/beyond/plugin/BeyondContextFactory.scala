@@ -1,5 +1,6 @@
 package beyond.plugin
 
+import akka.actor.Actor
 import akka.actor.ActorRef
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
@@ -10,7 +11,7 @@ case class BeyondContextFactoryConfig(strictMode: Boolean = false,
   warningAsError: Boolean = false,
   parentProtoProperties: Boolean = true)
 
-class BeyondContextFactory(config: BeyondContextFactoryConfig)(implicit actor: ActorRef) extends ContextFactory {
+class BeyondContextFactory(config: BeyondContextFactoryConfig)(implicit actor: ActorRef = Actor.noSender) extends ContextFactory {
   override def onContextCreated(cx: Context) {
     super.onContextCreated(cx)
     cx.setWrapFactory(BeyondWrapFactory)
