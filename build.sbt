@@ -19,6 +19,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-slf4j" % "2.2.4",
   "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
   "io.spray" % "spray-client" % "1.2.1",
+  "jline" % "jline" % "2.12",
   "org.apache.curator" % "curator-recipes" % "2.4.2",
   "org.apache.zookeeper" % "zookeeper" % "3.4.6",
   "org.fusesource" % "sigar" % "1.6.4" classifier "native" classifier "",
