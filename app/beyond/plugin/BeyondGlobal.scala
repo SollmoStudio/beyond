@@ -136,13 +136,12 @@ object BeyondGlobal {
   }
 }
 
-class BeyondGlobal(factory: ContextFactory,
-    sealedStdLib: Boolean = false) extends ImporterTopLevel {
+class BeyondGlobal(sealedStdLib: Boolean = false) extends ImporterTopLevel {
   import com.beyondframework.rhino.RhinoConversions._
 
-  // Define some global functions particular to the beyond. Note
-  // that these functions are not part of ECMA.
-  factory.call { cx: Context =>
+  def init(cx: Context) {
+    // Define some global functions particular to the beyond. Note
+    // that these functions are not part of ECMA.
     initStandardObjects(cx, sealedStdLib)
     val names = Array[String](
       "setTimeout",
@@ -154,7 +153,6 @@ class BeyondGlobal(factory: ContextFactory,
     )
     defineFunctionProperties(names, classOf[BeyondGlobal], ScriptableObject.DONTENUM)
     ScriptableObject.defineClass(this, classOf[ScriptableRequest[_]])
-    Unit
   }
 
   def installRequire(cx: Context, modulePaths: Seq[String], sandboxed: Boolean): Require = {

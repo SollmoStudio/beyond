@@ -10,7 +10,8 @@ class BeyondJavaScriptEngine extends Logging {
 
   val contextFactory: BeyondContextFactory = new BeyondContextFactory(new BeyondContextFactoryConfig)
 
-  val global: BeyondGlobal = new BeyondGlobal(contextFactory)
+  val global: BeyondGlobal = new BeyondGlobal
+  contextFactory.call { cx: Context => global.init(cx); Unit }
 
   def load(filename: String): Scriptable = contextFactory.call { cx: Context =>
     // Sandboxed means that the require function doesn't have the "paths"
