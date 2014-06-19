@@ -7,23 +7,21 @@ import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.commonjs.module.ModuleScope
 import play.api.mvc.Request
 
-class GamePluginWorker(contextFactory: BeyondContextFactory,
-    global: BeyondGlobal,
-    handler: Function) extends Actor {
+class GamePluginWorker(engine: BeyondJavaScriptEngine, handler: Function) extends Actor {
   import com.beyondframework.rhino.RhinoConversions._
   import beyond.plugin.GamePlugin._
 
   // FIXME: Pass the module URI once we load scripts from file path.
-  val scope = new ModuleScope(global, null, null)
+  val scope = new ModuleScope(engine.global, null, null)
 
-  private def handle[A](request: Request[A]): String = contextFactory.call { cx: Context =>
+  private def handle[A](request: Request[A]): String = engine.contextFactory.call { cx: Context =>
     val scriptableRequest: Scriptable = cx.newObject(scope, "Request", Array(request))
     val args: Array[AnyRef] = Array(scriptableRequest)
     handler.call(cx, scope, scope, args)
   }.toString
 
   private def invokeFunction(function: Function, args: Array[AnyRef]) {
-    contextFactory.call { cx: Context =>
+    engine.contextFactory.call { cx: Context =>
       function.call(cx, scope, scope, args)
     }
   }

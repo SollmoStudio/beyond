@@ -39,7 +39,7 @@ class GamePlugin(filename: String) extends Actor with ActorLogging {
   private val workerActor = {
     val numProcessors = Runtime.getRuntime.availableProcessors()
     val router = RoundRobinRouter(nrOfInstances = numProcessors)
-    val props = Props(classOf[GamePluginWorker], engine.contextFactory, engine.global, handler).withRouter(router)
+    val props = Props(classOf[GamePluginWorker], engine, handler).withRouter(router)
     context.actorOf(props, name = "gamePluginWorker")
   }
 
