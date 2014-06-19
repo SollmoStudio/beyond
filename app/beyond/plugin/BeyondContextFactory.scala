@@ -4,6 +4,7 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
+import org.mozilla.javascript.ErrorReporter
 import scala.annotation.switch
 
 case class BeyondContextFactoryConfig(strictMode: Boolean = false,
@@ -15,7 +16,12 @@ class BeyondContextFactory(config: BeyondContextFactoryConfig)(implicit actor: A
   override def onContextCreated(cx: Context) {
     super.onContextCreated(cx)
     cx.setWrapFactory(BeyondWrapFactory)
+    if (errorReporter != null) {
+      cx.setErrorReporter(errorReporter)
+    }
   }
+
+  private var errorReporter: ErrorReporter = _
 
   // Strictly speaking, there is no need to override onContextReleased for now
   // because it simply calls its superclass method. However, it is better
@@ -36,6 +42,13 @@ class BeyondContextFactory(config: BeyondContextFactoryConfig)(implicit actor: A
       case Context.FEATURE_LOCATION_INFORMATION_IN_ERROR => true
       case _ => super.hasFeature(cx, featureIndex);
     }
+  }
+
+  def setErrorReporter(errorReporter: ErrorReporter) {
+    if (errorReporter == null) {
+      throw new IllegalArgumentException
+    }
+    this.errorReporter = errorReporter
   }
 
   // Override makeContext to return an instance of BeyondContext, not Context.
