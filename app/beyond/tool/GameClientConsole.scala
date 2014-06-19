@@ -3,6 +3,7 @@ package beyond.tool
 import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.io.IO
+import jline.console.completer.StringsCompleter
 import jline.console.ConsoleReader
 import scala.concurrent.duration._
 import scala.util.Failure
@@ -22,6 +23,12 @@ object GameClientConsole extends App {
   val baseUrl = "http://localhost:9000"
   val prompt = "> "
   val consoleReader = new ConsoleReader
+  // FIXME: Get the list of actions from routes file.
+  consoleReader.addCompleter(new StringsCompleter(
+    "/ping",
+    "/session/logout",
+    "/user/create"
+  ))
 
   login()
 
