@@ -3,6 +3,7 @@ package beyond.tool
 import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.io.IO
+import jline.console.ConsoleReader
 import scala.concurrent.duration._
 import scala.util.Failure
 import scala.util.Success
@@ -20,12 +21,13 @@ object GameClientConsole extends App {
   // FIXME: Don't hardcode the base URL. Take this as an optional argument.
   val baseUrl = "http://localhost:9000"
   val prompt = "> "
+  val consoleReader = new ConsoleReader
 
   login()
 
   def login() {
-    val username = Console.readLine("Username: ")
-    val password = Console.readLine("Password: ") // FIXME: Don't show plain password texts.
+    val username = consoleReader.readLine("Username: ")
+    val password = consoleReader.readLine("Password: ", new Character('*'))
     val data = Map("username" -> username, "password" -> password)
 
     val pipeline = sendReceive
@@ -70,8 +72,8 @@ object GameClientConsole extends App {
 
   def readCommand(): Command = {
     try {
-      val input = Console.readLine(prompt)
-      // Console.readLine returns null if the end of the input stream has been reached.
+      val input = consoleReader.readLine(prompt)
+      // ConsoleReader.readLine returns null if the end of the input stream has been reached.
       if (input == "exit" || input == null) {
         ExitCommand
       } else if (input.startsWith("/")) {
