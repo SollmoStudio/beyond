@@ -5,12 +5,11 @@ import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 
-class BeyondJavaScriptEngine extends Logging {
+class BeyondJavaScriptEngine(val global: BeyondGlobal = new BeyondGlobal) extends Logging {
   import com.beyondframework.rhino.RhinoConversions._
 
   val contextFactory: BeyondContextFactory = new BeyondContextFactory(new BeyondContextFactoryConfig)
 
-  val global: BeyondGlobal = new BeyondGlobal
   contextFactory.call { cx: Context => global.init(cx); Unit }
 
   def load(filename: String): Scriptable = contextFactory.call { cx: Context =>
