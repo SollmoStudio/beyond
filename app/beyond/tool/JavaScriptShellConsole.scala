@@ -16,6 +16,9 @@ object JavaScriptShellConsole extends App {
 
   val engine = new BeyondJavaScriptEngine(scope)
 
+  val errorReporter = new ToolErrorReporter(false, System.err)
+  engine.contextFactory.setErrorReporter(errorReporter)
+
   val prompt = "> "
 
   val secondaryPrompt = "... "
