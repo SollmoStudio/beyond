@@ -19,8 +19,13 @@ object GameClientConsole extends App {
   implicit val system = ActorSystem("game-client-console")
   import system.dispatcher
 
-  // FIXME: Don't hardcode the base URL. Take this as an optional argument.
-  val baseUrl = "http://localhost:9000"
+  // FIXME: Show usage when -h option is given.
+  val baseUrl = if (args.length == 0) {
+    "http://localhost:9000"
+  } else {
+    args(0)
+  }
+
   val prompt = "> "
   val consoleReader = new ConsoleReader
   // FIXME: Get the list of actions from routes file.
