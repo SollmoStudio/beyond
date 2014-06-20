@@ -1,13 +1,75 @@
 package beyond.tool
 
 import beyond.plugin.BeyondJavaScriptEngine
+import java.util
 import jline.console.ConsoleReader
+import jline.console.completer.Completer
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.RhinoException
 import org.mozilla.javascript.Script
+import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.tools.ToolErrorReporter
 import scala.annotation.tailrec
+
+class FlexibleCompletor(global: Scriptable) extends Completer {
+  private object DottedName {
+    def apply(buffer: String, cursor: Int): DottedName = {
+      val m = buffer.lastIndexWhere(c => !Character.isJavaIdentifierPart(c) && c != '.', cursor - 1)
+      val name = buffer.slice(m + 1, cursor)
+      val names = name.split("\\.", -1)
+      new DottedName(names)
+    }
+  }
+
+  private class DottedName(val names: Seq[String]) {
+    val lastPart = names.last
+  }
+
+  private def getScriptableFromDottedName(dottedName: DottedName): Option[Scriptable] = {
+    dottedName.names.dropRight(1).foldLeft(Option(global)) {
+      (optionObj, name) =>
+        optionObj.flatMap { obj =>
+          obj.get(name, global) match {
+            case s: Scriptable => Some(s)
+            case _ => None
+          }
+        }
+    }
+  }
+
+  private def getIdsWithPrefix(obj: Scriptable, prefix: String): Seq[String] = {
+    val ids = obj match {
+      case s: ScriptableObject => s.getAllIds
+      case _ => obj.getIds
+    }
+    ids.filter {
+      case idString: String => idString.startsWith(prefix)
+      case _ => false
+    }.toSeq.asInstanceOf[Seq[String]]
+  }
+
+  override def complete(buffer: String, cursor: Int, candidates: util.List[CharSequence]): Int = {
+    // Starting from "cursor" at the end of the buffer, look backward
+    // and collect a list of identifiers separated by (possibly zero)
+    // dots. Then look up each identifier in turn until getting to the
+    // last, presumably incomplete fragment. Then enumerate all the
+    // properties of the last object and find any that have the
+    // fragment as a prefix and return those for autocompletion.
+
+    val dottedName = DottedName(buffer, cursor) // e.g., console.lo
+    val obj: Option[Scriptable] = getScriptableFromDottedName(dottedName)
+    obj.fold(buffer.length) { obj =>
+      import scala.collection.JavaConverters._
+
+      val lastPart = dottedName.lastPart
+      val ids = getIdsWithPrefix(obj, prefix = lastPart)
+      candidates.addAll(ids.asJava)
+      buffer.length() - lastPart.length()
+    }
+  }
+}
 
 object JavaScriptShellConsole extends App {
   import com.beyondframework.rhino.RhinoConversions._
@@ -24,6 +86,7 @@ object JavaScriptShellConsole extends App {
   val secondaryPrompt = "... "
 
   val consoleReader = new ConsoleReader
+  consoleReader.addCompleter(new FlexibleCompletor(scope))
 
   var hitEOF = false
 
