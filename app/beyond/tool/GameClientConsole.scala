@@ -3,6 +3,7 @@ package beyond.tool
 import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.io.IO
+import jline.console.completer.StringsCompleter
 import jline.console.ConsoleReader
 import jline.console.completer.StringsCompleter
 import scala.concurrent.duration._
