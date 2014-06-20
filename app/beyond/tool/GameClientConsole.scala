@@ -6,8 +6,11 @@ import akka.io.IO
 import jline.console.ConsoleReader
 import jline.console.completer.StringsCompleter
 import scala.concurrent.duration._
+import scala.io.Codec
+import scala.io.Source
 import scala.util.Failure
 import scala.util.Success
+import scalax.file.Path
 import spray.can.Http
 import spray.client.pipelining._
 import spray.http.FormData
@@ -16,6 +19,8 @@ import spray.http.HttpHeaders._
 import spray.util._
 
 object GameClientConsole extends App {
+  import scala.collection.JavaConverters._
+
   implicit val system = ActorSystem("game-client-console")
   import system.dispatcher
 
@@ -27,13 +32,16 @@ object GameClientConsole extends App {
   }
 
   val prompt = "> "
+
   val consoleReader = new ConsoleReader
-  // FIXME: Get the list of actions from routes file.
-  consoleReader.addCompleter(new StringsCompleter(
-    "/ping",
-    "/session/logout",
-    "/user/create"
-  ))
+
+  val routes: Set[String] = {
+    val routesPath = Path.fromString(System.getProperty("user.dir")) / "conf" / "routes"
+    val lines = Source.fromFile(routesPath.jfile)(Codec.UTF8).getLines()
+    lines.withFilter(!_.startsWith("#")).map(_.split("\\s+")).withFilter(_(0) == "POST").map(_(1)).toSet
+  }
+
+  consoleReader.addCompleter(new StringsCompleter(routes.asJava))
 
   login()
 
