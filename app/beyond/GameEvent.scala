@@ -7,7 +7,7 @@ import play.api.libs.json._
 // FIXME: Write events to HDFS for analysis.
 trait GameEvent extends Logging {
   def track(tag: String, event: JsObject = Json.obj()) {
-    logger.info(s"GameEvent ${Json.stringify(event)}")
+    logger.info(s"GameEvent tag:$tag event:${Json.stringify(event)}")
   }
 
   def trackUser[A](tag: String, event: JsObject = Json.obj())(implicit request: RequestWithUsername[A]) {
