@@ -24,7 +24,7 @@ class GamePlugin(filename: String) extends Actor with ActorLogging {
   private val engine = new BeyondJavaScriptEngine
 
   private val handler: Function = engine.contextFactory.call { cx: Context =>
-    val exports = engine.load(filename)
+    val exports = engine.loadMain(filename)
     // FIXME: Don't hardcode the name of handler function.
     val handler = exports.get("handle", exports)
     handler match {

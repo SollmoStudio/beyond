@@ -12,6 +12,7 @@ import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.tools.ToolErrorReporter
 import scala.annotation.tailrec
+import scalax.file.Path
 
 class FlexibleCompletor(global: Scriptable) extends Completer {
   private object DottedName {
@@ -76,7 +77,12 @@ object JavaScriptShellConsole extends App {
 
   val scope = new BeyondShellGlobal
 
-  val engine = new BeyondJavaScriptEngine(scope)
+  val pluginPaths = Seq(
+    Path.fromString(System.getProperty("user.dir")) / "plugins",
+    Path.fromString(System.getProperty("user.dir")) / "plugins" / "lib"
+  )
+
+  val engine = new BeyondJavaScriptEngine(scope, pluginPaths = pluginPaths.map(_.path))
 
   val errorReporter = new ToolErrorReporter(false, System.err)
   engine.contextFactory.setErrorReporter(errorReporter)
