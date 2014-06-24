@@ -3,6 +3,7 @@ package beyond.plugin
 import beyond.BeyondConfiguration
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.commonjs.module.Require
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.commonjs.module.Require
 
