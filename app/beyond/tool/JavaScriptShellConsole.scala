@@ -88,7 +88,7 @@ object JavaScriptShellConsole extends App with JavaScriptTimerProvider {
     Path.fromString(System.getProperty("user.dir")) / "plugins" / "lib"
   )
 
-  val engine = new BeyondJavaScriptEngine(scope, pluginPaths = pluginPaths.map(_.path))
+  val engine = new BeyondJavaScriptEngine(scope, pluginPaths = pluginPaths.map(_.path), timer = this)
 
   val errorReporter = new ToolErrorReporter(false, System.err)
   engine.contextFactory.setErrorReporter(errorReporter)

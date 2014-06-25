@@ -1,12 +1,8 @@
 package beyond.plugin
 
-import akka.actor.ActorRef
-import akka.actor.Cancellable
-import beyond.plugin.GamePlugin.InvokeFunction
 import java.io.File
 import java.net.URI
 import org.mozilla.javascript.Context
-import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.ImporterTopLevel
 import org.mozilla.javascript.Scriptable
@@ -18,59 +14,54 @@ import org.mozilla.javascript.commonjs.module.RequireBuilder
 import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
 import org.mozilla.javascript.commonjs.module.provider.UrlModuleSourceProvider
 import org.mozilla.javascript.tools.ToolErrorReporter
-import play.api.libs.concurrent.Akka
-import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
+import scala.util.Failure
+import scala.util.Success
 
 object BeyondGlobal {
   // setTimeout/clearTimeout and setInterval/clearInterval are equivalent to
   // Node.js timers: http://nodejs.org/api/timers.html
   def setTimeout(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function): AnyRef = {
-    if (args.length < 2 || !args(0).isInstanceOf[Function]) {
-      throw reportRuntimeError("msg.setTimeout.bad.args")
+    val timer = cx.asInstanceOf[BeyondContext].timer
+    timer.setTimeout(thisObj, args, funObj) match {
+      case Failure(ex: IllegalArgumentException) =>
+        throw reportRuntimeError("msg.setTimeout." + ex.getMessage)
+      case Failure(ex: Throwable) =>
+        throw ex
+      case Success(timeoutObject) => timeoutObject
     }
-
-    val callback = args(0).asInstanceOf[Function]
-    val callbackArgs = args.drop(2)
-    val delay = Context.toNumber(args(1)).millis
-
-    import play.api.Play.current
-    implicit val ec: ExecutionContext = Akka.system.dispatcher
-    val self: ActorRef = cx.asInstanceOf[BeyondContext].actor
-    Akka.system.scheduler.scheduleOnce(delay, self, InvokeFunction(callback, callbackArgs))
   }
 
   def clearTimeout(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function) {
-    if (args.length == 0 || !args(0).isInstanceOf[Cancellable]) {
-      throw reportRuntimeError("msg.clearTimeout.bad.args")
+    val timer = cx.asInstanceOf[BeyondContext].timer
+    timer.clearTimeout(thisObj, args, funObj) match {
+      case Failure(ex: IllegalArgumentException) =>
+        throw reportRuntimeError("msg.clearTimeout." + ex.getMessage)
+      case Failure(ex: Throwable) =>
+        throw ex
+      case Success(_) => Unit
     }
-
-    val id = args(0).asInstanceOf[Cancellable]
-    id.cancel()
   }
 
   def setInterval(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function): AnyRef = {
-    if (args.length < 2 || !args(0).isInstanceOf[Function]) {
-      throw reportRuntimeError("msg.setInterval.bad.args")
+    val timer = cx.asInstanceOf[BeyondContext].timer
+    timer.setInterval(thisObj, args, funObj) match {
+      case Failure(ex: IllegalArgumentException) =>
+        throw reportRuntimeError("msg.setInterval." + ex.getMessage)
+      case Failure(ex: Throwable) =>
+        throw ex
+      case Success(intervalObject) => intervalObject
     }
-
-    val callback = args(0).asInstanceOf[Function]
-    val callbackArgs = args.drop(2)
-    val delay = Context.toNumber(args(1)).millis
-
-    import play.api.Play.current
-    implicit val ec: ExecutionContext = Akka.system.dispatcher
-    val self: ActorRef = cx.asInstanceOf[BeyondContext].actor
-    Akka.system.scheduler.schedule(initialDelay = delay, interval = delay, self, InvokeFunction(callback, callbackArgs))
   }
 
   def clearInterval(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function) {
-    if (args.length == 0 || !args(0).isInstanceOf[Cancellable]) {
-      throw reportRuntimeError("msg.clearInterval.bad.args")
+    val timer = cx.asInstanceOf[BeyondContext].timer
+    timer.clearInterval(thisObj, args, funObj) match {
+      case Failure(ex: IllegalArgumentException) =>
+        throw reportRuntimeError("msg.clearInterval." + ex.getMessage)
+      case Failure(ex: Throwable) =>
+        throw ex
+      case Success(_) => Unit
     }
-
-    val id = args(0).asInstanceOf[Cancellable]
-    id.cancel()
   }
 
   def seal(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function) {

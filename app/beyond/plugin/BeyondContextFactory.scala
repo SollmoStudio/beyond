@@ -1,7 +1,5 @@
 package beyond.plugin
 
-import akka.actor.Actor
-import akka.actor.ActorRef
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.ErrorReporter
@@ -12,7 +10,7 @@ case class BeyondContextFactoryConfig(strictMode: Boolean = false,
   warningAsError: Boolean = false,
   parentProtoProperties: Boolean = true)
 
-class BeyondContextFactory(config: BeyondContextFactoryConfig)(implicit actor: ActorRef = Actor.noSender) extends ContextFactory {
+class BeyondContextFactory(config: BeyondContextFactoryConfig, timer: JavaScriptTimerProvider) extends ContextFactory {
   override def onContextCreated(cx: Context) {
     super.onContextCreated(cx)
     cx.setWrapFactory(BeyondWrapFactory)
@@ -52,6 +50,6 @@ class BeyondContextFactory(config: BeyondContextFactoryConfig)(implicit actor: A
   }
 
   // Override makeContext to return an instance of BeyondContext, not Context.
-  protected override def makeContext(): Context = new BeyondContext(this, actor)
+  protected override def makeContext(): Context = new BeyondContext(this, timer)
 }
 
