@@ -1,8 +1,7 @@
-package beyond.plugin
+package beyond.engine.javascript
 
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.Scriptable
-import scala.util.Failure
 import scala.util.Try
 
 trait JavaScriptTimerProvider {
