@@ -1,7 +1,10 @@
 package beyond.tool
 
 import beyond.plugin.BeyondJavaScriptEngine
+import beyond.plugin.JavaScriptTimerProvider
 import java.util
+import java.util.Timer
+import java.util.TimerTask
 import jline.console.ConsoleReader
 import jline.console.completer.Completer
 import org.mozilla.javascript.Context
@@ -12,6 +15,9 @@ import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.tools.ToolErrorReporter
 import scala.annotation.tailrec
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
 import scalax.file.Path
 
 class FlexibleCompletor(global: Scriptable) extends Completer {
@@ -72,7 +78,7 @@ class FlexibleCompletor(global: Scriptable) extends Completer {
   }
 }
 
-object JavaScriptShellConsole extends App {
+object JavaScriptShellConsole extends App with JavaScriptTimerProvider {
   import com.beyondframework.rhino.RhinoConversions._
 
   val scope = new BeyondShellGlobal
@@ -149,5 +155,63 @@ object JavaScriptShellConsole extends App {
     Console.flush()
     Unit
   }
+
+  private def createTimerTask(callback: Function, callbackArgs: Array[AnyRef]) =
+    new TimerTask() {
+      override def run() {
+        engine.contextFactory.call { cx: Context =>
+          callback.call(cx, scope, scope, callbackArgs)
+        }
+      }
+    }
+
+  override def setTimeout(thisObj: Scriptable, args: Array[AnyRef], funObj: Function): Try[AnyRef] =
+    if (args.length < 2) {
+      Failure(new IllegalArgumentException("args.are.not.enough"))
+    } else if (!args(0).isInstanceOf[Function]) {
+      Failure(new IllegalArgumentException("first.arg.is.not.function"))
+    } else {
+      val timer = new Timer()
+      val callback = args(0).asInstanceOf[Function]
+      val callbackArgs = args.drop(2)
+      val delay = Context.toNumber(args(1)).toLong
+
+      timer.schedule(createTimerTask(callback, callbackArgs), delay)
+      Success(timer)
+    }
+  override def clearTimeout(thisObj: Scriptable, args: Array[AnyRef], funObj: Function): Try[Unit] =
+    if (args.length == 0) {
+      Failure(new IllegalArgumentException("args.length.is.zero"))
+    } else if (!args(0).isInstanceOf[Timer]) {
+      Failure(new IllegalArgumentException("first.arg.is.not.timeout.object"))
+    } else {
+      val timer = args(0).asInstanceOf[Timer]
+      timer.cancel()
+      Success(Unit)
+    }
+  override def setInterval(thisObj: Scriptable, args: Array[AnyRef], funObj: Function): Try[AnyRef] =
+    if (args.length < 2) {
+      Failure(new IllegalArgumentException("args.are.not.enough"))
+    } else if (!args(0).isInstanceOf[Function]) {
+      Failure(new IllegalArgumentException("first.arg.is.not.function"))
+    } else {
+      val timer = new Timer()
+      val callback = args(0).asInstanceOf[Function]
+      val callbackArgs = args.drop(2)
+      val delay = Context.toNumber(args(1)).toLong
+
+      timer.schedule(createTimerTask(callback, callbackArgs), delay, delay)
+      Success(timer)
+    }
+  override def clearInterval(thisObj: Scriptable, args: Array[AnyRef], funObj: Function): Try[Unit] =
+    if (args.length == 0) {
+      Failure(new IllegalArgumentException("args.length.is.zero"))
+    } else if (!args(0).isInstanceOf[Timer]) {
+      Failure(new IllegalArgumentException("first.arg.is.not.timeout.object"))
+    } else {
+      val timer = args(0).asInstanceOf[Timer]
+      timer.cancel()
+      Success(Unit)
+    }
 }
 
