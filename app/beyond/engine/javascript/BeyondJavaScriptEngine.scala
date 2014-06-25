@@ -1,4 +1,4 @@
-package beyond.plugin
+package beyond.engine.javascript
 
 import beyond.BeyondConfiguration
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }

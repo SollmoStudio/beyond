@@ -1,4 +1,4 @@
-package beyond.plugin
+package beyond.engine.javascript
 
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.annotations.JSConstructor

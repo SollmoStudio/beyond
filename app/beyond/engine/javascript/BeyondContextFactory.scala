@@ -1,4 +1,4 @@
-package beyond.plugin
+package beyond.engine.javascript
 
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory

@@ -1,6 +1,7 @@
 package beyond.plugin
 
 import akka.actor.Actor
+import beyond.engine.javascript.BeyondJavaScriptEngine
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.Scriptable

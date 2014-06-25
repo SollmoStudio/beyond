@@ -1,4 +1,4 @@
-package beyond.plugin
+package beyond.engine.javascript
 
 import java.io.File
 import java.net.URI
@@ -128,7 +128,6 @@ object BeyondGlobal {
 }
 
 class BeyondGlobal(sealedStdLib: Boolean = false) extends ImporterTopLevel {
-  import com.beyondframework.rhino.RhinoConversions._
 
   def init(cx: Context) {
     // Define some global functions particular to the beyond. Note

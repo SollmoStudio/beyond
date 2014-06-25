@@ -1,4 +1,4 @@
-package beyond.plugin.lib
+package beyond.engine.javascript.lib
 
 import beyond.GameEvent
 import com.fasterxml.jackson.core.JsonParseException

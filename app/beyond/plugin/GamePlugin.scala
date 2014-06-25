@@ -5,6 +5,8 @@ import akka.actor.ActorLogging
 import akka.actor.Cancellable
 import akka.actor.Props
 import akka.routing.RoundRobinRouter
+import beyond.engine.javascript.BeyondJavaScriptEngine
+import beyond.engine.javascript.JavaScriptTimerProvider
 import beyond.plugin.GamePlugin.InvokeFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
