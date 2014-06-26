@@ -1,13 +1,16 @@
 name := "beyond"
 
 lazy val beyond = project.in(file("."))
-  .aggregate(beyondCore, beyondAdmin, rhinoScalaBinding)
-  .dependsOn(beyondCore, beyondAdmin)
+  .aggregate(beyondCore, beyondUser, beyondAdmin, rhinoScalaBinding)
+  .dependsOn(beyondCore, beyondUser, beyondAdmin)
 
 lazy val beyondCore = project.in(file("core"))
   .dependsOn(rhinoScalaBinding, beyondAdmin)
 
 lazy val beyondAdmin = project
+
+lazy val beyondUser: Project = project.in(file("modules/user"))
+  .dependsOn(beyondCore)
 
 lazy val rhinoScalaBinding = project
 

@@ -1,4 +1,4 @@
-package controllers
+package controllers.user
 
 import java.util.Date
 import org.apache.commons.codec.digest.DigestUtils

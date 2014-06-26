@@ -1,4 +1,4 @@
-package controllers
+package controllers.user
 
 import beyond.GameEvent
 import beyond.UserAction

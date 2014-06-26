@@ -52,7 +52,7 @@ object GameClientConsole extends App {
 
     val pipeline = sendReceive
     val responseFuture = pipeline {
-      Post(baseUrl + "/session/login", FormData(data))
+      Post(baseUrl + "/user/login", FormData(data))
     }
 
     responseFuture.onComplete {
@@ -79,7 +79,7 @@ object GameClientConsole extends App {
   case object InvalidCommand extends Command
 
   def parseActionCommand(input: String): ActionCommand = {
-    // e.g. /session/login username=kseo password=kseopass
+    // e.g. /user/login username=kseo password=kseopass
     val words = input.split("\\s+")
     val action = words(0)
     val params = words.drop(1).map(param => {
