@@ -40,7 +40,7 @@ object Global extends WithFilters(RequestsCountFilter, TimeoutFilter) with Loggi
   override def beforeStart(app: Application) {
     super.beforeStart(app)
 
-    val nativeLib = Path.fromString(app.path.getAbsolutePath) / "target" / "native_libraries" / (System.getProperty("sun.arch.data.model") + "bits")
+    val nativeLib = Path.fromString(app.path.getAbsolutePath) / "core" / "target" / "native_libraries" / (System.getProperty("sun.arch.data.model") + "bits")
     val defaultLibPath = System.getProperty("java.library.path")
     val newLibPath = defaultLibPath + File.pathSeparator + nativeLib.path
     System.setProperty("java.library.path", newLibPath)
