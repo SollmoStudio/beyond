@@ -35,6 +35,9 @@ data
 # RhinoScalaBinding
 /rhinoScalaBinding/project
 /rhinoScalaBinding/target
+# BeyondCore
+/core/project
+/core/target
 # BeyondAdmin
 /beyondAdmin/project
 /beyondAdmin/target
