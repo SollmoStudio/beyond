@@ -1,6 +1,6 @@
 var util = require('util');
 
-importClass(Packages.beyond.plugin.lib.PluginConsole);
+importClass(Packages.beyond.engine.javascript.lib.PluginConsole);
 var nativeConsole = new PluginConsole();
 exports.log = function () {
     var message = util.format.apply(util.format, arguments);

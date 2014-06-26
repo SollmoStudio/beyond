@@ -1,5 +1,5 @@
 var util = require('util');
-importClass(Packages.beyond.plugin.lib.PluginEvent);
+importClass(Packages.beyond.engine.javascript.lib.PluginEvent);
 var nativeEvent = new PluginEvent();
 exports.track = function (tag) {
     var formatString,
