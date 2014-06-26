@@ -5,9 +5,9 @@ lazy val beyond = project.in(file("."))
   .dependsOn(beyondCore, beyondUser, beyondAdmin)
 
 lazy val beyondCore = project.in(file("core"))
-  .dependsOn(rhinoScalaBinding, beyondAdmin)
+  .dependsOn(rhinoScalaBinding)
 
-lazy val beyondAdmin = project
+lazy val beyondAdmin: Project = project.in(file("modules/admin"))
 
 lazy val beyondUser: Project = project.in(file("modules/user"))
   .dependsOn(beyondCore)

@@ -37,9 +37,6 @@ data
 # BeyondCore
 /core/project
 /core/target
-# BeyondAdmin
-/beyondAdmin/project
-/beyondAdmin/target
-# User
-/modules/user/project
-/modules/user/target
+# Modules
+/modules/*/project
+/modules/*/target
