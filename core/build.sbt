@@ -14,7 +14,8 @@ libraryDependencies ++= Seq(
   "org.fusesource" % "sigar" % "1.6.4" classifier "native" classifier "",
   "org.mozilla" % "rhino" % "1.7R4",
   "org.reactivemongo" %% "play2-reactivemongo" % "0.10.2",
-  "org.reactivemongo" %% "reactivemongo" % "0.10.0"
+  "org.reactivemongo" %% "reactivemongo" % "0.10.0",
+  "org.scalaz" %% "scalaz-core" % "7.0.6"
 ).map(_.exclude("org.slf4j", "slf4j-log4j12"))
 
 val copyNativeLibraries = taskKey[Set[File]]("Copy native libraries to native libraries directory")
