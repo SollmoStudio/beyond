@@ -16,6 +16,7 @@ import org.mozilla.javascript.commonjs.module.provider.UrlModuleSourceProvider
 import org.mozilla.javascript.tools.ToolErrorReporter
 import scala.util.Failure
 import scala.util.Success
+import scalaz.syntax.std.boolean._
 
 object BeyondGlobal {
   // setTimeout/clearTimeout and setInterval/clearInterval are equivalent to
@@ -153,20 +154,12 @@ class BeyondGlobal(sealedStdLib: Boolean = false) extends ImporterTopLevel {
 
     val uris = modulePaths.map { path =>
       val uri: URI = new URI(path)
-      if (uri.isAbsolute) {
-        uri
-      } else {
-        // call resolve("") to canonify the path
-        new File(path).toURI.resolve("")
-      }
+      // call resolve("") to canonify the path
+      uri.isAbsolute ? uri | new File(path).toURI.resolve("")
     }.map { uri =>
-      if (uri.toString.endsWith("/")) {
-        uri
-      } else {
-        // make sure URI always terminates with slash to
-        // avoid loading from unintended locations
-        new URI(uri + "/")
-      }
+      // make sure URI always terminates with slash to
+      // avoid loading from unintended locations
+      uri.toString.endsWith("/") ?  uri | new URI(uri + "/")
     }
 
     rb.setModuleScriptProvider(
