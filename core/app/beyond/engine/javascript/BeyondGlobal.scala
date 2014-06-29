@@ -1,5 +1,6 @@
 package beyond.engine.javascript
 
+import beyond.engine.javascript.lib.ScriptableFuture
 import java.io.File
 import java.net.URI
 import org.mozilla.javascript.Context
@@ -145,6 +146,7 @@ class BeyondGlobal extends ImporterTopLevel {
     )
     defineFunctionProperties(names, classOf[BeyondGlobal], ScriptableObject.DONTENUM)
     ScriptableObject.defineClass(this, classOf[ScriptableRequest[_]])
+    ScriptableObject.defineClass(this, classOf[ScriptableFuture])
   }
 
   def installRequire(cx: Context, modulePaths: Seq[String], sandboxed: Boolean): Require = {
