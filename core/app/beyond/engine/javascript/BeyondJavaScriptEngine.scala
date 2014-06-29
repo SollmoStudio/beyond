@@ -11,7 +11,7 @@ class BeyondJavaScriptEngine(val global: BeyondGlobal = new BeyondGlobal,
     timer: JavaScriptTimerProvider) extends Logging {
   import com.beyondframework.rhino.RhinoConversions._
 
-  val contextFactory: BeyondContextFactory = new BeyondContextFactory(new BeyondContextFactoryConfig, timer)
+  val contextFactory: BeyondContextFactory = new BeyondContextFactory(new BeyondContextFactoryConfig, global, timer)
 
   private val require: Require = contextFactory.call { cx: Context =>
     global.init(cx)

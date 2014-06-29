@@ -10,7 +10,7 @@ case class BeyondContextFactoryConfig(strictMode: Boolean = false,
   warningAsError: Boolean = false,
   parentProtoProperties: Boolean = true)
 
-class BeyondContextFactory(config: BeyondContextFactoryConfig, timer: JavaScriptTimerProvider) extends ContextFactory {
+class BeyondContextFactory(config: BeyondContextFactoryConfig, val global: BeyondGlobal, timer: JavaScriptTimerProvider) extends ContextFactory {
   override def onContextCreated(cx: Context) {
     super.onContextCreated(cx)
     cx.setWrapFactory(BeyondWrapFactory)
