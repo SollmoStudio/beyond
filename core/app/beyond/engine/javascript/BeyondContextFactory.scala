@@ -4,13 +4,15 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.ErrorReporter
 import scala.annotation.switch
+import scala.concurrent.ExecutionContext
 
 case class BeyondContextFactoryConfig(strictMode: Boolean = false,
   strictVars: Boolean = true,
   warningAsError: Boolean = false,
   parentProtoProperties: Boolean = true)
 
-class BeyondContextFactory(config: BeyondContextFactoryConfig, val global: BeyondGlobal, timer: JavaScriptTimerProvider) extends ContextFactory {
+class BeyondContextFactory(config: BeyondContextFactoryConfig, val global: BeyondGlobal, timer: JavaScriptTimerProvider)(
+    implicit val executionContext: ExecutionContext) extends ContextFactory {
   override def onContextCreated(cx: Context) {
     super.onContextCreated(cx)
     cx.setWrapFactory(BeyondWrapFactory)
