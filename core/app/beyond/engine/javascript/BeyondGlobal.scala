@@ -128,11 +128,12 @@ object BeyondGlobal {
   }
 }
 
-class BeyondGlobal(sealedStdLib: Boolean = false) extends ImporterTopLevel {
+class BeyondGlobal extends ImporterTopLevel {
 
   def init(cx: Context) {
     // Define some global functions particular to the beyond. Note
     // that these functions are not part of ECMA.
+    val sealedStdLib = true
     initStandardObjects(cx, sealedStdLib)
     val names = Array[String](
       "setTimeout",
