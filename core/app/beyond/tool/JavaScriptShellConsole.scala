@@ -15,6 +15,7 @@ import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.tools.ToolErrorReporter
 import scala.annotation.tailrec
+import scala.concurrent.ExecutionContext
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
@@ -88,7 +89,10 @@ object JavaScriptShellConsole extends App with JavaScriptTimerProvider {
     Path.fromString(System.getProperty("user.dir")) / "plugins" / "lib"
   )
 
-  val engine = new BeyondJavaScriptEngine(scope, pluginPaths = pluginPaths.map(_.path), timer = this)
+  val engine = {
+    import ExecutionContext.Implicits.global
+    new BeyondJavaScriptEngine(scope, pluginPaths = pluginPaths.map(_.path), timer = this)
+  }
 
   val errorReporter = new ToolErrorReporter(false, System.err)
   engine.contextFactory.setErrorReporter(errorReporter)

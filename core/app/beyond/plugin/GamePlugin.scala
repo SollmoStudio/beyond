@@ -30,7 +30,7 @@ class NoHandlerFunctionFoundException extends Exception
 class GamePlugin(filename: String) extends Actor with ActorLogging with JavaScriptTimerProvider {
   import com.beyondframework.rhino.RhinoConversions._
 
-  private val engine = new BeyondJavaScriptEngine(timer = this)
+  private val engine = new BeyondJavaScriptEngine(timer = this)(context.dispatcher)
 
   private val handler: Function = engine.contextFactory.call { cx: Context =>
     val exports = engine.loadMain(filename)

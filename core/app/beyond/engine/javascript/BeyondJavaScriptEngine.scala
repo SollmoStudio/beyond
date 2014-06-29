@@ -5,10 +5,11 @@ import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.commonjs.module.Require
+import scala.concurrent.ExecutionContext
 
 class BeyondJavaScriptEngine(val global: BeyondGlobal = new BeyondGlobal,
     pluginPaths: Seq[String] = BeyondConfiguration.pluginPaths,
-    timer: JavaScriptTimerProvider) extends Logging {
+    timer: JavaScriptTimerProvider)(implicit val executionContext: ExecutionContext) extends Logging {
   import com.beyondframework.rhino.RhinoConversions._
 
   val contextFactory: BeyondContextFactory = new BeyondContextFactory(new BeyondContextFactoryConfig, global, timer)
