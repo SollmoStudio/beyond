@@ -4,7 +4,6 @@ bin/
 .eclipse
 /lib/
 /logs/
-/modules
 /project/project
 /project/target
 /target
@@ -35,6 +34,9 @@ data
 # RhinoScalaBinding
 /rhinoScalaBinding/project
 /rhinoScalaBinding/target
-# BeyondAdmin
-/beyondAdmin/project
-/beyondAdmin/target
+# BeyondCore
+/core/project
+/core/target
+# Modules
+/modules/*/project
+/modules/*/target

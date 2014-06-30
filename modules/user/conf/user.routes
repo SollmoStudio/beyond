@@ -1,0 +1,8 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+POST    /create                     controllers.user.User.create
+
+POST    /login                      controllers.user.Session.login
+POST    /logout                     controllers.user.Session.logout

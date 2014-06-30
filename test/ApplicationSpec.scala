@@ -83,7 +83,7 @@ class ApplicationSpec extends Specification {
     }
 
     "login" in new WithApplication {
-      val login = route(FakeRequest(POST, "/session/login")
+      val login = route(FakeRequest(POST, "/user/login")
         .withFormUrlEncodedBody("username" -> "myname", "password" -> "mypass")).get
 
       status(login) must equalTo(OK)
@@ -94,7 +94,7 @@ class ApplicationSpec extends Specification {
     }
 
     "logout when username exists in session" in new WithApplication {
-      val logout = route(FakeRequest(POST, "/session/logout").withSession("username" -> "myname")).get
+      val logout = route(FakeRequest(POST, "/user/logout").withSession("username" -> "myname")).get
 
       status(logout) must equalTo(OK)
       contentType(logout) must beSome.which(_ == "text/plain")
@@ -103,7 +103,7 @@ class ApplicationSpec extends Specification {
     }
 
     "logout without login" in new WithApplication {
-      val login = route(FakeRequest(POST, "/session/logout")).get
+      val login = route(FakeRequest(POST, "/user/logout")).get
 
       status(login) must equalTo(FORBIDDEN)
     }
