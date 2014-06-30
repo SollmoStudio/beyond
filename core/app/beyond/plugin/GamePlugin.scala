@@ -38,9 +38,10 @@ class NoHandlerFunctionFoundException extends Exception
 
 // FIXME: Handle script errors.
 class GamePlugin(filename: String) extends Actor with ActorLogging with JavaScriptTimerProvider {
+  import GamePlugin._
   import com.beyondframework.rhino.RhinoConversions._
 
-  private val engine = new BeyondJavaScriptEngine(timer = this)(context.dispatcher)
+  private val engine = new BeyondJavaScriptEngine(timer = this, console = new JavaScriptConsole)(context.dispatcher)
 
   private val handler: Function = engine.contextFactory.call { cx: Context =>
     val exports = engine.loadMain(filename)
