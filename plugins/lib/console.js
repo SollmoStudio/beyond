@@ -1,28 +1,27 @@
 var util = require('util');
 
-importClass(Packages.beyond.engine.javascript.lib.PluginConsole);
-var nativeConsole = new PluginConsole();
+var console = new Console();
 exports.log = function () {
     var message = util.format.apply(util.format, arguments);
-    nativeConsole.log(message);
+    console.log(message);
 }
 
 exports.info = function () {
     var message = util.format.apply(util.format, arguments);
-    nativeConsole.info(message);
+    console.info(message);
 }
 
 exports.warn = function () {
     var message = util.format.apply(util.format, arguments);
-    nativeConsole.warn(message);
+    console.warn(message);
 }
 
 exports.debug = function () {
     var message = util.format.apply(util.format, arguments);
-    nativeConsole.debug(message);
+    console.debug(message);
 }
 
 exports.error = function () {
     var message = util.format.apply(util.format, arguments);
-    nativeConsole.error(message);
+    console.error(message);
 }
