@@ -1,5 +1,6 @@
 package beyond.engine.javascript
 
+import beyond.engine.javascript.provider.JavaScriptConsoleProvider
 import beyond.engine.javascript.provider.JavaScriptTimerProvider
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
@@ -12,7 +13,7 @@ case class BeyondContextFactoryConfig(strictMode: Boolean = false,
   warningAsError: Boolean = false,
   parentProtoProperties: Boolean = true)
 
-class BeyondContextFactory(config: BeyondContextFactoryConfig, val global: BeyondGlobal, timer: JavaScriptTimerProvider)(
+class BeyondContextFactory(config: BeyondContextFactoryConfig, val global: BeyondGlobal, timer: JavaScriptTimerProvider, console: JavaScriptConsoleProvider)(
     implicit val executionContext: ExecutionContext) extends ContextFactory {
   override def onContextCreated(cx: Context) {
     super.onContextCreated(cx)
@@ -53,6 +54,6 @@ class BeyondContextFactory(config: BeyondContextFactoryConfig, val global: Beyon
   }
 
   // Override makeContext to return an instance of BeyondContext, not Context.
-  protected override def makeContext(): Context = new BeyondContext(this, timer)
+  protected override def makeContext(): Context = new BeyondContext(this, timer, console)
 }
 
