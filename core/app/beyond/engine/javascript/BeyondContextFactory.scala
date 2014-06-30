@@ -1,5 +1,6 @@
 package beyond.engine.javascript
 
+import beyond.engine.javascript.provider.JavaScriptTimerProvider
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.ErrorReporter

@@ -1,6 +1,7 @@
 package beyond.engine.javascript
 
 import beyond.BeyondConfiguration
+import beyond.engine.javascript.provider.JavaScriptTimerProvider
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
