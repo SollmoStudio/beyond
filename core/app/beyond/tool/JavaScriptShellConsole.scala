@@ -1,7 +1,7 @@
 package beyond.tool
 
 import beyond.engine.javascript.BeyondJavaScriptEngine
-import beyond.engine.javascript.JavaScriptTimerProvider
+import beyond.engine.javascript.provider.JavaScriptTimerProvider
 import java.util
 import java.util.Timer
 import java.util.TimerTask

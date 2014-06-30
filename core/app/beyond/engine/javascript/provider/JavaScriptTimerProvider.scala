@@ -1,4 +1,4 @@
-package beyond.engine.javascript
+package beyond.engine.javascript.provider
 
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.Scriptable
