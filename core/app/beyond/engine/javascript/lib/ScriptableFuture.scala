@@ -63,6 +63,20 @@ object ScriptableFuture {
     thisFuture
   }
 
+  def jsFunction_map(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val callback = args(0).asInstanceOf[Function]
+    val beyondContext = context.asInstanceOf[BeyondContext]
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.map { result =>
+      val callbackArgs: Array[AnyRef] = Array(result)
+      executeCallback(context.getFactory, callback, callbackArgs)
+    }
+
+    val constructorArgs: Array[AnyRef] = Array(newFuture)
+    beyondContext.newObject(beyondContextFactory.global, "Future", constructorArgs).asInstanceOf[ScriptableFuture]
+  }
+
   def jsConstructor(context: Context, args: Array[AnyRef], constructor: Function, inNewExpr: Boolean): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val newFuture = args(0) match {
