@@ -6,8 +6,10 @@ import akka.actor.Cancellable
 import akka.actor.Props
 import akka.routing.RoundRobinRouter
 import beyond.engine.javascript.BeyondJavaScriptEngine
+import beyond.engine.javascript.provider.JavaScriptConsoleProvider
 import beyond.engine.javascript.provider.JavaScriptTimerProvider
 import beyond.plugin.GamePlugin.InvokeFunction
+import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.Scriptable
@@ -22,6 +24,14 @@ object GamePlugin {
 
   case class Handle[A](request: Request[A])
   case class InvokeFunction(function: Function, args: Array[AnyRef])
+
+  private[GamePlugin] class JavaScriptConsole extends JavaScriptConsoleProvider with Logging {
+    override def log(message: String): Unit = logger.info(message)
+    override def info(message: String): Unit = logger.info(message)
+    override def warn(message: String): Unit = logger.warn(message)
+    override def debug(message: String): Unit = logger.debug(message)
+    override def error(message: String): Unit = logger.error(message)
+  }
 }
 
 class NoHandlerFunctionFoundException extends Exception
