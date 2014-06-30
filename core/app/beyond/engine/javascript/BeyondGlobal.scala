@@ -159,7 +159,7 @@ class BeyondGlobal(sealedStdLib: Boolean = false) extends ImporterTopLevel {
     }.map { uri =>
       // make sure URI always terminates with slash to
       // avoid loading from unintended locations
-      uri.toString.endsWith("/") ?  uri | new URI(uri + "/")
+      uri.toString.endsWith("/") ? uri | new URI(uri + "/")
     }
 
     rb.setModuleScriptProvider(
