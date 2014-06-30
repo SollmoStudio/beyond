@@ -6,6 +6,7 @@ import java.lang.{ Boolean => JavaBoolean }
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.Function
+import org.mozilla.javascript.RhinoException
 import org.mozilla.javascript.ScriptRuntime
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
@@ -87,6 +88,24 @@ object ScriptableFuture {
       val callbackArgs: Array[AnyRef] = Array(result)
       val filterResult = executeCallback(context.getFactory, callback, callbackArgs)
       ScriptRuntime.toBoolean(filterResult)
+    }
+
+    val constructorArgs: Array[AnyRef] = Array(newFuture)
+    beyondContext.newObject(beyondContextFactory.global, "Future", constructorArgs).asInstanceOf[ScriptableFuture]
+  }
+
+  def jsFunction_recover(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val callback = args(0).asInstanceOf[Function]
+    val beyondContext = context.asInstanceOf[BeyondContext]
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.recover {
+      case exception: RhinoException =>
+        val callbackArgs: Array[AnyRef] = Array(exception.details)
+        executeCallback(context.getFactory, callback, callbackArgs)
+      case throwable: Throwable =>
+        val callbackArgs: Array[AnyRef] = Array(throwable.getMessage)
+        executeCallback(context.getFactory, callback, callbackArgs)
     }
 
     val constructorArgs: Array[AnyRef] = Array(newFuture)
