@@ -1,6 +1,7 @@
 package beyond.tool
 
 import beyond.engine.javascript.BeyondJavaScriptEngine
+import beyond.engine.javascript.provider.JavaScriptConsoleProvider
 import beyond.engine.javascript.provider.JavaScriptTimerProvider
 import java.util
 import java.util.Timer
@@ -79,7 +80,7 @@ class FlexibleCompletor(global: Scriptable) extends Completer {
   }
 }
 
-object JavaScriptShellConsole extends App with JavaScriptTimerProvider {
+object JavaScriptShellConsole extends App with JavaScriptTimerProvider with JavaScriptConsoleProvider {
   import com.beyondframework.rhino.RhinoConversions._
 
   val scope = new BeyondShellGlobal
@@ -220,5 +221,30 @@ object JavaScriptShellConsole extends App with JavaScriptTimerProvider {
       timer.cancel()
       Success(Unit)
     }
+
+  override def log(message: String) {
+    Console.println(s"LOG: $message")
+    Console.flush()
+  }
+
+  override def info(message: String) {
+    Console.println(s"INFO: $message")
+    Console.flush()
+  }
+
+  override def warn(message: String) {
+    Console.println(s"WARN: $message")
+    Console.flush()
+  }
+
+  override def error(message: String) {
+    Console.println(s"ERROR: $message")
+    Console.flush()
+  }
+
+  override def debug(message: String) {
+    Console.println(s"DEBUG: $message")
+    Console.flush()
+  }
 }
 
