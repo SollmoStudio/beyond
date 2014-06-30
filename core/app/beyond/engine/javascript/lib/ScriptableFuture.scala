@@ -6,6 +6,7 @@ import java.lang.{ Boolean => JavaBoolean }
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.Function
+import org.mozilla.javascript.ScriptRuntime
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import scala.concurrent.Future
@@ -71,6 +72,21 @@ object ScriptableFuture {
     val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.map { result =>
       val callbackArgs: Array[AnyRef] = Array(result)
       executeCallback(context.getFactory, callback, callbackArgs)
+    }
+
+    val constructorArgs: Array[AnyRef] = Array(newFuture)
+    beyondContext.newObject(beyondContextFactory.global, "Future", constructorArgs).asInstanceOf[ScriptableFuture]
+  }
+
+  def jsFunction_filter(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val callback = args(0).asInstanceOf[Function]
+    val beyondContext = context.asInstanceOf[BeyondContext]
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.filter { result =>
+      val callbackArgs: Array[AnyRef] = Array(result)
+      val filterResult = executeCallback(context.getFactory, callback, callbackArgs)
+      ScriptRuntime.toBoolean(filterResult)
     }
 
     val constructorArgs: Array[AnyRef] = Array(newFuture)
