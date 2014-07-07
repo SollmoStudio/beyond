@@ -11,6 +11,7 @@ import org.mozilla.javascript.ScriptRuntime
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import scala.concurrent.Future
+import scala.concurrent.Promise
 import scala.util.Failure
 import scala.util.Success
 
@@ -73,6 +74,32 @@ object ScriptableFuture {
     val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.map { result =>
       val callbackArgs: Array[AnyRef] = Array(result)
       executeCallback(context.getFactory, callback, callbackArgs)
+    }
+
+    val constructorArgs: Array[AnyRef] = Array(newFuture)
+    beyondContext.newObject(beyondContextFactory.global, "Future", constructorArgs).asInstanceOf[ScriptableFuture]
+  }
+
+  def jsFunction_flatMap(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val callback = args(0).asInstanceOf[Function]
+    val beyondContext = context.asInstanceOf[BeyondContext]
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.flatMap { result =>
+      val callbackArgs: Array[AnyRef] = Array(result)
+      executeCallback(context.getFactory, callback, callbackArgs) match {
+        case futureByCallback: ScriptableFuture =>
+          val promise = Promise[AnyRef]()
+          futureByCallback.future.onComplete {
+            case Success(success) =>
+              promise.success(success)
+            case Failure(throwable) =>
+              promise.failure(throwable)
+          }
+          promise.future
+        case _ =>
+          throw new Exception("result.of.callback.is.not.future")
+      }
     }
 
     val constructorArgs: Array[AnyRef] = Array(newFuture)
