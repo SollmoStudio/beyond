@@ -34,6 +34,8 @@ object ScriptableFuture {
       val callbackArgs: Array[AnyRef] = futureResult match {
         case Success(result) =>
           Array(result, new JavaBoolean(true))
+        case Failure(ex: RhinoException) =>
+          Array(ex.details(), new JavaBoolean(false))
         case Failure(throwable) =>
           Array(throwable.getMessage, new JavaBoolean(false))
       }
@@ -59,6 +61,9 @@ object ScriptableFuture {
     val callback = args(0).asInstanceOf[Function]
     val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
     thisFuture.future.onFailure {
+      case ex: RhinoException =>
+        val callbackArgs: Array[AnyRef] = Array(ex.details)
+        executeCallback(context.getFactory, callback, callbackArgs)
       case throwable: Throwable =>
         val callbackArgs: Array[AnyRef] = Array(throwable.getMessage)
         executeCallback(context.getFactory, callback, callbackArgs)
