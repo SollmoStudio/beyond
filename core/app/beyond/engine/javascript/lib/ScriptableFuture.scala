@@ -65,12 +65,19 @@ object ScriptableFuture {
 
   def jsConstructor(context: Context, args: Array[AnyRef], constructor: Function, inNewExpr: Boolean): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
-    val scalaFuture = Future {
-      val callback = args(0).asInstanceOf[Function]
-      val callbackArgs = Array.empty[AnyRef]
-      executeCallback(context.getFactory, callback, callbackArgs)
+    val newFuture = args(0) match {
+      case callback: Function =>
+        Future {
+          val callbackArgs = Array.empty[AnyRef]
+          executeCallback(context.getFactory, callback, callbackArgs)
+        }
+      case future: Future[_] =>
+        // Cannot check Future[AnyRef] because of type erasure.
+        future.asInstanceOf[Future[AnyRef]]
+      case _ =>
+        throw new IllegalArgumentException("type.is.not.matched")
     }
-    new ScriptableFuture(scalaFuture)
+    new ScriptableFuture(newFuture)
   }
 }
 
