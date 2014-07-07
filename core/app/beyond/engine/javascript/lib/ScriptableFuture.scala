@@ -139,6 +139,31 @@ object ScriptableFuture {
     beyondContext.newObject(beyondContextFactory.global, "Future", constructorArgs).asInstanceOf[ScriptableFuture]
   }
 
+  def jsFunction_transform(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val beyondContext = context.asInstanceOf[BeyondContext]
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
+    val promise = Promise[AnyRef]()
+    thisFuture.future.onComplete {
+      case Success(result) =>
+        val callbackArgs: Array[AnyRef] = Array(result)
+        val callbackOnSuccess = args(0).asInstanceOf[Function]
+        promise.success(executeCallback(context.getFactory, callbackOnSuccess, callbackArgs))
+      case Failure(exception: RhinoException) =>
+        val callbackArgs: Array[AnyRef] = Array(exception.details)
+        val callbackOnFailure = args(1).asInstanceOf[Function]
+        promise.failure(new Exception(executeCallback(context.getFactory, callbackOnFailure, callbackArgs).asInstanceOf[String]))
+      case Failure(throwable) =>
+        val callbackArgs: Array[AnyRef] = Array(throwable.getMessage)
+        val callbackOnFailure = args(1).asInstanceOf[Function]
+        promise.failure(new Exception(executeCallback(context.getFactory, callbackOnFailure, callbackArgs).asInstanceOf[String]))
+    }
+
+    val constructorArgs: Array[AnyRef] = Array(promise.future)
+    beyondContext.newObject(beyondContextFactory.global, "Future", constructorArgs).asInstanceOf[ScriptableFuture]
+  }
+
   def jsConstructor(context: Context, args: Array[AnyRef], constructor: Function, inNewExpr: Boolean): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val newFuture = args(0) match {
