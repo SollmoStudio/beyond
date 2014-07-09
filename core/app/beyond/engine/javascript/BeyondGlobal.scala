@@ -4,6 +4,7 @@ import beyond.engine.javascript.lib.ScriptableConsole
 import beyond.engine.javascript.lib.ScriptableFuture
 import beyond.engine.javascript.lib.ScriptableRequest
 import beyond.engine.javascript.lib.database.ScriptableQuery
+import beyond.engine.javascript.lib.database.ScriptableSchema
 import java.io.File
 import java.net.URI
 import org.mozilla.javascript.Context
@@ -152,6 +153,7 @@ class BeyondGlobal extends ImporterTopLevel {
     ScriptableObject.defineClass(this, classOf[ScriptableConsole])
     ScriptableObject.defineClass(this, classOf[ScriptableFuture])
     ScriptableObject.defineClass(this, classOf[ScriptableQuery])
+    ScriptableObject.defineClass(this, classOf[ScriptableSchema])
   }
 
   def installRequire(cx: Context, modulePaths: Seq[String], sandboxed: Boolean): Require = {
