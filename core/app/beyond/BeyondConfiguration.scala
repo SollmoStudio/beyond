@@ -5,6 +5,7 @@ import org.apache.curator.RetryPolicy
 import org.apache.curator.retry.ExponentialBackoffRetry
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.FiniteDuration
+import scalax.file.Path
 
 object BeyondConfiguration {
   private def configuration = play.api.Play.current.configuration
@@ -23,9 +24,10 @@ object BeyondConfiguration {
     configuration.getStringList("beyond.zookeeper.servers").map(_.asScala).get.toSet
   }
 
-  def pluginPaths: Seq[String] = {
+  def pluginPaths: Seq[Path] = {
     import scala.collection.JavaConverters._
-    configuration.getStringList("beyond.plugin.path").map(_.asScala).get
+    val paths: Seq[String] = configuration.getStringList("beyond.plugin.path").map(_.asScala).get
+    paths.map(Path.fromString)
   }
 
   def curatorConnectionPolicy: RetryPolicy = {

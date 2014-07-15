@@ -8,9 +8,10 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.commonjs.module.Require
 import scala.concurrent.ExecutionContext
+import scalax.file.Path
 
 class BeyondJavaScriptEngine(val global: BeyondGlobal = new BeyondGlobal,
-    pluginPaths: Seq[String] = BeyondConfiguration.pluginPaths,
+    pluginPaths: Seq[Path] = BeyondConfiguration.pluginPaths,
     timer: JavaScriptTimerProvider, console: JavaScriptConsoleProvider)(implicit val executionContext: ExecutionContext) extends Logging {
   import com.beyondframework.rhino.RhinoConversions._
 
@@ -23,7 +24,7 @@ class BeyondJavaScriptEngine(val global: BeyondGlobal = new BeyondGlobal,
     // property, and also that the modules it loads don't export the
     // "module.uri" property.
     val sandboxed = true
-    global.installRequire(cx, pluginPaths, sandboxed)
+    global.installRequire(cx, pluginPaths.map(_.path), sandboxed)
   }.asInstanceOf[Require]
 
   def loadMain(filename: String): Scriptable = contextFactory.call { cx: Context =>
