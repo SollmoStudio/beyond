@@ -9,6 +9,15 @@ import org.mozilla.javascript.Wrapper
 import scala.annotation.tailrec
 
 object RhinoConversions {
+  implicit def unitFunctionToContextAction(f: Context => Unit): ContextAction = {
+    new ContextAction {
+      override def run(cx: Context): AnyRef = {
+        f(cx)
+        Unit
+      }
+    }
+  }
+
   implicit def functionToContextAction(f: Context => AnyRef): ContextAction = {
     new ContextAction {
       override def run(cx: Context): AnyRef = {

@@ -158,7 +158,6 @@ object JavaScriptShellConsole extends App with JavaScriptTimerProvider with Java
     }
     Console.println()
     Console.flush()
-    Unit
   }
 
   private def createTimerTask(callback: Function, callbackArgs: Array[AnyRef]) =
