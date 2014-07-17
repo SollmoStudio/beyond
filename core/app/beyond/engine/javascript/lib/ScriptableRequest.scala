@@ -8,7 +8,7 @@ import play.api.mvc.Request
 // FIXME: Add more members.
 // The type of param must be AnyRef.
 // Otherwise, Rhino throws an exception when checking parameter types.
-class ScriptableRequest[A] @JSConstructor()(param: AnyRef) extends ScriptableObject {
+class ScriptableRequest[A] @JSConstructor() (param: AnyRef) extends ScriptableObject {
   def this() = this(null)
 
   private val request: Request[A] = param.asInstanceOf[Request[A]]
