@@ -2,6 +2,7 @@ package beyond.engine.javascript
 
 import beyond.engine.javascript.lib.ScriptableConsole
 import beyond.engine.javascript.lib.ScriptableFuture
+import beyond.engine.javascript.lib.ScriptableRequest
 import java.io.File
 import java.net.URI
 import org.mozilla.javascript.Context

@@ -1,8 +1,7 @@
-package beyond.engine.javascript
+package beyond.engine.javascript.lib
 
 import org.mozilla.javascript.ScriptableObject
-import org.mozilla.javascript.annotations.JSConstructor
-import org.mozilla.javascript.annotations.JSGetter
+import org.mozilla.javascript.annotations.{JSConstructor, JSGetter}
 import play.api.mvc.Request
 
 // FIXME: Add more members.
