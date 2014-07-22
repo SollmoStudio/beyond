@@ -4,6 +4,7 @@ resolvers += "spray repo" at "http://repo.spray.io"
 
 libraryDependencies ++= Seq(
   "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.2",
+  "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.2",
   "com.typesafe.akka" %% "akka-actor" % "2.2.4",
   "com.typesafe.akka" %% "akka-slf4j" % "2.2.4",
   "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
@@ -42,7 +43,7 @@ val toolsJar = if (System.getProperty("os.name") != "Mac OS X") {
 // adding the tools.jar to the unmanaged-jars seq
 unmanagedJars in Compile ~= (toolsJar ++ _)
 
-play.Project.playScalaSettings
+lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 org.scalastyle.sbt.ScalastylePlugin.Settings
 

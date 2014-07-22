@@ -1,28 +1,32 @@
 name := "beyond"
 
-lazy val beyond = project.in(file("."))
-  .aggregate(beyondCore, beyondUser, beyondAdmin, rhinoScalaBinding)
-  .dependsOn(beyondCore, beyondUser, beyondAdmin)
-
-lazy val beyondCore = project.in(file("core"))
-  .dependsOn(rhinoScalaBinding)
-
-lazy val beyondAdmin: Project = project.in(file("modules/admin"))
-
-lazy val beyondUser: Project = project.in(file("modules/user"))
-  .dependsOn(beyondCore)
-
-lazy val rhinoScalaBinding = project
+resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
   jdbc,
   anorm,
   cache,
-  "org.reactivemongo" %% "play2-reactivemongo" % "0.10.2",
-  "org.reactivemongo" %% "reactivemongo" % "0.10.0"
+  "org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.akka23-SNAPSHOT",
+  "org.reactivemongo" %% "reactivemongo" % "0.10.5.akka23-SNAPSHOT"
 )
 
-play.Project.playScalaSettings
+lazy val root = project.in(file("."))
+  .aggregate(beyondCore, beyondUser, beyondAdmin, rhinoScalaBinding)
+  .dependsOn(beyondCore, beyondUser, beyondAdmin)
+  .enablePlugins(PlayScala)
+
+lazy val beyondCore = project.in(file("core"))
+  .dependsOn(rhinoScalaBinding)
+  .enablePlugins(PlayScala)
+
+lazy val beyondAdmin: Project = project.in(file("modules/admin"))
+  .enablePlugins(PlayScala)
+
+lazy val beyondUser: Project = project.in(file("modules/user"))
+  .dependsOn(beyondCore)
+  .enablePlugins(PlayScala)
+
+lazy val rhinoScalaBinding = project
 
 org.scalastyle.sbt.ScalastylePlugin.Settings
 

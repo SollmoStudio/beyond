@@ -9,8 +9,6 @@ libraryDependencies ++= Seq(
   "org.reactivemongo" %% "reactivemongo" % "0.10.0"
 )
 
-play.Project.playScalaSettings
-
 org.scalastyle.sbt.ScalastylePlugin.Settings
 
 scalariformSettings

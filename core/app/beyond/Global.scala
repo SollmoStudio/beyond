@@ -11,10 +11,8 @@ import play.api.Configuration
 import play.api.Mode
 import play.api.Play
 import play.api.libs.concurrent.Akka
-import play.api.mvc.RequestHeader
+import play.api.mvc._
 import play.api.mvc.Results.NotFound
-import play.api.mvc.SimpleResult
-import play.api.mvc.WithFilters
 import scala.concurrent.Future
 import scalax.file.Path
 
@@ -59,7 +57,7 @@ object Global extends WithFilters(RequestsCountFilter, TimeoutFilter) with Loggi
     BeyondMBean.unregister()
   }
 
-  override def onHandlerNotFound(request: RequestHeader): Future[SimpleResult] = {
+  override def onHandlerNotFound(request: RequestHeader): Future[Result] = {
     Play.maybeApplication.filter(_.mode == Mode.Prod).map { _ =>
       Future.successful(NotFound)
     } getOrElse {

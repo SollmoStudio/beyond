@@ -37,7 +37,7 @@ object User extends Controller with MongoController {
 
     result.map {
       case List() =>
-        val newAccount = Account(data("username"), DigestUtils.shaHex(data("password")), now)
+        val newAccount = Account(data("username"), DigestUtils.sha1Hex(data("password")), now)
         collection.save(Json.toJson(newAccount))
         Ok(Json.obj("result" -> "OK", "message" -> "Account created", "username" -> newAccount.username))
       case _ =>

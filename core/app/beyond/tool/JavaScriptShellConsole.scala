@@ -123,7 +123,7 @@ object JavaScriptShellConsole extends App with JavaScriptTimerProvider {
 
   val engine = {
     import ExecutionContext.Implicits.global
-    new BeyondJavaScriptEngine(scope, pluginPaths = pluginPaths, timer = this, console = JavaScriptShellConsoleProvider)
+    new BeyondJavaScriptEngine(scope, pluginPaths = pluginPaths, timer = this, console = JavaScriptShellConsoleProvider)(global)
   }
 
   val errorReporter = new ToolErrorReporter(false, System.err)
