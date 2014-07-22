@@ -6,11 +6,12 @@ import beyond.BeyondConfiguration
 import beyond.MongoMixin
 import beyond.TickGenerator
 import java.io.File
+import java.io.IOException
 import play.api.libs.concurrent.Akka
 import reactivemongo.core.commands.Status
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-import scala.sys.process.Process
+import scala.sys.process._
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
@@ -30,12 +31,16 @@ class MongoDBLauncher extends {
   override protected val tickInterval = 1.second
 } with Actor with TickGenerator with ActorLogging with MongoMixin {
   private val pidFilePath: Path = Path.fromString(BeyondConfiguration.pidDirectory) / "mongo.pid"
-  // FIXME: Add more mongod paths.
-  private val mongodPaths = Seq(
-    "/usr/bin/mongod",
-    "/opt/local/bin/mongod", // Max OS X Port default path
-    "C:/Program Files/MongoDB 2.6 Standard/bin/mongod.exe" // Windows default path
-  )
+
+  private def mongodPath: Option[String] = try {
+    Some(("which mongod" !!).trim) // Locate Unix mongod path
+  } catch {
+    case _: IOException => try {
+      Some(("where.exe mongod.exe" !!).trim) // Locate Windows mongod path
+    } catch {
+      case _: IOException => None
+    }
+  }
 
   override def preRestart(reason: Throwable, message: Option[Any]) {
     super.preRestart(reason, message)
@@ -62,14 +67,14 @@ class MongoDBLauncher extends {
       dbPath.mkdirs()
     }
 
-    mongodPaths.find(new File(_).isFile).map {
-      path =>
-        val processBuilder = Process(Seq(path, "--dbpath", dbPath.getCanonicalPath, "--pidfilepath", pidFilePath.path))
-        processBuilder.run()
-        log.info("MongoDB started")
-    }.getOrElse {
+    val path: String = mongodPath.getOrElse {
       throw new LauncherInitializationException
     }
+
+    val processBuilder = Process(Seq(path, "--dbpath", dbPath.getCanonicalPath, "--pidfilepath", pidFilePath.path))
+    processBuilder.run()
+    log.info("MongoDB started")
+
     healthCheck(RetryDelayAtInitialization)
   }
 
