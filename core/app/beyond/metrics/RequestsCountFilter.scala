@@ -2,9 +2,7 @@ package beyond.metrics
 
 import akka.actor.Props
 import play.api.libs.concurrent.Akka
-import play.api.mvc.Filter
-import play.api.mvc.RequestHeader
-import play.api.mvc.SimpleResult
+import play.api.mvc._
 import scala.concurrent.Future
 
 object RequestsCountFilter extends Filter {
@@ -13,7 +11,7 @@ object RequestsCountFilter extends Filter {
     import play.api.Play.current
     Akka.system.actorOf(Props[RequestsCounter], name = RequestsCounter.Name)
   }
-  def apply(next: (RequestHeader) => Future[SimpleResult])(request: RequestHeader): Future[SimpleResult] = {
+  def apply(next: (RequestHeader) => Future[Result])(request: RequestHeader): Future[Result] = {
     requestsCounter ! RequestsCounter.Increase
     next(request)
   }

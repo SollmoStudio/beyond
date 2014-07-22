@@ -21,7 +21,7 @@ object Admin extends Controller with MongoController {
 
   private class AuthenticatedRequest[A](val username: String, request: Request[A]) extends WrappedRequest[A](request)
   private object AuthenticatedAction extends ActionBuilder[AuthenticatedRequest] {
-    protected def invokeBlock[A](request: Request[A], block: (AuthenticatedRequest[A]) => Future[SimpleResult]) = {
+    def invokeBlock[A](request: Request[A], block: (AuthenticatedRequest[A]) => Future[Result]) = {
       request.session.get("username").map { username =>
         block(new AuthenticatedRequest(username, request))
       } getOrElse {

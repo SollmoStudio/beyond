@@ -9,9 +9,8 @@ import beyond.route.RouteAddress
 import beyond.route.RoutingTableView
 import beyond.route.RoutingTableView._
 import play.api.libs.json.JsArray
-import play.api.mvc.Request
+import play.api.mvc._
 import play.api.mvc.Results.Status
-import play.api.mvc.SimpleResult
 import play.api.mvc.WrappedRequest
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
@@ -23,7 +22,7 @@ object UserActionActor {
     // FIXME: Use a better hashing algorithm.
     override def consistentHashKey: Any = username.##
   }
-  case class BlockAndRequest[A](block: (RequestWithUsername[A]) => Future[SimpleResult], request: RequestWithUsername[A]) extends ConsistentHashable {
+  case class BlockAndRequest[A](block: (RequestWithUsername[A]) => Future[Result], request: RequestWithUsername[A]) extends ConsistentHashable {
     override def consistentHashKey: Any = request.consistentHashKey
   }
 

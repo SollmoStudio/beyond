@@ -4,7 +4,7 @@ import akka.actor.Actor
 import akka.actor.ActorLogging
 import akka.actor.Cancellable
 import akka.actor.Props
-import akka.routing.RoundRobinRouter
+import akka.routing.RoundRobinPool
 import beyond.engine.javascript.BeyondJavaScriptEngine
 import beyond.engine.javascript.provider.JavaScriptConsoleProvider
 import beyond.engine.javascript.provider.JavaScriptTimerProvider
@@ -58,8 +58,8 @@ class GamePlugin(filename: String) extends Actor with ActorLogging with JavaScri
 
   private val workerActor = {
     val numProcessors = Runtime.getRuntime.availableProcessors()
-    val router = RoundRobinRouter(nrOfInstances = numProcessors)
-    val props = Props(classOf[GamePluginWorker], engine, handler).withRouter(router)
+    val pool = RoundRobinPool(nrOfInstances = numProcessors)
+    val props = pool.props(Props(classOf[GamePluginWorker], engine, handler))
     context.actorOf(props, name = "gamePluginWorker")
   }
 

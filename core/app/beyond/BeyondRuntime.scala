@@ -1,6 +1,7 @@
 package beyond
 
 import java.io.File
+import java.lang.ClassLoader
 import java.lang.management.ManagementFactory
 import java.lang.management.RuntimeMXBean
 import java.net.URLClassLoader
@@ -13,7 +14,8 @@ object BeyondRuntime {
     val currentClassLoaderURLs = current.classloader.asInstanceOf[URLClassLoader].getURLs
     val urls = current.mode match {
       case Mode.Dev =>
-        val parentURLs = current.classloader.getParent.asInstanceOf[URLClassLoader].getURLs
+        val parent: ClassLoader = current.classloader.getParent.getParent
+        val parentURLs = parent.asInstanceOf[URLClassLoader].getURLs
         currentClassLoaderURLs ++ parentURLs
       case _ =>
         currentClassLoaderURLs
