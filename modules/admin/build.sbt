@@ -1,4 +1,4 @@
-name := "beyondAdmin"
+name := "admin"
 
 libraryDependencies ++= Seq(
   jdbc,
