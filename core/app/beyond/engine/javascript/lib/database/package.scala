@@ -24,4 +24,27 @@ package object database {
         throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a BSONValue")
     }
   }
+
+  private[database] object Field {
+    def apply(name: String, tpe: String): Field =
+      tpe match {
+        case "string" => StringField(name)
+        case "int" => IntField(name)
+        case "date" => DateField(name)
+        case "long" => LongField(name)
+        case "double" => DoubleField(name)
+        case "boolean" => BooleanField(name)
+      }
+  }
+
+  private[database] trait Field {
+    val name: String
+  }
+  // FIXME: Support complex type(embedding, referencing, array).
+  private[database] case class BooleanField(override val name: String) extends Field
+  private[database] case class IntField(override val name: String) extends Field
+  private[database] case class StringField(override val name: String) extends Field
+  private[database] case class DateField(override val name: String) extends Field
+  private[database] case class DoubleField(override val name: String) extends Field
+  private[database] case class LongField(override val name: String) extends Field
 }

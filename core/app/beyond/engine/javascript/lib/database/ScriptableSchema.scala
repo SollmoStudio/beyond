@@ -3,12 +3,27 @@ package beyond.engine.javascript.lib.database
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.ScriptRuntime
 
 object ScriptableSchema {
-  def jsConstructor(cx: Context, args: Array[AnyRef], constructor: Function, inNewExpr: Boolean): ScriptableSchema =
-    new ScriptableSchema
+  private[ScriptableSchema] val InvalidVersion: Int = -1
+
+  // FIXME: Currently, schema only handles type. Add validation and other options.
+  def jsConstructor(cx: Context, args: Array[AnyRef], constructor: Function, inNewExpr: Boolean): ScriptableSchema = {
+    val version = ScriptRuntime.toInt32(args(0))
+    val fieldsObject = args(1).asInstanceOf[ScriptableObject]
+
+    val fields = fieldsObject.getIds.map { key =>
+      val fieldName = key.toString
+      val fieldType = fieldsObject.get(fieldName).asInstanceOf[ScriptableObject].get("type").toString
+      Field(fieldName, fieldType)
+    }
+    new ScriptableSchema(version, fields)
+  }
 }
 
-class ScriptableSchema extends ScriptableObject {
+class ScriptableSchema(val version: Int, val fields: Seq[Field]) extends ScriptableObject {
+  def this() = this(ScriptableSchema.InvalidVersion, Seq.empty)
+
   override val getClassName: String = "Schema"
 }
