@@ -16,4 +16,5 @@ object JsonResponse {
 
   val ok = Response("ok")
   val badRequest = Response("bad request")
+  val unauthorized = Response("unauthorized")
 }
