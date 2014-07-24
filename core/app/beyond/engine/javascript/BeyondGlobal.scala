@@ -3,6 +3,7 @@ package beyond.engine.javascript
 import beyond.engine.javascript.lib.ScriptableConsole
 import beyond.engine.javascript.lib.ScriptableFuture
 import beyond.engine.javascript.lib.ScriptableRequest
+import beyond.engine.javascript.lib.database.ScriptableCollection
 import beyond.engine.javascript.lib.database.ScriptableDocument
 import beyond.engine.javascript.lib.database.ScriptableQuery
 import beyond.engine.javascript.lib.database.ScriptableSchema
@@ -151,6 +152,7 @@ class BeyondGlobal extends ImporterTopLevel {
     )
     defineFunctionProperties(names, classOf[BeyondGlobal], ScriptableObject.DONTENUM)
     ScriptableObject.defineClass(this, classOf[ScriptableRequest[_]])
+    ScriptableObject.defineClass(this, classOf[ScriptableCollection])
     ScriptableObject.defineClass(this, classOf[ScriptableConsole])
     ScriptableObject.defineClass(this, classOf[ScriptableDocument])
     ScriptableObject.defineClass(this, classOf[ScriptableFuture])
