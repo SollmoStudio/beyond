@@ -1,5 +1,6 @@
 package beyond.engine.javascript.lib.database
 
+import beyond.engine.javascript.BeyondContextFactory
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.ScriptableObject
@@ -14,6 +15,13 @@ object ScriptableDocument {
     val fields = args(0).asInstanceOf[Seq[Field]]
     val currentValueInDB = args(1).asInstanceOf[BSONDocument]
     new ScriptableDocument(fields, currentValueInDB)
+  }
+
+  private[database] def apply(context: Context, fields: Seq[Field], document: BSONDocument): ScriptableDocument = {
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val scope = beyondContextFactory.global
+    val args: Array[AnyRef] = Array(fields, document)
+    context.newObject(scope, "Document", args).asInstanceOf[ScriptableDocument]
   }
 }
 
