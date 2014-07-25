@@ -43,3 +43,6 @@ scalariformSettings
 
 Common.settings
 
+scalacOptions ++= Seq(
+  "-feature"
+)
