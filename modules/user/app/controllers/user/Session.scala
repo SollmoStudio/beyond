@@ -1,6 +1,7 @@
 package controllers.user
 
 import beyond.GameEvent
+import beyond.JsonResponse
 import beyond.UserAction
 import play.api.data.Form
 import play.api.data.Forms.text
@@ -26,7 +27,9 @@ object Session extends Controller with GameEvent {
   }
 
   def logout: Action[AnyContent] = UserAction { implicit request =>
-    trackUser("User Logout")
-    Ok("Goodbye " + request.username).withNewSession
+    val username = request.session.get("username").getOrElse("No User")
+
+    trackUser("User Logout", Json.obj("username" -> username))
+    JsonResponse.ok(Json.obj("message" -> "User Logout", "username" -> username))
   }
 }

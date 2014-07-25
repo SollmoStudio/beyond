@@ -1,5 +1,6 @@
 package controllers.user
 
+import beyond.JsonResponse
 import db.UserMixin
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -19,9 +20,9 @@ object User extends Controller with UserMixin {
     result.map {
       case None =>
         collection.save(Json.toJson(createAccount(username, password)))
-        Ok(Json.obj("result" -> "OK", "message" -> "Account created", "username" -> username))
+        JsonResponse.ok(Json.obj("message" -> "User Created", "username" -> username))
       case _ =>
-        Ok(Json.obj("result" -> "Error", "message" -> "Already exists account"))
+        JsonResponse.badRequest(Json.obj("message" -> "Username Duplicated"))
     }
   }
 }
