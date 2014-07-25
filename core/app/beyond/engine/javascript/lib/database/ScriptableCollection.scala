@@ -44,8 +44,24 @@ object ScriptableCollection {
   }
 
   @JSFunction
-  def findOne(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture =
-    ???
+  def findOne(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
+    val findQuery = args(0).asInstanceOf[ScriptableQuery]
+    val findResult = thisCollection.findOneInternal(findQuery)
+
+    import com.beyondframework.rhino.RhinoConversions._
+    val convertedToScriptableDocumentResult = findResult.map {
+      case None =>
+        throw new NoSuchElementException
+      case Some(document) =>
+        beyondContextFactory.call { context: Context =>
+          ScriptableDocument(context, thisCollection.fields, document)
+        }
+    }
+    ScriptableFuture(context, convertedToScriptableDocumentResult)
+  }
 
   @JSFunction
   def remove(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture =
@@ -86,4 +102,8 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
   // Cannot use name 'find', because static forwarder is not generated when the companion object and class have the same name method.
   private def findInternal(query: ScriptableQuery)(implicit ec: ExecutionContext): Future[Seq[BSONDocument]] =
     collection.find(query.query).cursor[BSONDocument].collect[Seq]()
+
+  // Cannot use name 'findOne', because static forwarder is not generated when the companion object and class have the same name method.
+  private def findOneInternal(query: ScriptableQuery)(implicit ec: ExecutionContext): Future[Option[BSONDocument]] =
+    collection.find(query.query).one[BSONDocument]
 }
