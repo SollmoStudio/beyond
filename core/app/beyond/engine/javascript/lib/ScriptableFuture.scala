@@ -74,22 +74,17 @@ object ScriptableFuture {
   def jsFunction_map(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[Function]
-    val beyondContext = context.asInstanceOf[BeyondContext]
-    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.map { result =>
       val callbackArgs: Array[AnyRef] = Array(result)
       executeCallback(context.getFactory, callback, callbackArgs)
     }
 
-    val constructorArgs: Array[AnyRef] = Array(newFuture)
-    beyondContext.newObject(beyondContextFactory.global, "Future", constructorArgs).asInstanceOf[ScriptableFuture]
+    ScriptableFuture(context, newFuture)
   }
 
   def jsFunction_flatMap(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[Function]
-    val beyondContext = context.asInstanceOf[BeyondContext]
-    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.flatMap { result =>
       val callbackArgs: Array[AnyRef] = Array(result)
       executeCallback(context.getFactory, callback, callbackArgs) match {
@@ -107,30 +102,24 @@ object ScriptableFuture {
       }
     }
 
-    val constructorArgs: Array[AnyRef] = Array(newFuture)
-    beyondContext.newObject(beyondContextFactory.global, "Future", constructorArgs).asInstanceOf[ScriptableFuture]
+    ScriptableFuture(context, newFuture)
   }
 
   def jsFunction_filter(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[Function]
-    val beyondContext = context.asInstanceOf[BeyondContext]
-    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.filter { result =>
       val callbackArgs: Array[AnyRef] = Array(result)
       val filterResult = executeCallback(context.getFactory, callback, callbackArgs)
       ScriptRuntime.toBoolean(filterResult)
     }
 
-    val constructorArgs: Array[AnyRef] = Array(newFuture)
-    beyondContext.newObject(beyondContextFactory.global, "Future", constructorArgs).asInstanceOf[ScriptableFuture]
+    ScriptableFuture(context, newFuture)
   }
 
   def jsFunction_recover(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[Function]
-    val beyondContext = context.asInstanceOf[BeyondContext]
-    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.recover {
       case exception: RhinoException =>
         val callbackArgs: Array[AnyRef] = Array(exception.details)
@@ -140,14 +129,11 @@ object ScriptableFuture {
         executeCallback(context.getFactory, callback, callbackArgs)
     }
 
-    val constructorArgs: Array[AnyRef] = Array(newFuture)
-    beyondContext.newObject(beyondContextFactory.global, "Future", constructorArgs).asInstanceOf[ScriptableFuture]
+    ScriptableFuture(context, newFuture)
   }
 
   def jsFunction_transform(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
-    val beyondContext = context.asInstanceOf[BeyondContext]
-    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
     val promise = Promise[AnyRef]()
     thisFuture.future.onComplete {
@@ -165,8 +151,7 @@ object ScriptableFuture {
         promise.failure(new Exception(executeCallback(context.getFactory, callbackOnFailure, callbackArgs).asInstanceOf[String]))
     }
 
-    val constructorArgs: Array[AnyRef] = Array(promise.future)
-    beyondContext.newObject(beyondContextFactory.global, "Future", constructorArgs).asInstanceOf[ScriptableFuture]
+    ScriptableFuture(context, promise.future)
   }
 
   def jsConstructor(context: Context, args: Array[AnyRef], constructor: Function, inNewExpr: Boolean): ScriptableFuture = {
@@ -184,6 +169,13 @@ object ScriptableFuture {
         throw new IllegalArgumentException("type.is.not.matched")
     }
     new ScriptableFuture(newFuture)
+  }
+
+  private[lib] def apply(context: Context, future: Future[_]): ScriptableFuture = {
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val scope = beyondContextFactory.global
+    val args: Array[AnyRef] = Array(future)
+    context.newObject(scope, "Future", args).asInstanceOf[ScriptableFuture]
   }
 }
 
