@@ -2,6 +2,7 @@ package beyond.engine.javascript.lib.database
 
 import beyond.MongoMixin
 import beyond.engine.javascript.BeyondContext
+import beyond.engine.javascript.BeyondContextFactory
 import beyond.engine.javascript.lib.ScriptableFuture
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
@@ -26,8 +27,21 @@ object ScriptableCollection {
   }
 
   @JSFunction
-  def find(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture =
-    ???
+  def find(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
+    val findQuery = args(0).asInstanceOf[ScriptableQuery]
+    val queryResultFuture = thisCollection.findInternal(findQuery)
+
+    import com.beyondframework.rhino.RhinoConversions._
+    val convertedToScriptableDocumentFuture = queryResultFuture.map { documents =>
+      beyondContextFactory.call { context: Context =>
+        documents.map(ScriptableDocument(context, thisCollection.fields, _)).toArray
+      }
+    }
+    ScriptableFuture(context, convertedToScriptableDocumentFuture)
+  }
 
   @JSFunction
   def findOne(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture =
@@ -58,6 +72,8 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
   override val getClassName: String = "Collection"
   private def collection: BSONCollection = db.collection[BSONCollection](name)
 
+  private def fields: Seq[Field] = schema.fields
+
   // Cannot use name 'insert', because static forwarder is not generated when the companion object and class have the same name method.
   private def insertInternal(obj: ScriptableObject)(implicit ec: ExecutionContext): Future[LastError] = {
     val dataToBeInserted: Seq[(String, BSONValue)] = schema.fields.map { field =>
@@ -66,4 +82,8 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
     }
     collection.insert(BSONDocument(dataToBeInserted))
   }
+
+  // Cannot use name 'find', because static forwarder is not generated when the companion object and class have the same name method.
+  private def findInternal(query: ScriptableQuery)(implicit ec: ExecutionContext): Future[Seq[BSONDocument]] =
+    collection.find(query.query).cursor[BSONDocument].collect[Seq]()
 }
