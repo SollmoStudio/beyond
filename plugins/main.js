@@ -24,6 +24,13 @@ exports.handle = function (req) {
             return new Response(headers);
         case "post":
             return new Response("body = " + req.bodyAsText);
+        case "postFormUrlEncoded":
+            var body = "";
+            var obj = req.bodyAsFormUrlEncoded
+            for (var prop in obj) {
+                body += prop + " = " + obj[prop] + ";";
+            }
+            return new Response("body = " + body);
         case "insert":
             db.insert(tokens[0], tokens[1]);
             break;
