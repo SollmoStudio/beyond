@@ -1,5 +1,6 @@
 var counter = require("counter");
 var db = require("examples/db");
+var future = require("future");
 
 exports.handle = function (req) {
     var tokens = req.uri.split("/");
@@ -9,6 +10,10 @@ exports.handle = function (req) {
     switch (operator) {
         case "counter":
             return new Response('Hello ' + req.uri + ' ' + counter.count());
+        case "futureCounter":
+            return future.create(function () {
+                return new Response('Hello future ' + req.uri + ' ' + counter.count());
+            });
         case "insert":
             db.insert(tokens[0], tokens[1]);
             break;
