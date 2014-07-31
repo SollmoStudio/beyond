@@ -1,7 +1,6 @@
 package beyond.engine.javascript.lib.database
 
 import beyond.engine.javascript.BeyondContextFactory
-import java.util.Date
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
@@ -9,14 +8,9 @@ import org.mozilla.javascript.IdScriptableObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.annotations.JSGetter
-import reactivemongo.bson.BSONBoolean
-import reactivemongo.bson.BSONDateTime
+import reactivemongo.bson.BSONValue
 import reactivemongo.bson.BSONDocument
-import reactivemongo.bson.BSONDouble
-import reactivemongo.bson.BSONInteger
-import reactivemongo.bson.BSONLong
 import reactivemongo.bson.BSONObjectID
-import reactivemongo.bson.BSONString
 import scala.collection.mutable.{ Map => MutableMap }
 import scalaz.syntax.std.boolean._
 
@@ -70,33 +64,10 @@ class ScriptableDocument(fields: Seq[Field], currentValueInDB: BSONDocument) ext
   private def newGetterFor(id: Int): Callable = new Callable() {
     val name = getInstanceIdName(id)
     override def call(cx: Context, scope: Scriptable, thisObj: Scriptable, args: Array[AnyRef]): AnyRef = {
-      val a = fieldInfo(id) match {
-        case _: IntField =>
-          currentValueInDB.getAs[BSONInteger](name).map { i =>
-            Int.box(i.value)
-          }
-        case _: StringField =>
-          currentValueInDB.getAs[BSONString](name).map { s =>
-            s.value
-          }
-        case _: DateField =>
-          currentValueInDB.getAs[BSONDateTime](name).map { d =>
-            new Date(d.value)
-          }
-        case _: DoubleField =>
-          currentValueInDB.getAs[BSONDouble](name).map { d =>
-            Double.box(d.value)
-          }
-        case _: BooleanField =>
-          currentValueInDB.getAs[BSONBoolean](name).map { z =>
-            Boolean.box(z.value)
-          }
-        case _: LongField =>
-          currentValueInDB.getAs[BSONLong](name).map { j =>
-            Long.box(j.value)
-          }
-      }
-      a.getOrElse(Undefined.instance)
+      currentValueInDB.getAs[BSONValue](name).map { bsonValue =>
+        val field = fieldInfo(id)
+        AnyRefTypedBSONHandler.read(field, bsonValue)
+      }.getOrElse(Undefined.instance)
     }
   }
 
