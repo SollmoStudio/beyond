@@ -8,7 +8,7 @@ exports.handle = function (req) {
     var operator = tokens.shift();
     switch (operator) {
         case "counter":
-            return 'Hello ' + req.uri + ' ' + counter.count();
+            return new Response('Hello ' + req.uri + ' ' + counter.count());
         case "insert":
             db.insert(tokens[0], tokens[1]);
             break;
@@ -21,5 +21,5 @@ exports.handle = function (req) {
         default:
             break;
     }
-    return "";
+    return new Response("");
 }

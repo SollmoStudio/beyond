@@ -19,7 +19,7 @@ object Plugin extends Controller {
     implicit val timeout = Timeout(BeyondConfiguration.requestTimeout)
     implicit val ec: ExecutionContext = Akka.system.dispatcher
 
-    (gamePlugin ? Handle(request)).asInstanceOf[Future[String]].map(Ok(_)).recover {
+    (gamePlugin ? Handle(request)).asInstanceOf[Future[Result]].recover {
       case _: AskTimeoutException => InternalServerError("Plugin Timeout")
     }
   }
