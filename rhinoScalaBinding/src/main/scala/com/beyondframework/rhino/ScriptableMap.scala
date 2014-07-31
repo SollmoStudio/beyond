@@ -85,12 +85,8 @@ class ScriptableMap private (scope: Scriptable,
   }
 
   private def getInternal(key: AnyRef): AnyRef = {
-    val value = map.get(key)
-    if (value == null) {
-      Scriptable.NOT_FOUND
-    } else {
-      RhinoConversions.javaToJS(value, getParentScope)
-    }
+    val value: Option[AnyRef] = map.get(key)
+    value.map(RhinoConversions.javaToJS(_, getParentScope)).getOrElse(Scriptable.NOT_FOUND)
   }
 
   override def has(name: String, start: Scriptable): Boolean = {
