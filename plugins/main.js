@@ -14,6 +14,14 @@ exports.handle = function (req) {
             return future.create(function () {
                 return new Response('Hello future ' + req.uri + ' ' + counter.count());
             });
+        case "headers":
+            var headers = "";
+            var obj = req.headers;
+            for (var prop in obj) {
+                // FIXME: obj does not support hasOwnProperty().
+                headers += prop + " = " + obj[prop] + ";";
+            }
+            return new Response(headers);
         case "insert":
             db.insert(tokens[0], tokens[1]);
             break;

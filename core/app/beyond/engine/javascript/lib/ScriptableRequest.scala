@@ -1,5 +1,6 @@
 package beyond.engine.javascript.lib
 
+import com.beyondframework.rhino.ScriptableMap
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.ScriptableObject
@@ -25,9 +26,8 @@ class ScriptableRequest(val request: Request[_]) extends ScriptableObject {
   @JSGetter
   def getUri: String = request.uri
 
-  // FIXME: Wrap maps as scriptables.
   // FIXME: toSimpleMap ignores multiple values.
   @JSGetter
-  def getHeaders: Map[String, String] = request.headers.toSimpleMap
+  def getHeaders: ScriptableMap = new ScriptableMap(getParentScope, request.headers.toSimpleMap)
 }
 
