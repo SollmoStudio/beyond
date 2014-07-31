@@ -22,6 +22,8 @@ exports.handle = function (req) {
                 headers += prop + " = " + obj[prop] + ";";
             }
             return new Response(headers);
+        case "post":
+            return new Response("body = " + req.bodyAsText);
         case "insert":
             db.insert(tokens[0], tokens[1]);
             break;
