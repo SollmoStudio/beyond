@@ -5,6 +5,7 @@ import java.{ lang => jl }
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.ScriptRuntime
 import reactivemongo.bson.BSONBoolean
+import reactivemongo.bson.BSONDateTime
 import reactivemongo.bson.BSONDouble
 import reactivemongo.bson.BSONInteger
 import reactivemongo.bson.BSONJavaScript
@@ -21,6 +22,7 @@ package object database {
       case j: jl.Long => BSONLong(j)
       case z: jl.Boolean => BSONBoolean(z)
       case d: jl.Double => BSONDouble(d)
+      case d: Date => BSONDateTime(d.getTime)
       case f: Function => BSONJavaScript(f.toString)
       case _ =>
         throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a BSONValue")
