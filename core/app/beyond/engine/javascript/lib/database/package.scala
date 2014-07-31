@@ -1,7 +1,9 @@
 package beyond.engine.javascript.lib
 
+import java.util.Date
 import java.{ lang => jl }
 import org.mozilla.javascript.Function
+import org.mozilla.javascript.ScriptRuntime
 import reactivemongo.bson.BSONBoolean
 import reactivemongo.bson.BSONDouble
 import reactivemongo.bson.BSONInteger
@@ -47,4 +49,31 @@ package object database {
   private[database] case class DateField(override val name: String) extends Field
   private[database] case class DoubleField(override val name: String) extends Field
   private[database] case class LongField(override val name: String) extends Field
+
+  object AnyRefTypedBSONWriter {
+    private def convertToFieldValue(field: Field, value: AnyRef): AnyRef = field match {
+      case _: BooleanField =>
+        Boolean.box(ScriptRuntime.toBoolean(value))
+      case _: IntField =>
+        Int.box(ScriptRuntime.toInt32(value))
+      case _: StringField =>
+        ScriptRuntime.toString(value)
+      case _: DateField =>
+        value match {
+          case date: Date =>
+            date
+          case _ =>
+            new Date(ScriptRuntime.toInteger(value).toLong)
+        }
+      case _: DoubleField =>
+        Double.box(ScriptRuntime.toNumber(value))
+      case _: LongField =>
+        Long.box(ScriptRuntime.toInteger(value).toLong)
+    }
+
+    def write(field: Field, value: AnyRef): BSONValue = {
+      val fieldValue: AnyRef = convertToFieldValue(field, value)
+      AnyRefBSONWriter.write(fieldValue)
+    }
+  }
 }

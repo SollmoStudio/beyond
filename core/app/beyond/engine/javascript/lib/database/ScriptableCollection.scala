@@ -94,7 +94,7 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
   private def insertInternal(obj: ScriptableObject)(implicit ec: ExecutionContext): Future[LastError] = {
     val dataToBeInserted: Seq[(String, BSONValue)] = schema.fields.map { field =>
       // FIXME: Handle default and optional value.
-      field.name -> AnyRefBSONWriter.write(obj.get(field.name))
+      field.name -> AnyRefTypedBSONWriter.write(field, obj.get(field.name))
     }
     collection.insert(BSONDocument(dataToBeInserted))
   }
