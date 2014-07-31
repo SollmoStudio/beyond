@@ -152,7 +152,7 @@ class BeyondGlobal extends ImporterTopLevel {
       "seal"
     )
     defineFunctionProperties(names, classOf[BeyondGlobal], ScriptableObject.DONTENUM)
-    ScriptableObject.defineClass(this, classOf[ScriptableRequest[_]])
+    ScriptableObject.defineClass(this, classOf[ScriptableRequest])
     ScriptableObject.defineClass(this, classOf[ScriptableResponse])
     ScriptableObject.defineClass(this, classOf[ScriptableCollection])
     ScriptableObject.defineClass(this, classOf[ScriptableConsole])

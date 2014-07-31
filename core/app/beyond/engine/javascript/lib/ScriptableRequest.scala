@@ -1,17 +1,21 @@
 package beyond.engine.javascript.lib
 
+import org.mozilla.javascript.Context
+import org.mozilla.javascript.Function
 import org.mozilla.javascript.ScriptableObject
-import org.mozilla.javascript.annotations.JSConstructor
 import org.mozilla.javascript.annotations.JSGetter
 import play.api.mvc.Request
 
-// FIXME: Add more members.
-// The type of param must be AnyRef.
-// Otherwise, Rhino throws an exception when checking parameter types.
-class ScriptableRequest[A] @JSConstructor() (param: AnyRef) extends ScriptableObject {
-  def this() = this(null)
+object ScriptableRequest {
+  def jsConstructor(context: Context, args: Array[AnyRef], constructor: Function, inNewExpr: Boolean): ScriptableRequest = {
+    var request = args(0).asInstanceOf[Request[_]]
+    new ScriptableRequest(request)
+  }
+}
 
-  private val request: Request[A] = param.asInstanceOf[Request[A]]
+// FIXME: Add more members.
+class ScriptableRequest(val request: Request[_]) extends ScriptableObject {
+  def this() = this(null)
 
   override def getClassName: String = "Request"
 
