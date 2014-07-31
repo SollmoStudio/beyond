@@ -21,5 +21,5 @@ exports.handle = function (req) {
         default:
             break;
     }
-    return new Response("");
+    return new Response("Hello World");
 }
