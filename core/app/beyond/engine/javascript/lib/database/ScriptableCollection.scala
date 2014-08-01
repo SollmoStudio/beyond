@@ -82,7 +82,7 @@ object ScriptableCollection {
   }
 
   @JSFunction
-  def save(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableDocument =
+  def save(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture =
     ???
 
   def jsConstructor(context: Context, args: Array[AnyRef], constructor: Function, inNewExpr: Boolean): ScriptableCollection = {
