@@ -38,6 +38,9 @@ class ScriptableRequest(val request: Request[AnyContent]) extends ScriptableObje
   @JSGetter
   def getUri: String = request.uri
 
+  @JSGetter
+  def getContentType: String = request.contentType.getOrElse("")
+
   // FIXME: toSimpleMap ignores multiple values.
   @JSGetter
   def getHeaders: ScriptableMap = new ScriptableMap(getParentScope, request.headers.toSimpleMap)

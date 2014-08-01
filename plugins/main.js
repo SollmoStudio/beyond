@@ -18,6 +18,8 @@ exports.handle = function (req) {
         case "jsonResponse":
             var jsonMessage = {status: "ok", msg: "Hello World" };
             return response.create(jsonMessage);
+        case "contentType":
+            return new Response(req.contentType);
         case "headers":
             var headers = "";
             var obj = req.headers;
