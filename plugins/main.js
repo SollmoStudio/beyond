@@ -56,6 +56,9 @@ exports.handle = function (req) {
         case "removeOne":
             db.removeOne.apply(db.remove, tokens);
             break;
+        case "save":
+            var saveResult = db.save.apply(db.save, tokens)
+            return response.create(saveResult)
         default:
             break;
     }
