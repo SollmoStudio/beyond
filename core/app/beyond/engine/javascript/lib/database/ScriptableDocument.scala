@@ -44,11 +44,19 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) ex
   private val updatedValues: UpdatedValueTable = emptyUpdatedValueTable
   private val fieldsAccessors: MutableMap[Int, Callable] = MutableMap.empty[Int, Callable]
 
+  def modifier: BSONDocument =
+    BSONDocument(updatedValues.map {
+      case (name, value) =>
+        val field = fieldByName(name)
+        (name, AnyRefTypedBSONHandler.write(field, value))
+    })
+
+  def objectID: BSONObjectID =
+    currentValuesInDB.getAs[BSONObjectID]("_id").getOrElse(throw new NoSuchElementException("ObjectID is not exists"))
+
   @JSGetter
   def getObjectID: String =
-    currentValuesInDB.getAs[BSONObjectID]("_id")
-      .getOrElse(throw new NoSuchElementException("ObjectID is not exists"))
-      .stringify
+    objectID.stringify
 
   override val getMaxInstanceId: Int = fields.size
 
