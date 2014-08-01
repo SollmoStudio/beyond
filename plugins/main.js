@@ -1,6 +1,7 @@
 var counter = require("counter");
 var db = require("examples/db");
 var future = require("future");
+var response = require("response");
 
 exports.handle = function (req) {
     var tokens = req.uri.split("/");
@@ -14,6 +15,9 @@ exports.handle = function (req) {
             return future.create(function () {
                 return new Response('Hello future ' + req.uri + ' ' + counter.count());
             });
+        case "jsonResponse":
+            var jsonMessage = {status: "ok", msg: "Hello World" };
+            return response.create(jsonMessage);
         case "headers":
             var headers = "";
             var obj = req.headers;
