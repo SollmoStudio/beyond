@@ -22,6 +22,8 @@ exports.handle = function (req) {
             return response.create(jsonMessage);
         case "contentType":
             return new Response(req.contentType);
+        case "secure":
+            return new Response(req.secure.toString());
         case "headers":
             var headers = "";
             var obj = req.headers;

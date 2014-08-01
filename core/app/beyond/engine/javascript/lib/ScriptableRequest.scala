@@ -51,6 +51,9 @@ class ScriptableRequest(val request: Request[AnyContent]) extends ScriptableObje
   @JSGetter
   def getContentType: String = request.contentType.getOrElse("")
 
+  @JSGetter
+  def getSecure: Boolean = request.secure
+
   // FIXME: toSimpleMap ignores multiple values.
   @JSGetter
   def getHeaders: ScriptableMap = new ScriptableMap(getParentScope, request.headers.toSimpleMap)
