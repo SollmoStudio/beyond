@@ -6,6 +6,9 @@ import org.mozilla.javascript.Function
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.annotations.JSGetter
+import play.api.libs.json.JsNull
+import play.api.libs.json.JsValue
+import play.api.libs.json.Json
 import play.api.mvc.AnyContent
 import play.api.mvc.Request
 
@@ -30,6 +33,13 @@ class ScriptableRequest(val request: Request[AnyContent]) extends ScriptableObje
     val formUrlEncoded: Map[String, Seq[String]] = request.body.asFormUrlEncoded.getOrElse(Map.empty)
     // FIXME: _.head ignores multiple values.
     new ScriptableMap(getParentScope, formUrlEncoded.mapValues(_.head))
+  }
+
+  // FIXME: Add getBodyAsJson which returns a JavaScript object.
+  @JSGetter
+  def getBodyAsJsonString: String = {
+    val jsValue: JsValue = request.body.asJson.getOrElse(JsNull)
+    Json.stringify(jsValue)
   }
 
   @JSGetter

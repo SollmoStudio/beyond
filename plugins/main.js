@@ -15,6 +15,8 @@ exports.handle = function (req) {
             return future.create(function () {
                 return new Response('Hello future ' + req.uri + ' ' + counter.count());
             });
+        case "jsonRequest":
+            return new Response(req.bodyAsJsonString);
         case "jsonResponse":
             var jsonMessage = {status: "ok", msg: "Hello World" };
             return response.create(jsonMessage);
