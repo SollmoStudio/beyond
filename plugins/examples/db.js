@@ -47,3 +47,23 @@ exports.findOne = function () {
         }
     });
 }
+
+exports.remove = function () {
+    var queries = Array.prototype.slice.call(arguments, 0).map(function (arg) {
+        return db.query().eq("key", arg);
+    });
+    var emptyQuery = db.query();
+    var baseQuery = queries.shift()
+    var q = baseQuery.or.apply(baseQuery, queries);
+    return collection.remove(q).onSuccess(console.info).onFailure(console.error);
+}
+
+exports.removeOne = function () {
+    var queries = Array.prototype.slice.call(arguments, 0).map(function (arg) {
+        return db.query().eq("key", arg);
+    });
+    var emptyQuery = db.query();
+    var baseQuery = queries.shift()
+    var q = baseQuery.or.apply(baseQuery, queries);
+    return collection.removeOne(q).onSuccess(console.info).onFailure(console.error);
+}
