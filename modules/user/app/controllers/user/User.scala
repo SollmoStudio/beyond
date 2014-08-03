@@ -1,47 +1,28 @@
 package controllers.user
 
-import java.util.Date
-import org.apache.commons.codec.digest.DigestUtils
-import play.api.data.Form
-import play.api.data.Forms._
+import beyond.JsonResponse
+import db.UserMixin
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.mvc._
-import play.modules.reactivemongo.MongoController
-import play.modules.reactivemongo.json.collection.JSONCollection
-import reactivemongo.api.Cursor
 import scala.concurrent.Future
 
-object User extends Controller with MongoController {
-  private def collection: JSONCollection = db.collection[JSONCollection]("user.account")
-
-  private val accountForm = Form(
-    tuple(
-      "username" -> text,
-      "password" -> text
-    )
-  )
-
-  case class Account(username: String, password: String, creationDate: Date)
-
-  implicit val accountFormat = Json.format[Account]
-
+object User extends Controller with UserMixin {
   def create: Action[AnyContent] = Action.async { implicit request =>
     import play.api.libs.concurrent.Execution.Implicits._
 
     val data = accountForm.bindFromRequest.data
-    val now = new Date()
+    val username = data("username")
+    val password = data("password")
 
-    val cursor: Cursor[Account] = collection.find(Json.obj("username" -> data("username"))).cursor[Account]
-    val result: Future[List[Account]] = cursor.collect[List]()
+    val result = collection.find(Json.obj("username" -> username)).one[Account]
 
     result.map {
-      case List() =>
-        val newAccount = Account(data("username"), DigestUtils.sha1Hex(data("password")), now)
-        collection.save(Json.toJson(newAccount))
-        Ok(Json.obj("result" -> "OK", "message" -> "Account created", "username" -> newAccount.username))
+      case None =>
+        collection.save(Json.toJson(createAccount(username, password)))
+        JsonResponse.ok(Json.obj("message" -> "User Created", "username" -> username))
       case _ =>
-        Ok(Json.obj("result" -> "Error", "message" -> "Already exists account"))
+        JsonResponse.badRequest(Json.obj("message" -> "Username Duplicated"))
     }
   }
 }
