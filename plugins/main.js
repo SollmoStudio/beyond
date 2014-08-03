@@ -50,6 +50,12 @@ exports.handle = function (req) {
         case "findOne":
             db.findOne.apply(db.findOne, tokens);
             break;
+        case "remove":
+            db.remove.apply(db.remove, tokens);
+            break;
+        case "removeOne":
+            db.removeOne.apply(db.remove, tokens);
+            break;
         default:
             break;
     }

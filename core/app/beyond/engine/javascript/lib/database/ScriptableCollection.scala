@@ -64,12 +64,22 @@ object ScriptableCollection {
   }
 
   @JSFunction
-  def remove(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture =
-    ???
+  def remove(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
+    val removeQuery = args(0).asInstanceOf[ScriptableQuery]
+    val removeResult = thisCollection.removeInternal(removeQuery)
+    ScriptableFuture(context, removeResult)
+  }
 
   @JSFunction
-  def removeOne(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture =
-    ???
+  def removeOne(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
+    val removeQuery = args(0).asInstanceOf[ScriptableQuery]
+    val removeResult = thisCollection.removeInternal(removeQuery, firstMatchOnly = true)
+    ScriptableFuture(context, removeResult)
+  }
 
   @JSFunction
   def save(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableDocument =
@@ -106,4 +116,8 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
   // Cannot use name 'findOne', because static forwarder is not generated when the companion object and class have the same name method.
   private def findOneInternal(query: ScriptableQuery)(implicit ec: ExecutionContext): Future[Option[BSONDocument]] =
     collection.find(query.query).one[BSONDocument]
+
+  // Cannot use name 'remove', because static forwarder is not generated when the companion object and class have the same name method.
+  private def removeInternal(query: ScriptableQuery, firstMatchOnly: Boolean = false)(implicit ec: ExecutionContext): Future[LastError] =
+    collection.remove(query.query, firstMatchOnly = firstMatchOnly)
 }
