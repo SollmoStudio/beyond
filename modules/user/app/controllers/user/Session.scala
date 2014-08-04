@@ -1,7 +1,7 @@
 package controllers.user
 
+import beyond.Authenticated
 import beyond.GameEvent
-import beyond.UserAction
 import play.api.data.Form
 import play.api.data.Forms.text
 import play.api.data.Forms.tuple
@@ -25,7 +25,7 @@ object Session extends Controller with GameEvent {
     Ok("Hello " + username).withSession("username" -> username)
   }
 
-  def logout: Action[AnyContent] = UserAction { implicit request =>
+  def logout: Action[AnyContent] = Authenticated { implicit request =>
     trackUser("User Logout")
     Ok("Goodbye " + request.username).withNewSession
   }

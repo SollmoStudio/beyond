@@ -1,6 +1,5 @@
 package beyond
 
-import beyond.UserActionActor.RequestWithUsername
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import play.api.libs.json._
 

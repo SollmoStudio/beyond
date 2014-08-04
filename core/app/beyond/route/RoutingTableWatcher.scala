@@ -2,8 +2,7 @@ package beyond.route
 
 import akka.actor.Actor
 import akka.actor.ActorLogging
-import beyond.BeyondSupervisor.UserActionSupervisorPath
-import beyond.UserActionActor.SyncRoutingTable
+import beyond.Authenticated
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.NodeCache
 import org.apache.curator.framework.recipes.cache.NodeCacheListener
@@ -17,14 +16,6 @@ object RoutingTableWatcher {
 class RoutingTableWatcher(curatorFramework: CuratorFramework) extends NodeCacheListener with Actor with ActorLogging {
   import beyond.route.RoutingTableConfig._
 
-  private val userActionSupervisor = {
-    import play.api.libs.concurrent.Akka
-    import play.api.Play.current
-    import scala.concurrent.ExecutionContext
-    implicit val ec: ExecutionContext = Akka.system.dispatcher
-    Akka.system.actorSelection(UserActionSupervisorPath)
-  }
-
   private val routingTableWatcher = {
     val nodeCache = new NodeCache(curatorFramework, RoutingTablePath)
     nodeCache.getListenable.addListener(this)
@@ -33,7 +24,7 @@ class RoutingTableWatcher(curatorFramework: CuratorFramework) extends NodeCacheL
 
   override def nodeChanged() {
     val changedData = routingTableWatcher.getCurrentData.getData
-    userActionSupervisor.tell(SyncRoutingTable(Json.parse(changedData).as[JsArray]), sender)
+    Authenticated.syncRoutingTable(Json.parse(changedData).as[JsArray])
   }
 
   override def preStart() {

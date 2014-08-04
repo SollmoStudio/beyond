@@ -1,6 +1,5 @@
 package beyond
 
-import beyond.UserActionActor.RequestWithUsername
 import beyond.route.RouteAddress
 import beyond.route.RoutingTableView
 import beyond.route.RoutingTableView.HandleHere
@@ -12,7 +11,10 @@ import play.api.mvc.Request
 import play.api.mvc.Result
 import play.api.mvc.Results.Forbidden
 import play.api.mvc.Results.Status
+import play.api.mvc.WrappedRequest
 import scala.concurrent.Future
+
+class RequestWithUsername[A](val username: String, request: Request[A]) extends WrappedRequest[A](request)
 
 object Authenticated extends ActionBuilder[RequestWithUsername] with Logging {
   private var routingTable: RoutingTableView = new RoutingTableView(BeyondConfiguration.currentServerRouteAddress)
