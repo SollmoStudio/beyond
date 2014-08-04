@@ -18,8 +18,6 @@ object BeyondSupervisor {
 
   val RootActorPath: ActorPath = new RootActorPath(Address("akka", "application"))
   val BeyondSupervisorPath: ActorPath = RootActorPath / "user" / BeyondSupervisor.Name
-  val UserActionSupervisorPath: ActorPath = BeyondSupervisorPath / UserActionSupervisor.Name
-  val UserActionActorPath: ActorPath = UserActionSupervisorPath / UserActionActor.Name
 }
 
 class BeyondSupervisor extends Actor {
@@ -30,7 +28,6 @@ class BeyondSupervisor extends Actor {
   context.actorOf(Props(classOf[GamePlugin], "main.js"), GamePlugin.Name)
   context.actorOf(Props[SystemMetricsSupervisor], SystemMetricsSupervisor.Name)
   context.actorOf(Props[CuratorSupervisor], CuratorSupervisor.Name)
-  context.actorOf(Props[UserActionSupervisor], UserActionSupervisor.Name)
 
   override val supervisorStrategy =
     OneForOneStrategy() {
