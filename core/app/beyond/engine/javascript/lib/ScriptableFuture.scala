@@ -18,7 +18,7 @@ import scala.util.Success
 object ScriptableFuture {
   import com.beyondframework.rhino.RhinoConversions._
 
-  private def executeCallback(contextFactory: ContextFactory, callback: Function, callbackArgs: Array[AnyRef]) = {
+  private def executeCallback(contextFactory: ContextFactory, callback: Function, callbackArgs: Array[AnyRef]): AnyRef = {
     val beyondContextFactory = contextFactory.asInstanceOf[BeyondContextFactory]
     val scope = beyondContextFactory.global
     beyondContextFactory.call { context: Context =>
