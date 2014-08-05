@@ -33,6 +33,13 @@ object ScriptableFuture {
     ScriptableFuture(context, newFuture)
   }
 
+  def jsStaticFunction_firstCompletedOf(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val futures: Seq[Future[AnyRef]] = args.map(_.asInstanceOf[ScriptableFuture].future).toSeq
+    val newFuture: Future[AnyRef] = Future.firstCompletedOf(futures)
+    ScriptableFuture(context, newFuture)
+  }
+
   def jsFunction_onComplete(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[Function]

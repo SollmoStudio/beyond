@@ -24,6 +24,14 @@ exports.handle = function (req) {
               var sum = values.reduce(function (acc, v) { return acc + v; });
               return response.create(sum);
             });
+        case "firstCompletedOf":
+            var f1 = future.successful(1);
+            var f2 = future.successful(2);
+            var f3 = future.successful(3);
+            var f4 = future.successful(4);
+            return Future.firstCompletedOf(f1, f2, f3, f4).map(function (value) {
+                return response.create(value);
+            });
         case "jsonRequest":
             return new Response(req.bodyAsJsonString);
         case "jsonResponse":
