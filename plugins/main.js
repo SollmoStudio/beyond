@@ -15,6 +15,9 @@ exports.handle = function (req) {
             return future.create(function () {
                 return new Response('Hello future ' + req.uri + ' ' + counter.count());
             });
+        case "successful":
+            var f = future.successful(1);
+            return f.map(function (v) { return response.create(v); });
         case "sequence":
             var f1 = future.successful(1);
             var f2 = future.successful(2);

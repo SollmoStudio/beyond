@@ -1,5 +1,5 @@
 exports.successful = function (value) {
-    return new Future(function () { return value; });
+    return Future.successful(value);
 }
 
 exports.failed = function (message) {
