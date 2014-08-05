@@ -10,7 +10,13 @@ var schema = new db.Schema(1, {
 var collection = new Collection("example.keyValue", schema);
 
 exports.insert = function (key, value) {
-    return collection.insert({key: key, value: value, time: new Date()}).onComplete(console.log);
+    return collection.insert({key: key, value: value, time: new Date()})
+        .onFailure(console.error)
+        .onSuccess(function (doc) {
+            console.info(
+                "New document{ _id: %s, key: %s, value: %s, time: %s } is inserted.",
+                doc.objectID, doc.key(), doc.value(), doc.time());
+        });
 }
 
 exports.find = function () {

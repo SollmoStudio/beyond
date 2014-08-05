@@ -11,6 +11,7 @@ import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.annotations.JSFunction
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.bson.BSONDocument
+import reactivemongo.bson.BSONObjectID
 import reactivemongo.bson.BSONValue
 import reactivemongo.core.commands.LastError
 import scala.concurrent.ExecutionContext
@@ -20,10 +21,18 @@ object ScriptableCollection {
   @JSFunction
   def insert(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
     val dataToInsert = args(0).asInstanceOf[ScriptableObject]
     val insertQueryResult = thisCollection.insertInternal(dataToInsert)
-    ScriptableFuture(context, insertQueryResult)
+
+    import com.beyondframework.rhino.RhinoConversions._
+    val scriptableDocument = insertQueryResult.map { document =>
+      beyondContextFactory.call { context: Context =>
+        ScriptableDocument(context, thisCollection.fields, document)
+      }
+    }
+    ScriptableFuture(context, scriptableDocument)
   }
 
   @JSFunction
@@ -106,12 +115,18 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
   private def fields: Seq[Field] = schema.fields
 
   // Cannot use name 'insert', because static forwarder is not generated when the companion object and class have the same name method.
-  private def insertInternal(obj: ScriptableObject)(implicit ec: ExecutionContext): Future[LastError] = {
+  private def insertInternal(obj: ScriptableObject)(implicit ec: ExecutionContext): Future[BSONDocument] = {
     val dataToBeInserted: Seq[(String, BSONValue)] = schema.fields.map { field =>
       // FIXME: Handle default and optional value.
       field.name -> AnyRefTypedBSONHandler.write(field, obj.get(field.name))
     }
-    collection.insert(BSONDocument(dataToBeInserted))
+    val documentToBeInserted = BSONDocument(dataToBeInserted.+:("_id" -> BSONObjectID.generate))
+    collection.insert(documentToBeInserted).map[BSONDocument] {
+      case lastError if lastError.inError =>
+        throw new Exception(lastError.message)
+      case _ =>
+        documentToBeInserted
+    }
   }
 
   // Cannot use name 'find', because static forwarder is not generated when the companion object and class have the same name method.
