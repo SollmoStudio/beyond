@@ -82,8 +82,13 @@ object ScriptableCollection {
   }
 
   @JSFunction
-  def save(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableDocument =
-    ???
+  def save(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
+    val dataToUpdate = args(0).asInstanceOf[ScriptableDocument]
+    val insertQueryResult = thisCollection.saveInternal(dataToUpdate)
+    ScriptableFuture(context, insertQueryResult)
+  }
 
   def jsConstructor(context: Context, args: Array[AnyRef], constructor: Function, inNewExpr: Boolean): ScriptableCollection = {
     val name = args(0).asInstanceOf[String]
@@ -120,4 +125,11 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
   // Cannot use name 'remove', because static forwarder is not generated when the companion object and class have the same name method.
   private def removeInternal(query: ScriptableQuery, firstMatchOnly: Boolean = false)(implicit ec: ExecutionContext): Future[LastError] =
     collection.remove(query.query, firstMatchOnly = firstMatchOnly)
+
+  // Cannot use name 'save', because static forwarder is not generated when the companion object and class have the same name method.
+  private def saveInternal(dataToBeUpdated: ScriptableDocument)(implicit ec: ExecutionContext): Future[LastError] = {
+    val objectID = BSONDocument("_id" -> dataToBeUpdated.objectID)
+    val modifier = BSONDocument("$set" -> dataToBeUpdated.modifier)
+    collection.update(objectID, modifier)
+  }
 }
