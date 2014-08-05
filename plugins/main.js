@@ -15,6 +15,15 @@ exports.handle = function (req) {
             return future.create(function () {
                 return new Response('Hello future ' + req.uri + ' ' + counter.count());
             });
+        case "sequence":
+            var f1 = future.successful(1);
+            var f2 = future.successful(2);
+            var f3 = future.successful(3);
+            var f4 = future.successful(4);
+            return Future.sequence(f1, f2, f3, f4).map(function (values) {
+              var sum = values.reduce(function (acc, v) { return acc + v; });
+              return response.create(sum);
+            });
         case "jsonRequest":
             return new Response(req.bodyAsJsonString);
         case "jsonResponse":
