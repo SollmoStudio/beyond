@@ -1,7 +1,7 @@
 var counter = require("counter");
 var db = require("examples/db");
 var future = require("future");
-var response = require("response");
+var Response = require("response").Response;
 
 exports.handle = function (req) {
     var tokens = req.uri.split("/");
@@ -17,7 +17,7 @@ exports.handle = function (req) {
             });
         case "successful":
             var f = future.successful(1);
-            return f.map(function (v) { return response.create(v); });
+            return f.map(function (v) { return new Response(v); });
         case "sequence":
             var f1 = future.successful(1);
             var f2 = future.successful(2);
@@ -25,7 +25,7 @@ exports.handle = function (req) {
             var f4 = future.successful(4);
             return Future.sequence(f1, f2, f3, f4).map(function (values) {
               var sum = values.reduce(function (acc, v) { return acc + v; });
-              return response.create(sum);
+              return new Response(sum);
             });
         case "firstCompletedOf":
             var f1 = future.successful(1);
@@ -33,13 +33,13 @@ exports.handle = function (req) {
             var f3 = future.successful(3);
             var f4 = future.successful(4);
             return Future.firstCompletedOf(f1, f2, f3, f4).map(function (value) {
-                return response.create(value);
+                return new Response(value);
             });
         case "jsonRequest":
             return new Response(req.bodyAsJsonString);
         case "jsonResponse":
             var jsonMessage = {status: "ok", msg: "Hello World" };
-            return response.create(jsonMessage);
+            return new Response(jsonMessage);
         case "contentType":
             return new Response(req.contentType);
         case "secure":
@@ -78,7 +78,7 @@ exports.handle = function (req) {
             break;
         case "save":
             var saveResult = db.save.apply(db.save, tokens)
-            return response.create(saveResult)
+            return new Response(saveResult)
         default:
             break;
     }

@@ -8,6 +8,7 @@ import beyond.engine.javascript.lib.ScriptableResponse
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.ScriptableObject
 import play.api.mvc.Request
 import play.api.mvc.Result
 import scala.concurrent.ExecutionContext
@@ -18,18 +19,20 @@ class GamePluginWorker(engine: BeyondJavaScriptEngine, handler: Function) extend
   import beyond.plugin.GamePlugin._
   implicit val ec: ExecutionContext = context.dispatcher
 
-  private def handle[A](request: Request[A]): Future[Result] = {
-    val response = engine.contextFactory.call { cx: Context =>
-      val scope = engine.global
-      val scriptableRequest: Scriptable = cx.newObject(scope, "Request", Array(request))
-      val args: Array[AnyRef] = Array(scriptableRequest)
-      handler.call(cx, scope, scope, args)
-    }
+  private def handle[A](request: Request[A]): Future[Result] = engine.contextFactory.call { cx: Context =>
+    val scope = engine.global
+    val scriptableRequest: Scriptable = cx.newObject(scope, "Request", Array(request))
+    val args: Array[AnyRef] = Array(scriptableRequest)
+    val response = handler.call(cx, scope, scope, args)
     response match {
-      case scriptableResponse: ScriptableResponse => Future.successful(scriptableResponse.result)
-      case scriptableFuture: ScriptableFuture => scriptableFuture.future.mapTo[ScriptableResponse].map(_.result)
+      case f: ScriptableFuture =>
+        f.future.mapTo[ScriptableObject].map(
+          ScriptableObject.getProperty(_, "_response").asInstanceOf[ScriptableResponse].result)
+      case obj: ScriptableObject =>
+        val scriptableResponse = ScriptableObject.getProperty(obj, "_response").asInstanceOf[ScriptableResponse]
+        Future.successful(scriptableResponse.result)
     }
-  }
+  }.asInstanceOf[Future[Result]]
 
   private def invokeFunction(function: Function, args: Array[AnyRef]) {
     engine.contextFactory.call { cx: Context =>
