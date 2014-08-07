@@ -3,12 +3,13 @@ package beyond.engine.javascript.lib.database
 import beyond.MongoMixin
 import beyond.engine.javascript.BeyondContext
 import beyond.engine.javascript.BeyondContextFactory
+import beyond.engine.javascript.JSArray
+import beyond.engine.javascript.JSFunction
 import beyond.engine.javascript.lib.ScriptableFuture
 import org.mozilla.javascript.Context
-import org.mozilla.javascript.Function
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
-import org.mozilla.javascript.annotations.JSFunction
+import org.mozilla.javascript.annotations.{ JSFunction => JSFunctionAnnotation }
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONObjectID
@@ -18,8 +19,8 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
 object ScriptableCollection {
-  @JSFunction
-  def insert(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+  @JSFunctionAnnotation
+  def insert(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
@@ -35,8 +36,8 @@ object ScriptableCollection {
     ScriptableFuture(context, scriptableDocument)
   }
 
-  @JSFunction
-  def find(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+  @JSFunctionAnnotation
+  def find(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
@@ -52,8 +53,8 @@ object ScriptableCollection {
     ScriptableFuture(context, convertedToScriptableDocumentFuture)
   }
 
-  @JSFunction
-  def findOne(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+  @JSFunctionAnnotation
+  def findOne(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
@@ -72,8 +73,8 @@ object ScriptableCollection {
     ScriptableFuture(context, convertedToScriptableDocumentResult)
   }
 
-  @JSFunction
-  def remove(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+  @JSFunctionAnnotation
+  def remove(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
     val removeQuery = args(0).asInstanceOf[ScriptableQuery]
@@ -81,8 +82,8 @@ object ScriptableCollection {
     ScriptableFuture(context, removeResult)
   }
 
-  @JSFunction
-  def removeOne(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+  @JSFunctionAnnotation
+  def removeOne(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
     val removeQuery = args(0).asInstanceOf[ScriptableQuery]
@@ -90,8 +91,8 @@ object ScriptableCollection {
     ScriptableFuture(context, removeResult)
   }
 
-  @JSFunction
-  def save(context: Context, thisObj: Scriptable, args: Array[AnyRef], function: Function): ScriptableFuture = {
+  @JSFunctionAnnotation
+  def save(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
     val dataToUpdate = args(0).asInstanceOf[ScriptableDocument]
@@ -99,7 +100,7 @@ object ScriptableCollection {
     ScriptableFuture(context, insertQueryResult)
   }
 
-  def jsConstructor(context: Context, args: Array[AnyRef], constructor: Function, inNewExpr: Boolean): ScriptableCollection = {
+  def jsConstructor(context: Context, args: JSArray, constructor: JSFunction, inNewExpr: Boolean): ScriptableCollection = {
     val name = args(0).asInstanceOf[String]
     val schema = args(1).asInstanceOf[ScriptableSchema]
     new ScriptableCollection(name, schema)

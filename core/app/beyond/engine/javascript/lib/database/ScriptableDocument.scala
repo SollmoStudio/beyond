@@ -1,9 +1,10 @@
 package beyond.engine.javascript.lib.database
 
 import beyond.engine.javascript.BeyondContextFactory
+import beyond.engine.javascript.JSArray
+import beyond.engine.javascript.JSFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
-import org.mozilla.javascript.Function
 import org.mozilla.javascript.IdScriptableObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
@@ -20,7 +21,7 @@ object ScriptableDocument {
 
   // This constructor is used internally. Users are not allowed to construct an instance directly.
   // A user must get a ScriptableDocument from either ScriptableCollection.find() or ScriptableCollection.findOne().
-  def jsConstructor(context: Context, args: Array[AnyRef], constructor: Function, inNewExpr: Boolean): ScriptableDocument = {
+  def jsConstructor(context: Context, args: JSArray, constructor: JSFunction, inNewExpr: Boolean): ScriptableDocument = {
     val fields = args(0).asInstanceOf[Seq[Field]]
     val currentValueInDB = args(1).asInstanceOf[BSONDocument]
     new ScriptableDocument(fields, currentValueInDB)
@@ -29,7 +30,7 @@ object ScriptableDocument {
   private[database] def apply(context: Context, fields: Seq[Field], document: BSONDocument): ScriptableDocument = {
     val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val scope = beyondContextFactory.global
-    val args: Array[AnyRef] = Array(fields, document)
+    val args: JSArray = Array(fields, document)
     context.newObject(scope, "Document", args).asInstanceOf[ScriptableDocument]
   }
 }
@@ -77,7 +78,7 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) ex
 
   private def newGetterFor(id: Int): Callable = new Callable() {
     val name = getInstanceIdName(id)
-    override def call(cx: Context, scope: Scriptable, thisObj: Scriptable, args: Array[AnyRef]): AnyRef = {
+    override def call(cx: Context, scope: Scriptable, thisObj: Scriptable, args: JSArray): AnyRef = {
       args match {
         case Array() =>
           currentValue(name)

@@ -1,8 +1,9 @@
 package beyond.engine.javascript.lib
 
+import beyond.engine.javascript.JSArray
+import beyond.engine.javascript.JSFunction
 import com.beyondframework.rhino.ScriptableMap
 import org.mozilla.javascript.Context
-import org.mozilla.javascript.Function
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.annotations.JSGetter
@@ -13,7 +14,7 @@ import play.api.mvc.AnyContent
 import play.api.mvc.Request
 
 object ScriptableRequest {
-  def jsConstructor(context: Context, args: Array[AnyRef], constructor: Function, inNewExpr: Boolean): ScriptableRequest = {
+  def jsConstructor(context: Context, args: JSArray, constructor: JSFunction, inNewExpr: Boolean): ScriptableRequest = {
     var request = args(0).asInstanceOf[Request[AnyContent]]
     new ScriptableRequest(request)
   }
