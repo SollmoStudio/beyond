@@ -36,7 +36,7 @@ exports.handle = function (req) {
                 return new Response(value);
             });
         case "jsonRequest":
-            return new Response(req.bodyAsJsonString);
+            return new Response(req.bodyAsJson);
         case "jsonResponse":
             var jsonMessage = {status: "ok", msg: "Hello World" };
             return new Response(jsonMessage);

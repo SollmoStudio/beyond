@@ -21,6 +21,7 @@ class GamePluginWorker(engine: BeyondJavaScriptEngine, handler: Function) extend
 
   private def handle[A](request: Request[A]): Future[Result] = engine.contextFactory.call { cx: Context =>
     val scope = engine.global
+
     val scriptableRequest: Scriptable = cx.newObject(scope, "Request", Array(request))
     val args: Array[AnyRef] = Array(scriptableRequest)
     val response = handler.call(cx, scope, scope, args)

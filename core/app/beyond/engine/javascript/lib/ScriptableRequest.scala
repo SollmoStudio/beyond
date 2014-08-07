@@ -23,7 +23,7 @@ object ScriptableRequest {
 class ScriptableRequest(val request: Request[AnyContent]) extends ScriptableObject {
   def this() = this(null)
 
-  override def getClassName: String = "Request"
+  override def getClassName: String = "RequestInternal"
 
   @JSGetter
   def getBodyAsText: String = request.body.asText.getOrElse("")
