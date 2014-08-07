@@ -7,7 +7,7 @@ var schema = new db.Schema(1, {
     value: { type: 'double' },
     time: { type: 'date' }
 })
-var collection = new Collection("example.keyValue", schema);
+var collection = new db.Collection("example.keyValue", schema);
 
 exports.insert = function (key, value) {
     return collection.insert({key: key, value: value, time: new Date()})
