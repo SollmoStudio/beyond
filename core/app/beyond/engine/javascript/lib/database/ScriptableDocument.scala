@@ -8,6 +8,7 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.IdScriptableObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
+import org.mozilla.javascript.annotations.{ JSFunction => JSFunctionAnnotation }
 import org.mozilla.javascript.annotations.JSGetter
 import reactivemongo.bson.BSONValue
 import reactivemongo.bson.BSONDocument
@@ -32,6 +33,18 @@ object ScriptableDocument {
     val scope = beyondContextFactory.global
     val args: JSArray = Array(fields, document)
     context.newObject(scope, "Document", args).asInstanceOf[ScriptableDocument]
+  }
+
+  @JSFunctionAnnotation
+  def toJSON(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): Scriptable = {
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val scope = beyondContextFactory.global
+    val obj = context.newObject(scope)
+    thisObj.asInstanceOf[ScriptableDocument].currentValues.foreach {
+      case (name, value) =>
+        obj.put(name, obj, value.toString)
+    }
+    obj
   }
 }
 
@@ -102,4 +115,9 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) ex
       val field = fieldByName(name)
       AnyRefTypedBSONHandler.read(field, bsonValue)
     }.getOrElse(Undefined.instance)
+
+  private def currentValues: Seq[(String, AnyRef)] =
+    fields.map { field =>
+      field.name -> currentValue(field.name)
+    }
 }
