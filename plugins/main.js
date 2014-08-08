@@ -56,7 +56,7 @@ exports.handle = function (req) {
             return new Response("body = " + req.bodyAsText);
         case "postFormUrlEncoded":
             var body = "";
-            var obj = req.bodyAsFormUrlEncoded
+            var obj = req.bodyAsFormUrlEncoded;
             for (var prop in obj) {
                 body += prop + " = " + obj[prop] + ";";
             }
@@ -77,10 +77,10 @@ exports.handle = function (req) {
             db.removeOne.apply(db.remove, tokens);
             break;
         case "save":
-            var saveResult = db.save.apply(db.save, tokens)
-            return new Response(saveResult)
+            var saveResult = db.save.apply(db.save, tokens);
+            return new Response(saveResult);
         default:
             break;
     }
     return new Response("Hello World");
-}
+};
