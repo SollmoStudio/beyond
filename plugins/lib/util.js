@@ -32,4 +32,4 @@ exports.format = function (inputString) {
     extraTokens = tokens.slice(index);
     extraTokens.unshift(middleStage);
     return extraTokens.join(' ');
-}
+};
