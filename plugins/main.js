@@ -2,6 +2,7 @@ var counter = require("counter");
 var db = require("examples/db");
 var future = require("future");
 var Response = require("response").Response;
+var uuid = require("uuid");
 
 exports.handle = function (req) {
     var tokens = req.uri.split("/");
@@ -15,6 +16,8 @@ exports.handle = function (req) {
             return future.create(function () {
                 return new Response('Hello future ' + req.uri + ' ' + counter.count());
             });
+        case "uuid":
+            return new Response(uuid.v4());
         case "successful":
             var f = future.successful(1);
             return f.map(function (v) { return new Response(v); });
