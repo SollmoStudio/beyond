@@ -85,25 +85,26 @@ package object database {
     private def apply(name: String, tpe: String, option: ScriptableObject): Field = {
       // ScriptRuntime treats null as false.
       val isOptional = ScriptRuntime.toBoolean(option.get("optional"))
+      val defaultValue = Option(option.get("default"))
       tpe match {
-        case "string" => StringField(name, isOptional)
-        case "int" => IntField(name, isOptional)
-        case "date" => DateField(name, isOptional)
-        case "long" => LongField(name, isOptional)
-        case "double" => DoubleField(name, isOptional)
-        case "boolean" => BooleanField(name, isOptional)
+        case "string" => StringField(name, isOptional, defaultValue)
+        case "int" => IntField(name, isOptional, defaultValue)
+        case "date" => DateField(name, isOptional, defaultValue)
+        case "long" => LongField(name, isOptional, defaultValue)
+        case "double" => DoubleField(name, isOptional, defaultValue)
+        case "boolean" => BooleanField(name, isOptional, defaultValue)
         case "reference" =>
           val collection = Option(option.get("collection")).asInstanceOf[Option[ScriptableCollection]]
-          ReferenceField(name, collection.getOrElse(throw new IllegalArgumentException("The reference type must have collection")), isOptional)
+          ReferenceField(name, collection.getOrElse(throw new IllegalArgumentException("The reference type must have collection")), isOptional, defaultValue)
         case "embedding" =>
           val schema = Option(option.get("schema")).asInstanceOf[Option[ScriptableSchema]]
-          EmbeddingField(name, schema.getOrElse(throw new IllegalArgumentException("The embedding type must have schema")), isOptional)
+          EmbeddingField(name, schema.getOrElse(throw new IllegalArgumentException("The embedding type must have schema")), isOptional, defaultValue)
         case "array" =>
           val elementType = Option(option.get("elementType"))
             .getOrElse(throw new IllegalArgumentException("The array type must have elementType"))
             .asInstanceOf[ScriptableObject]
           val elementField = Field(NoName, elementType)
-          ArrayField(name, elementField, isOptional)
+          ArrayField(name, elementField, isOptional, defaultValue)
       }
     }
   }
@@ -111,18 +112,23 @@ package object database {
   private[database] trait Field {
     val name: String
     val isOptional: Boolean
+    val defaultValue: Option[AnyRef]
   }
 
   // FIXME: Support complex type(embedding, referencing, array).
-  private[database] case class BooleanField(override val name: String, override val isOptional: Boolean) extends Field
-  private[database] case class IntField(override val name: String, override val isOptional: Boolean) extends Field
-  private[database] case class StringField(override val name: String, override val isOptional: Boolean) extends Field
-  private[database] case class DateField(override val name: String, override val isOptional: Boolean) extends Field
-  private[database] case class DoubleField(override val name: String, override val isOptional: Boolean) extends Field
-  private[database] case class LongField(override val name: String, override val isOptional: Boolean) extends Field
-  private[database] case class ReferenceField(override val name: String, collection: ScriptableCollection, override val isOptional: Boolean) extends Field
-  private[database] case class EmbeddingField(override val name: String, schema: ScriptableSchema, override val isOptional: Boolean) extends Field
-  private[database] case class ArrayField(override val name: String, elementType: Field, override val isOptional: Boolean) extends Field
+  private[database] case class BooleanField(override val name: String, override val isOptional: Boolean,
+    override val defaultValue: Option[AnyRef]) extends Field
+  private[database] case class IntField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef]) extends Field
+  private[database] case class StringField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef]) extends Field
+  private[database] case class DateField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef]) extends Field
+  private[database] case class DoubleField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef]) extends Field
+  private[database] case class LongField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef]) extends Field
+  private[database] case class ReferenceField(override val name: String, collection: ScriptableCollection, override val isOptional: Boolean,
+    override val defaultValue: Option[AnyRef]) extends Field
+  private[database] case class EmbeddingField(override val name: String, schema: ScriptableSchema, override val isOptional: Boolean,
+    override val defaultValue: Option[AnyRef]) extends Field
+  private[database] case class ArrayField(override val name: String, elementType: Field, override val isOptional: Boolean,
+    override val defaultValue: Option[AnyRef]) extends Field
 
   private[database] def convertScalaToJavaScript(value: AnyRef)(implicit context: Context, scope: Scriptable): AnyRef = value match {
     case number: jl.Number =>
@@ -151,33 +157,35 @@ package object database {
   }
   // FIXME: Handle default and optional value.
   private[database] def convertJavaScriptToScalaWithField(value: AnyRef)(implicit field: Field): AnyRef = (value, field) match {
+    case (null, field: Field) if field.defaultValue.isDefined =>
+      null
     case (null, field: Field) if field.isOptional =>
       null
     case (null, field: Field) =>
       throw new IllegalArgumentException(s"$field is not optional field.")
     case (native: NativeJavaObject, field: Field) =>
       convertJavaScriptToScalaWithField(native.unwrap())(field)
-    case (_, IntField(_, _)) =>
+    case (_, IntField(_, _, _)) =>
       Int.box(ScriptRuntime.toInt32(value))
-    case (_, DoubleField(_, _)) =>
+    case (_, DoubleField(_, _, _)) =>
       Double.box(ScriptRuntime.toNumber(value))
-    case (_, LongField(_, _)) =>
+    case (_, LongField(_, _, _)) =>
       Long.box(ScriptRuntime.toInteger(value).toLong)
-    case (_, StringField(_, _)) =>
+    case (_, StringField(_, _, _)) =>
       ScriptRuntime.toString(value)
-    case (_, BooleanField(_, _)) =>
+    case (_, BooleanField(_, _, _)) =>
       Boolean.box(ScriptRuntime.toBoolean(value))
-    case (date: Date, DateField(_, _)) =>
+    case (date: Date, DateField(_, _, _)) =>
       date
-    case (_, DateField(_, _)) =>
+    case (_, DateField(_, _, _)) =>
       new Date(ScriptRuntime.toInteger(value).toLong)
-    case (obj: ScriptableDocument, ReferenceField(_, _, _)) =>
+    case (obj: ScriptableDocument, ReferenceField(_, _, _, _)) =>
       ObjectId(obj.objectID)
-    case (objectID: ObjectId, ReferenceField(_, _, _)) =>
+    case (objectID: ObjectId, ReferenceField(_, _, _, _)) =>
       objectID
-    case (value: ScriptableObject, EmbeddingField(_, schema, _)) =>
+    case (value: ScriptableObject, EmbeddingField(_, schema, _, _)) =>
       convertJavaScriptObjectToScalaWithField(value)(schema.fields)
-    case (array: NativeArray, ArrayField(_, elementType, _)) =>
+    case (array: NativeArray, ArrayField(_, elementType, _, _)) =>
       array.toArray.map(convertJavaScriptToScalaWithField(_)(elementType)).toSeq
     case (_, _) =>
       throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a Scala object with $field type")
