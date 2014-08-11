@@ -64,7 +64,7 @@ object ScriptableCollection {
     import com.beyondframework.rhino.RhinoConversions._
     val convertedToScriptableDocumentResult = findResult.map {
       case None =>
-        throw new NoSuchElementException
+        null
       case Some(document) =>
         beyondContextFactory.call { context: Context =>
           ScriptableDocument(context, thisCollection.fields, document)
