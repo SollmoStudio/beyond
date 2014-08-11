@@ -11,9 +11,10 @@ import reactivemongo.bson.BSONArray
 import reactivemongo.bson.BSONDocument
 
 object ScriptableQuery {
-  // Cannot find eq method when @JSFunction annotation is used
-  // because static forwarder is not generated when the same name method exists in the class and companion object.
-  def jsFunction_eq(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableQuery = {
+  // Cannot use name eq because static forwarder is not generated
+  // when the same name method exists in the class and companion object.
+  @JSFunctionAnnotation("eq")
+  def jsEq(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableQuery = {
     val currentQuery: BSONDocument = thisObj.asInstanceOf[ScriptableQuery].query
     val field = args(0).asInstanceOf[String]
     val value = args(1)

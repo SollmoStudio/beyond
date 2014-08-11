@@ -11,6 +11,8 @@ import org.mozilla.javascript.RhinoException
 import org.mozilla.javascript.ScriptRuntime
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.annotations.{ JSFunction => JSFunctionAnnotation }
+import org.mozilla.javascript.annotations.JSStaticFunction
 import scala.concurrent.Future
 import scala.concurrent.Promise
 import scala.util.Failure
@@ -27,26 +29,30 @@ object ScriptableFuture {
     }
   }
 
-  def jsStaticFunction_successful(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+  @JSStaticFunction
+  def successful(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     val newFuture = Future.successful(args(0))
     ScriptableFuture(context, newFuture)
   }
 
-  def jsStaticFunction_sequence(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+  @JSStaticFunction
+  def sequence(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val futures: Seq[Future[AnyRef]] = args.map(_.asInstanceOf[ScriptableFuture].future).toSeq
     val newFuture: Future[JSArray] = Future.sequence(futures).map(_.toArray)
     ScriptableFuture(context, newFuture)
   }
 
-  def jsStaticFunction_firstCompletedOf(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+  @JSStaticFunction
+  def firstCompletedOf(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val futures: Seq[Future[AnyRef]] = args.map(_.asInstanceOf[ScriptableFuture].future).toSeq
     val newFuture: Future[AnyRef] = Future.firstCompletedOf(futures)
     ScriptableFuture(context, newFuture)
   }
 
-  def jsFunction_onComplete(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+  @JSFunctionAnnotation
+  def onComplete(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[JSFunction]
     val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
@@ -64,7 +70,8 @@ object ScriptableFuture {
     thisFuture
   }
 
-  def jsFunction_onSuccess(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+  @JSFunctionAnnotation
+  def onSuccess(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[JSFunction]
     val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
@@ -76,7 +83,8 @@ object ScriptableFuture {
     thisFuture
   }
 
-  def jsFunction_onFailure(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+  @JSFunctionAnnotation
+  def onFailure(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[JSFunction]
     val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
@@ -91,7 +99,8 @@ object ScriptableFuture {
     thisFuture
   }
 
-  def jsFunction_map(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+  @JSFunctionAnnotation
+  def map(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[JSFunction]
     val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.map { result =>
@@ -102,7 +111,8 @@ object ScriptableFuture {
     ScriptableFuture(context, newFuture)
   }
 
-  def jsFunction_flatMap(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+  @JSFunctionAnnotation
+  def flatMap(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[JSFunction]
     val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.flatMap { result =>
@@ -125,7 +135,8 @@ object ScriptableFuture {
     ScriptableFuture(context, newFuture)
   }
 
-  def jsFunction_filter(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+  @JSFunctionAnnotation
+  def filter(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[JSFunction]
     val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.filter { result =>
@@ -137,7 +148,8 @@ object ScriptableFuture {
     ScriptableFuture(context, newFuture)
   }
 
-  def jsFunction_recover(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+  @JSFunctionAnnotation
+  def recover(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[JSFunction]
     val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.recover {
@@ -152,7 +164,8 @@ object ScriptableFuture {
     ScriptableFuture(context, newFuture)
   }
 
-  def jsFunction_transform(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+  @JSFunctionAnnotation
+  def transform(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
     val promise = Promise[AnyRef]()
