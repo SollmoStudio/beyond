@@ -9,6 +9,7 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.IdScriptableObject
 import org.mozilla.javascript.NativeJavaObject
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.annotations.{ JSFunction => JSFunctionAnnotation }
 import org.mozilla.javascript.annotations.JSGetter
 import reactivemongo.bson.BSONValue
@@ -103,16 +104,15 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) ex
   private def fieldByName(name: String): Field = fields.find(_.name == name).get
 
   private def currentJavaScriptValue(name: String)(implicit context: Context, scope: Scriptable): AnyRef = {
-    val bsonValue = currentBSONValue(name)
-    val scalaValue = AnyRefBSONHandler.read(bsonValue)
+    val scalaValue = currentBSONValue(name).map(AnyRefBSONHandler.read).getOrElse(fieldByName(name).defaultValue.getOrElse(Undefined.instance))
     convertScalaToJavaScript(scalaValue)(context, scope)
   }
 
-  private def currentBSONValue(name: String): BSONValue =
-    updatedValues.getOrElse(name, currentBSONValueInDB(name))
+  private def currentBSONValue(name: String): Option[BSONValue] =
+    updatedValues.get(name).map(Some(_)).getOrElse(currentBSONValueInDB(name))
 
-  private def currentBSONValueInDB(name: String): BSONValue =
-    currentValuesInDB.getAs[BSONValue](name).getOrElse(BSONUndefined)
+  private def currentBSONValueInDB(name: String): Option[BSONValue] =
+    currentValuesInDB.getAs[BSONValue](name)
 
   private def toScriptable(context: Context): Scriptable = {
     val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
