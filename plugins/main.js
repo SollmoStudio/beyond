@@ -1,6 +1,7 @@
 var console = require("console");
 var counter = require("counter");
 var db = require("examples/db");
+var fs = require("fs");
 var future = require("future");
 var Response = require("response").Response;
 var uuid = require("uuid");
@@ -114,6 +115,24 @@ exports.handle = function (req) {
         case "save":
             var saveResult = db.save.apply(db.save, tokens);
             return new Response(saveResult);
+        case "writeFile":
+            var fileName = decodeURIComponent(tokens[0]);
+            var content = req.bodyAsText;
+            var result = fs.writeFile(fileName, content, {
+                encoding: 'UTF-8',
+                mode: 0755
+            });
+            return result.map(function () {
+                return new Response(fileName + " written");
+            });
+        case "readFile":
+            var fileName = decodeURIComponent(tokens[0]);
+            var result = fs.readFile(fileName, {
+                encoding: 'UTF-8'
+            });
+            return result.map(function (data) {
+                return new Response(data);
+            });
         default:
             break;
     }
