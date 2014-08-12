@@ -76,7 +76,7 @@ object ScriptableFuture {
     val callback = args(0).asInstanceOf[JSFunction]
     val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
     thisFuture.future.onSuccess {
-      case result: AnyRef =>
+      case result =>
         val callbackArgs: JSArray = Array(result)
         executeCallback(context.getFactory, callback, callbackArgs)
     }
