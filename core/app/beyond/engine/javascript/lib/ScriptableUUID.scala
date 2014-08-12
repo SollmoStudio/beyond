@@ -6,10 +6,10 @@ import java.util.UUID
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
-import org.mozilla.javascript.annotations.JSStaticFunction
+import org.mozilla.javascript.annotations.{ JSStaticFunction => JSStaticFunctionAnnotation }
 
 object ScriptableUUID {
-  @JSStaticFunction
+  @JSStaticFunctionAnnotation
   def v4(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): String =
     UUID.randomUUID().toString
 

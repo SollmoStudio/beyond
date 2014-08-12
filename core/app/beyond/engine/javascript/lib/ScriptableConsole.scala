@@ -6,30 +6,30 @@ import beyond.engine.javascript.JSFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
-import org.mozilla.javascript.annotations.JSStaticFunction
+import org.mozilla.javascript.annotations.{ JSStaticFunction => JSStaticFunctionAnnotation }
 
 object ScriptableConsole {
-  @JSStaticFunction
+  @JSStaticFunctionAnnotation
   def log(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction) {
     context.asInstanceOf[BeyondContext].console.log(args(0).asInstanceOf[String])
   }
 
-  @JSStaticFunction
+  @JSStaticFunctionAnnotation
   def info(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction) {
     context.asInstanceOf[BeyondContext].console.info(args(0).asInstanceOf[String])
   }
 
-  @JSStaticFunction
+  @JSStaticFunctionAnnotation
   def warn(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction) {
     context.asInstanceOf[BeyondContext].console.warn(args(0).asInstanceOf[String])
   }
 
-  @JSStaticFunction
+  @JSStaticFunctionAnnotation
   def debug(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction) {
     context.asInstanceOf[BeyondContext].console.debug(args(0).asInstanceOf[String])
   }
 
-  @JSStaticFunction
+  @JSStaticFunctionAnnotation
   def error(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction) {
     context.asInstanceOf[BeyondContext].console.error(args(0).asInstanceOf[String])
   }

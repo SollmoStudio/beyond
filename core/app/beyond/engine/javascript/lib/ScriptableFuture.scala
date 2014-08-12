@@ -12,7 +12,7 @@ import org.mozilla.javascript.ScriptRuntime
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.annotations.{ JSFunction => JSFunctionAnnotation }
-import org.mozilla.javascript.annotations.JSStaticFunction
+import org.mozilla.javascript.annotations.{ JSStaticFunction => JSStaticFunctionAnnotation }
 import scala.concurrent.Future
 import scala.concurrent.Promise
 import scala.util.Failure
@@ -29,13 +29,13 @@ object ScriptableFuture {
     }
   }
 
-  @JSStaticFunction
+  @JSStaticFunctionAnnotation
   def successful(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     val newFuture = Future.successful(args(0))
     ScriptableFuture(context, newFuture)
   }
 
-  @JSStaticFunction
+  @JSStaticFunctionAnnotation
   def sequence(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val futures: Seq[Future[AnyRef]] = args.map(_.asInstanceOf[ScriptableFuture].future).toSeq
@@ -43,7 +43,7 @@ object ScriptableFuture {
     ScriptableFuture(context, newFuture)
   }
 
-  @JSStaticFunction
+  @JSStaticFunctionAnnotation
   def firstCompletedOf(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val futures: Seq[Future[AnyRef]] = args.map(_.asInstanceOf[ScriptableFuture].future).toSeq
