@@ -187,6 +187,27 @@ object ScriptableFuture {
     ScriptableFuture(context, promise.future)
   }
 
+  @JSFunctionAnnotation
+  def andThen(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
+    val callback = args(0).asInstanceOf[JSFunction]
+    val newFuture = thisFuture.future.andThen {
+      case result =>
+        val callbackArgs: JSArray = result match {
+          case Success(result) =>
+            Array(result, new JavaBoolean(true))
+          case Failure(ex: RhinoException) =>
+            Array(ex.details(), new JavaBoolean(false))
+          case Failure(throwable) =>
+            Array(throwable.getMessage, new JavaBoolean(false))
+        }
+        executeCallback(context.getFactory, callback, callbackArgs)
+    }
+
+    ScriptableFuture(context, newFuture)
+  }
+
   def jsConstructor(context: Context, args: JSArray, constructor: JSFunction, inNewExpr: Boolean): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val newFuture = args(0) match {

@@ -1,3 +1,4 @@
+var console = require("console");
 var counter = require("counter");
 var db = require("examples/db");
 var future = require("future");
@@ -21,6 +22,13 @@ exports.handle = function (req) {
         case "successful":
             var f = future.successful(1);
             return f.map(function (v) { return new Response(v); });
+        case "andThen":
+            var f = future.successful(1);
+            return f.andThen(function (result, isSuccess) {
+              console.log("andThen1: " + result);
+            }).andThen(function (result, isSuccess) {
+              console.log("andThen2: " + result);
+            }).map(function (v) { return new Response(v); });
         case "sequence":
             var f1 = future.successful(1);
             var f2 = future.successful(2);
