@@ -19,6 +19,7 @@ import reactivemongo.bson.BSONHandler
 import reactivemongo.bson.BSONInteger
 import reactivemongo.bson.BSONJavaScript
 import reactivemongo.bson.BSONLong
+import reactivemongo.bson.BSONObjectID
 import reactivemongo.bson.BSONString
 import reactivemongo.bson.BSONUndefined
 import reactivemongo.bson.BSONValue
@@ -42,6 +43,10 @@ package object database {
       case seq: Seq[AnyRef] =>
         BSONArray(seq.map(write))
       case _: Undefined => BSONUndefined
+      case ObjectID(id) =>
+        id
+      case native: NativeJavaObject =>
+        write(native.unwrap())
       case _ =>
         throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a BSONValue")
     }
@@ -62,6 +67,7 @@ package object database {
       case array: BSONArray =>
         array.values.map(read)
       case BSONUndefined => Undefined.instance
+      case id: BSONObjectID => ObjectID(id)
       case _ =>
         throw new IllegalArgumentException(s"$bson cannot be a scala object")
     }

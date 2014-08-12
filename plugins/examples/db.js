@@ -96,3 +96,14 @@ exports.save = function () {
         return collection.save(result.value(newValue).time(new Date())).onComplete(console.log);
     });
 };
+
+exports.findOneWithKey = function (key) {
+    var query = db.query().eq("_id", db.ObjectID(key));
+    return collection.findOne(query).onComplete(function (result, isSuccess) {
+        if (isSuccess) {
+            console.log("%j", result);
+        } else {
+            console.error("Cannot find data. ERROR: %s", result);
+        }
+    });
+};
