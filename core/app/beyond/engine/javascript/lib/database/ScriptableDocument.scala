@@ -3,8 +3,10 @@ package beyond.engine.javascript.lib.database
 import beyond.engine.javascript.BeyondContextFactory
 import beyond.engine.javascript.JSArray
 import beyond.engine.javascript.JSFunction
+import java.util.Date
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.Function
 import org.mozilla.javascript.IdScriptableObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
