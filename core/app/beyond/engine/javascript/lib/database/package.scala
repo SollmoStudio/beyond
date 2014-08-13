@@ -74,7 +74,7 @@ package object database {
   }
 
   private[database] object Field {
-    def apply(name: String, tpe: String): Field =
+    def apply(name: String, tpe: String, option: ScriptableObject): Field =
       tpe match {
         case "string" => StringField(name)
         case "int" => IntField(name)
@@ -82,6 +82,9 @@ package object database {
         case "long" => LongField(name)
         case "double" => DoubleField(name)
         case "boolean" => BooleanField(name)
+        case "reference" =>
+          val collection = Option(option.get("collection")).asInstanceOf[Option[ScriptableCollection]]
+          ReferenceField(name, collection.getOrElse(throw new IllegalArgumentException("The reference type must have collection")))
       }
   }
 
@@ -95,6 +98,7 @@ package object database {
   private[database] case class DateField(override val name: String) extends Field
   private[database] case class DoubleField(override val name: String) extends Field
   private[database] case class LongField(override val name: String) extends Field
+  private[database] case class ReferenceField(override val name: String, collection: ScriptableCollection) extends Field
 
   private[database] def convertScalaToJavaScript(value: AnyRef)(implicit context: Context, scope: Scriptable): Scriptable = value match {
     case i: jl.Integer =>
@@ -126,32 +130,35 @@ package object database {
     case seq: Seq[AnyRef] =>
       val args: JSArray = seq.map(convertScalaToJavaScript).toArray
       context.newObject(scope, "Array", args)
+    case objectID: ObjectID =>
+      context.getWrapFactory.wrapNewObject(context, scope, objectID)
     case _ =>
       throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a JavaScript Object")
   }
-
   // FIXME: Handle default and optional value.
-  private[database] def convertJavaScriptToScalaWithField(value: AnyRef)(implicit field: Field): AnyRef = {
-    (value, field) match {
-      case (native: NativeJavaObject, field: Field) =>
-        convertJavaScriptToScalaWithField(native.unwrap())(field)
-      case (_, IntField(_)) =>
-        Int.box(ScriptRuntime.toInt32(value))
-      case (_, DoubleField(_)) =>
-        Double.box(ScriptRuntime.toNumber(value))
-      case (_, LongField(_)) =>
-        Long.box(ScriptRuntime.toInteger(value).toLong)
-      case (_, StringField(_)) =>
-        ScriptRuntime.toString(value)
-      case (_, BooleanField(_)) =>
-        Boolean.box(ScriptRuntime.toBoolean(value))
-      case (date: Date, DateField(_)) =>
-        date
-      case (_, DateField(_)) =>
-        new Date(ScriptRuntime.toInteger(value).toLong)
-      case _ =>
-        throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a Scala object with $field type")
-    }
+  private[database] def convertJavaScriptToScalaWithField(value: AnyRef)(implicit field: Field): AnyRef = (value, field) match {
+    case (native: NativeJavaObject, field: Field) =>
+      convertJavaScriptToScalaWithField(native.unwrap())(field)
+    case (_, IntField(_)) =>
+      Int.box(ScriptRuntime.toInt32(value))
+    case (_, DoubleField(_)) =>
+      Double.box(ScriptRuntime.toNumber(value))
+    case (_, LongField(_)) =>
+      Long.box(ScriptRuntime.toInteger(value).toLong)
+    case (_, StringField(_)) =>
+      ScriptRuntime.toString(value)
+    case (_, BooleanField(_)) =>
+      Boolean.box(ScriptRuntime.toBoolean(value))
+    case (date: Date, DateField(_)) =>
+      date
+    case (_, DateField(_)) =>
+      new Date(ScriptRuntime.toInteger(value).toLong)
+    case (obj: ScriptableDocument, ReferenceField(_, _)) =>
+      ObjectID(obj.objectID)
+    case (objectID: ObjectID, ReferenceField(_, _)) =>
+      objectID
+    case (_, _) =>
+      throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a Scala object with $field type")
   }
 
   private[database] def convertJavaScriptObjectToScalaWithField(obj: ScriptableObject)(implicit fields: Seq[Field]): Map[String, AnyRef] =

@@ -9,6 +9,14 @@ var schema = new db.Schema(1, {
 });
 var collection = new db.Collection("example.keyValue", schema);
 
+var schema2 = new db.Schema(1, {
+    key: { type: 'string' },
+    value: { type: 'double' },
+    time: { type: 'date' },
+    ref: { type: 'reference', collection: collection }
+});
+var collection2 = new db.Collection('example.reference', schema2);
+
 exports.insert = function (key, value) {
     return collection.insert({key: key, value: value, time: new Date()})
         .onFailure(console.error)
@@ -105,5 +113,56 @@ exports.findOneWithKey = function (key) {
         } else {
             console.error("Cannot find data. ERROR: %s", result);
         }
+    });
+};
+
+exports.referenceInsert = function (key) {
+    var query = db.query().eq("key", key);
+    return collection.findOne(query).onSuccess(function (result) {
+        console.log("document1: %j", result);
+    }).onFailure(function (message) {
+        console.error("Cannot find data. ERROR: %s", message);
+    }).map(function (data) {
+        console.log("ID: %s", data.objectID);
+        if (data) {
+            return collection2.insert({ key: data.key(), value: data.value(), time: data.time(), ref: data }).onComplete(console.error);
+        }
+        return null;
+    });
+};
+
+exports.referenceFindOne = function (key) {
+    var query = db.query().eq("key", key);
+    return collection2.findOne(query).flatMap(function (result) {
+        return result.ref();
+    }).onSuccess(function (result) {
+        console.log("Found data: %j", result);
+    }).onFailure(function (message) {
+        console.error("Cannot find data. ERROR: %s", message);
+    });
+};
+
+exports.referenceUpdate = function (key1, key2) {
+    var query1 = db.query().eq("key", key1);
+    var query2 = db.query().eq("key", key2);
+
+    return collection.findOne(query1).onSuccess(function (result) {
+        console.log("document1: %j", result);
+    }).onFailure(function (message) {
+        console.error("Cannot find document1: %s", message);
+    }).flatMap(function (document1) {
+        return collection2.findOne(query2).onSuccess(function (result) {
+            console.log("document2: %j", result);
+        }).onFailure(function (message) {
+            console.error("Cannot find document2: %s", message);
+        }).flatMap(function (document2) {
+            return document2.ref().onSuccess(function (result) {
+                console.log("document2.ref: %j", result);
+            }).onFailure(function (message) {
+                console.error("Cannot find documennt2.ref: %s", message);
+            }).flatMap(function () {
+                return collection2.save(document2.ref(document1));
+            });
+        });
     });
 };

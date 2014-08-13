@@ -6,6 +6,7 @@ import beyond.engine.javascript.JSFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.IdScriptableObject
+import org.mozilla.javascript.NativeJavaObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.annotations.{ JSFunction => JSFunctionAnnotation }
 import org.mozilla.javascript.annotations.JSGetter
@@ -85,7 +86,15 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) ex
     override def call(cx: Context, scope: Scriptable, thisObj: Scriptable, args: JSArray): AnyRef = {
       args match {
         case Array() =>
-          currentJavaScriptValue(name)(cx, scope)
+          (currentJavaScriptValue(name)(cx, scope), fieldByName(name)) match {
+            case (nativeObjectID: NativeJavaObject, ReferenceField(_, collection)) =>
+              val objectID = nativeObjectID.unwrap().asInstanceOf[ObjectID].bson
+              val query: JSArray = Array(ScriptableQuery(cx, BSONDocument("_id" -> objectID)))
+              // reference type field returns the future of document.
+              ScriptableCollection.findOne(cx, collection, query, null)
+            case (javaScriptValue, _) =>
+              javaScriptValue
+          }
         case Array(arg) =>
           implicit val field = fieldByName(name)
           val scalaValue = convertJavaScriptToScalaWithField(arg)
