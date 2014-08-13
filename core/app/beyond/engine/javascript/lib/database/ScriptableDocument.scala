@@ -7,18 +7,18 @@ import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.IdScriptableObject
 import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.annotations.{ JSFunction => JSFunctionAnnotation }
 import org.mozilla.javascript.annotations.JSGetter
 import reactivemongo.bson.BSONValue
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson.BSONUndefined
 import scala.collection.mutable.{ Map => MutableMap }
 import scalaz.syntax.std.boolean._
 
 object ScriptableDocument {
-  private type UpdatedValueTable = MutableMap[String, AnyRef]
-  private val emptyUpdatedValueTable = MutableMap.empty[String, AnyRef]
+  private type UpdatedValueTable = MutableMap[String, BSONValue]
+  private val emptyUpdatedValueTable = MutableMap.empty[String, BSONValue]
 
   // This constructor is used internally. Users are not allowed to construct an instance directly.
   // A user must get a ScriptableDocument from either ScriptableCollection.find() or ScriptableCollection.findOne().
@@ -36,16 +36,8 @@ object ScriptableDocument {
   }
 
   @JSFunctionAnnotation
-  def toJSON(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): Scriptable = {
-    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
-    val scope = beyondContextFactory.global
-    val obj = context.newObject(scope)
-    thisObj.asInstanceOf[ScriptableDocument].currentValues.foreach {
-      case (name, value) =>
-        obj.put(name, obj, value.toString)
-    }
-    obj
-  }
+  def toJSON(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): Scriptable =
+    thisObj.asInstanceOf[ScriptableDocument].toScriptable(context)
 }
 
 class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) extends IdScriptableObject {
@@ -59,14 +51,13 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) ex
   private val fieldsAccessors: MutableMap[Int, Callable] = MutableMap.empty[Int, Callable]
 
   def modifier: BSONDocument =
-    BSONDocument(updatedValues.map {
-      case (name, value) =>
-        val field = fieldByName(name)
-        (name, AnyRefTypedBSONHandler.write(field, value))
-    })
+    BSONDocument(updatedValues)
+
+  val objectIDOption: Option[BSONObjectID] =
+    currentValuesInDB.getAs[BSONObjectID]("_id")
 
   def objectID: BSONObjectID =
-    currentValuesInDB.getAs[BSONObjectID]("_id").getOrElse(throw new NoSuchElementException("ObjectID is not exists"))
+    objectIDOption.getOrElse(throw new NoSuchElementException("ObjectID is not exists"))
 
   @JSGetter
   def getObjectID: String =
@@ -94,9 +85,11 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) ex
     override def call(cx: Context, scope: Scriptable, thisObj: Scriptable, args: JSArray): AnyRef = {
       args match {
         case Array() =>
-          currentValue(name)
+          currentJavaScriptValue(name)(cx, scope)
         case Array(arg) =>
-          updatedValues.update(name, arg)
+          implicit val field = fieldByName(name)
+          val scalaValue = convertJavaScriptToScalaWithField(arg)
+          updatedValues.update(name, AnyRefBSONHandler.write(scalaValue))
           thisObj
         case _ =>
           throw new IllegalArgumentException(s"$name() method cannot get more than one argument.")
@@ -105,19 +98,34 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) ex
   }
 
   private def fieldByID(id: Int): Field = fields(id - 1)
+
   private def fieldByName(name: String): Field = fields.find(_.name == name).get
 
-  private def currentValue(name: String): AnyRef =
-    updatedValues.getOrElse(name, currentValueInDB(name))
+  private def currentJavaScriptValue(name: String)(implicit context: Context, scope: Scriptable): Scriptable = {
+    val bsonValue = currentBSONValue(name)
+    val scalaValue = AnyRefBSONHandler.read(bsonValue)
+    convertScalaToJavaScript(scalaValue)(context, scope)
+  }
 
-  private def currentValueInDB(name: String): AnyRef =
-    currentValuesInDB.getAs[BSONValue](name).map { bsonValue =>
-      val field = fieldByName(name)
-      AnyRefTypedBSONHandler.read(field, bsonValue)
-    }.getOrElse(Undefined.instance)
+  private def currentBSONValue(name: String): BSONValue =
+    updatedValues.getOrElse(name, currentBSONValueInDB(name))
 
-  private def currentValues: Seq[(String, AnyRef)] =
-    fields.map { field =>
-      field.name -> currentValue(field.name)
+  private def currentBSONValueInDB(name: String): BSONValue =
+    currentValuesInDB.getAs[BSONValue](name).getOrElse(BSONUndefined)
+
+  private def toScriptable(context: Context): Scriptable = {
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val scope = beyondContextFactory.global
+
+    val obj = context.newObject(scope)
+    objectIDOption.foreach { objectID =>
+      obj.put("_id", obj, objectID.stringify)
     }
+    fields.foreach { field =>
+      val name = field.name
+      val javaScriptValue = currentJavaScriptValue(name)(context, scope)
+      obj.put(name, obj, javaScriptValue)
+    }
+    obj
+  }
 }
