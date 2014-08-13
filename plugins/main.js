@@ -81,6 +81,15 @@ exports.handle = function (req) {
         case "findOne":
             db.findOne.apply(db.findOne, tokens);
             break;
+        case "referenceFindOne":
+            db.referenceFindOne(tokens[0]);
+            break;
+        case "referenceInsert":
+            db.referenceInsert(tokens[0]);
+            break;
+        case "referenceUpdate":
+            db.referenceUpdate(tokens[0], tokens[1]);
+            break;
         case "remove":
             db.remove.apply(db.remove, tokens);
             break;
