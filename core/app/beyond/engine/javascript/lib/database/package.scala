@@ -85,6 +85,9 @@ package object database {
         case "reference" =>
           val collection = Option(option.get("collection")).asInstanceOf[Option[ScriptableCollection]]
           ReferenceField(name, collection.getOrElse(throw new IllegalArgumentException("The reference type must have collection")))
+        case "embedding" =>
+          val schema = Option(option.get("schema")).asInstanceOf[Option[ScriptableSchema]]
+          EmbeddingField(name, schema.getOrElse(throw new IllegalArgumentException("The embedding type must have schema")))
       }
   }
 
@@ -99,6 +102,7 @@ package object database {
   private[database] case class DoubleField(override val name: String) extends Field
   private[database] case class LongField(override val name: String) extends Field
   private[database] case class ReferenceField(override val name: String, collection: ScriptableCollection) extends Field
+  private[database] case class EmbeddingField(override val name: String, schema: ScriptableSchema) extends Field
 
   private[database] def convertScalaToJavaScript(value: AnyRef)(implicit context: Context, scope: Scriptable): Scriptable = value match {
     case i: jl.Integer =>
@@ -157,6 +161,8 @@ package object database {
       ObjectID(obj.objectID)
     case (objectID: ObjectID, ReferenceField(_, _)) =>
       objectID
+    case (value: ScriptableObject, EmbeddingField(_, schema)) =>
+      convertJavaScriptObjectToScalaWithField(value)(schema.fields)
     case (_, _) =>
       throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a Scala object with $field type")
   }

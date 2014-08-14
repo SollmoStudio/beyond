@@ -99,6 +99,12 @@ exports.handle = function (req) {
         case "findOneWithKey":
             db.findOneWithKey(tokens[0]);
             break;
+        case "embeddingInsert":
+            db.embeddingInsert(tokens[0], tokens[1]);
+            break;
+        case "embeddingFind":
+            db.embeddingFind.apply(db.embeddingFind, tokens);
+            break;
         case "save":
             var saveResult = db.save.apply(db.save, tokens);
             return new Response(saveResult);

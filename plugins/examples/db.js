@@ -17,6 +17,11 @@ var schema2 = new db.Schema(1, {
 });
 var collection2 = new db.Collection('example.reference', schema2);
 
+var embeddingSchema = new db.Schema(1, {
+    embed: { type: 'embedding', schema: schema }
+});
+var embeddingCollection = new db.Collection('example.embedding', embeddingSchema);
+
 exports.insert = function (key, value) {
     return collection.insert({key: key, value: value, time: new Date()})
         .onFailure(console.error)
@@ -163,6 +168,31 @@ exports.referenceUpdate = function (key1, key2) {
             }).flatMap(function () {
                 return collection2.save(document2.ref(document1));
             });
+        });
+    });
+};
+
+exports.embeddingInsert = function (key, value) {
+    embeddingCollection.insert({ embed: {
+        key: key,
+        value: value,
+        time: new Date()
+    }}).onFailure(console.error).onSuccess(function (doc) {
+        console.log("doc: %j", doc);
+    });
+};
+
+exports.embeddingFind = function () {
+    var queries = Array.prototype.slice.call(arguments, 0).map(function (arg) {
+        return db.query().eq("embed.key", arg);
+    });
+    var emptyQuery = db.query();
+    var baseQuery = queries.shift();
+    var query = baseQuery.or.apply(baseQuery, queries);
+    embeddingCollection.find(query).onFailure(console.error).onSuccess(function (result) {
+        console.log(util.format("Find %d keyValue", result.length));
+        result.map(function (result) {
+            console.log(": %j", result);
         });
     });
 };
