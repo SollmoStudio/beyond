@@ -105,6 +105,12 @@ exports.handle = function (req) {
         case "embeddingFind":
             db.embeddingFind.apply(db.embeddingFind, tokens);
             break;
+        case "arrayInsert":
+            db.arrayInsert.apply(db.arrayInsert, tokens);
+            break;
+        case "arrayFindOne":
+            db.arrayFindOne(tokens[0]);
+            break;
         case "save":
             var saveResult = db.save.apply(db.save, tokens);
             return new Response(saveResult);

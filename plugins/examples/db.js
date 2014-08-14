@@ -22,6 +22,13 @@ var embeddingSchema = new db.Schema(1, {
 });
 var embeddingCollection = new db.Collection('example.embedding', embeddingSchema);
 
+var arraySchema = new db.Schema(1, {
+    intArray: { type: 'array', elementType: { type: 'int' } },
+    embedArray: { type: 'array', elementType: { type: 'embedding', schema: schema } },
+    refArray: { type: 'array', elementType: { type: 'reference', collection: collection } }
+});
+var arrayCollection = new db.Collection("example.array", arraySchema);
+
 exports.insert = function (key, value) {
     return collection.insert({key: key, value: value, time: new Date()})
         .onFailure(console.error)
@@ -198,5 +205,24 @@ exports.embeddingFind = function () {
         result.map(function (result) {
             console.log(": %j", result);
         });
+    });
+};
+
+exports.arrayInsert = function(refKey, key1, value1, key2, value2) {
+    var values = Array.prototype.slice.call(arguments, 5);
+    var refQuery = db.query().eq('key', refKey);
+    return collection.find(refQuery).onComplete(console.log).flatMap(function (refDocs) {
+        var e1 = { key: key1, value: value1 };
+        var e2 = { key: key2, value: value2 };
+        return arrayCollection
+            .insert({ intArray: values, refArray: refDocs, embedArray: [ e1, e2 ] })
+            .onComplete(console.log);
+    }).onComplete(console.log);
+};
+
+exports.arrayFindOne = function(key) {
+    var query = db.query().eq('_id', db.ObjectID(key));
+    return arrayCollection.findOne(query).onComplete(console.log).onSuccess(function (doc) {
+        console.log("%j", doc);
     });
 };

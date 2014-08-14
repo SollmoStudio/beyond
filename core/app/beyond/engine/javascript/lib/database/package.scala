@@ -6,6 +6,7 @@ import beyond.engine.javascript.JSArray
 import com.beyondframework.rhino.ContextOps._
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
+import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeJavaObject
 import org.mozilla.javascript.ScriptRuntime
 import org.mozilla.javascript.ScriptableObject
@@ -75,7 +76,13 @@ package object database {
   }
 
   private[database] object Field {
-    def apply(name: String, tpe: String, option: ScriptableObject): Field =
+    private val NoName: String = ""
+    def apply(name: String, fieldOption: ScriptableObject): Field = {
+      val fieldType = fieldOption.get("type").toString
+      Field(name, fieldType, fieldOption)
+    }
+
+    private def apply(name: String, tpe: String, option: ScriptableObject): Field =
       tpe match {
         case "string" => StringField(name)
         case "int" => IntField(name)
@@ -89,6 +96,12 @@ package object database {
         case "embedding" =>
           val schema = Option(option.get("schema")).asInstanceOf[Option[ScriptableSchema]]
           EmbeddingField(name, schema.getOrElse(throw new IllegalArgumentException("The embedding type must have schema")))
+        case "array" =>
+          val elementType = Option(option.get("elementType"))
+            .getOrElse(throw new IllegalArgumentException("The array type must have elementType"))
+            .asInstanceOf[ScriptableObject]
+          val elementField = Field(NoName, elementType)
+          ArrayField(name, elementField)
       }
   }
 
@@ -104,6 +117,7 @@ package object database {
   private[database] case class LongField(override val name: String) extends Field
   private[database] case class ReferenceField(override val name: String, collection: ScriptableCollection) extends Field
   private[database] case class EmbeddingField(override val name: String, schema: ScriptableSchema) extends Field
+  private[database] case class ArrayField(override val name: String, elementType: Field) extends Field
 
   private[database] def convertScalaToJavaScript(value: AnyRef)(implicit context: Context, scope: Scriptable): AnyRef = value match {
     case number: jl.Number =>
@@ -123,8 +137,7 @@ package object database {
       }
       obj
     case seq: Seq[AnyRef] =>
-      val args: JSArray = seq.map(convertScalaToJavaScript).toArray
-      context.newObject(scope, "Array", args)
+      context.newObject(scope, "Array", seq.map(convertScalaToJavaScript).toArray)
     case objectID: ObjectId =>
       context.getWrapFactory.wrapNewObject(context, scope, objectID)
     case _ =>
@@ -154,6 +167,8 @@ package object database {
       objectID
     case (value: ScriptableObject, EmbeddingField(_, schema)) =>
       convertJavaScriptObjectToScalaWithField(value)(schema.fields)
+    case (array: NativeArray, ArrayField(_, elementType)) =>
+      array.toArray.map(convertJavaScriptToScalaWithField(_)(elementType)).toSeq
     case (_, _) =>
       throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a Scala object with $field type")
   }

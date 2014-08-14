@@ -17,8 +17,7 @@ object ScriptableSchema {
     val fields = fieldsObject.getIds.map { key =>
       val fieldName = key.toString
       val fieldOption = fieldsObject.get(fieldName).asInstanceOf[ScriptableObject]
-      val fieldType = fieldOption.get("type").toString
-      Field(fieldName, fieldType, fieldOption)
+      Field(fieldName, fieldOption)
     }
     new ScriptableSchema(version, fields)
   }
