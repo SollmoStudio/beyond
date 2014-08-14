@@ -36,7 +36,6 @@ class ScriptableRequest(val request: Request[AnyContent]) extends ScriptableObje
     new ScriptableMap(getParentScope, formUrlEncoded.mapValues(_.head))
   }
 
-  // FIXME: Add getBodyAsJson which returns a JavaScript object.
   @JSGetter
   def getBodyAsJsonString: String = {
     val jsValue: JsValue = request.body.asJson.getOrElse(JsNull)
