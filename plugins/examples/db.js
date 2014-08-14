@@ -139,7 +139,8 @@ exports.referenceInsert = function (key) {
 exports.referenceFindOne = function (key) {
     var query = db.query().eq("key", key);
     return collection2.findOne(query).flatMap(function (result) {
-        return result.ref();
+        var query = db.query().eq("_id", result.ref())
+        return collection.findOne(query);
     }).onSuccess(function (result) {
         console.log("Found data: %j", result);
     }).onFailure(function (message) {
@@ -161,7 +162,8 @@ exports.referenceUpdate = function (key1, key2) {
         }).onFailure(function (message) {
             console.error("Cannot find document2: %s", message);
         }).flatMap(function (document2) {
-            return document2.ref().onSuccess(function (result) {
+            var query = db.query().eq("_id", document2.ref())
+            return collection.findOne(query).onSuccess(function (result) {
                 console.log("document2.ref: %j", result);
             }).onFailure(function (message) {
                 console.error("Cannot find documennt2.ref: %s", message);
