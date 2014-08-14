@@ -58,7 +58,7 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) ex
     currentValuesInDB.getAs[BSONObjectID]("_id")
 
   def objectID: BSONObjectID =
-    objectIDOption.getOrElse(throw new NoSuchElementException("ObjectID is not exists"))
+    objectIDOption.getOrElse(throw new NoSuchElementException("ObjectID does not exist"))
 
   @JSGetter
   def getObjectID: String =
