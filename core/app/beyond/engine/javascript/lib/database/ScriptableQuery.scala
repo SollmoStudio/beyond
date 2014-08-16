@@ -3,6 +3,7 @@ package beyond.engine.javascript.lib.database
 import beyond.engine.javascript.BeyondContextFactory
 import beyond.engine.javascript.JSArray
 import beyond.engine.javascript.JSFunction
+import com.beyondframework.rhino.ContextOps._
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
@@ -98,8 +99,7 @@ object ScriptableQuery {
   private[database] def apply(context: Context, bson: BSONDocument): ScriptableQuery = {
     val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val scope = beyondContextFactory.global
-    val args: JSArray = Array(bson)
-    context.newObject(scope, "Query", args).asInstanceOf[ScriptableQuery]
+    context.newObject(scope, "Query", bson).asInstanceOf[ScriptableQuery]
   }
 }
 

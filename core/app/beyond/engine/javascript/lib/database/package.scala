@@ -3,6 +3,7 @@ package beyond.engine.javascript.lib
 import java.util.Date
 import java.{ lang => jl }
 import beyond.engine.javascript.JSArray
+import com.beyondframework.rhino.ContextOps._
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.NativeJavaObject
@@ -112,8 +113,7 @@ package object database {
     case boolean: jl.Boolean =>
       boolean
     case date: Date =>
-      val args: JSArray = Array(Long.box(date.getTime))
-      context.newObject(scope, "Date", args)
+      context.newObject(scope, "Date", Long.box(date.getTime))
     case map: Map[String, AnyRef] =>
       val obj = context.newObject(scope)
       map.foreach {
