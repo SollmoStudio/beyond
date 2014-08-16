@@ -5,6 +5,7 @@ import akka.pattern.pipe
 import beyond.engine.javascript.BeyondJavaScriptEngine
 import beyond.engine.javascript.lib.ScriptableFuture
 import beyond.engine.javascript.lib.ScriptableResponse
+import com.beyondframework.rhino.ContextOps._
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.Scriptable
@@ -22,7 +23,7 @@ class GamePluginWorker(engine: BeyondJavaScriptEngine, handler: Function) extend
   private def handle[A](request: Request[A]): Future[Result] = engine.contextFactory.call { cx: Context =>
     val scope = engine.global
 
-    val scriptableRequest: Scriptable = cx.newObject(scope, "Request", Array(request))
+    val scriptableRequest: Scriptable = cx.newObject(scope, "Request", request)
     val args: Array[AnyRef] = Array(scriptableRequest)
     val response = handler.call(cx, scope, scope, args)
     response match {

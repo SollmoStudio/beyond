@@ -4,6 +4,7 @@ import beyond.engine.javascript.BeyondContext
 import beyond.engine.javascript.BeyondContextFactory
 import beyond.engine.javascript.JSArray
 import beyond.engine.javascript.JSFunction
+import com.beyondframework.rhino.ContextOps._
 import java.lang.{ Boolean => JavaBoolean }
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
@@ -228,8 +229,7 @@ object ScriptableFuture {
   private[lib] def apply(context: Context, future: Future[_]): ScriptableFuture = {
     val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val scope = beyondContextFactory.global
-    val args: JSArray = Array(future)
-    context.newObject(scope, "Future", args).asInstanceOf[ScriptableFuture]
+    context.newObject(scope, "Future", future).asInstanceOf[ScriptableFuture]
   }
 }
 
