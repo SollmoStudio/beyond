@@ -129,4 +129,13 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) ex
     }
     obj
   }
+
+  def currentBSONDocument: BSONDocument = {
+    val modifiedDocument = modifier
+    val currentElements = currentValuesInDB.elements.filter {
+      case (key, _) =>
+        modifiedDocument.get(key) == None
+    } ++ modifiedDocument.elements
+    BSONDocument(currentElements)
+  }
 }

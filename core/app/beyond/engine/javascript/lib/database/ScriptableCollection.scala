@@ -94,10 +94,18 @@ object ScriptableCollection {
   @JSFunctionAnnotation
   def save(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
     val dataToUpdate = args(0).asInstanceOf[ScriptableDocument]
-    val insertQueryResult = thisCollection.saveInternal(dataToUpdate)
-    ScriptableFuture(context, insertQueryResult)
+    val saveQueryResult = thisCollection.saveInternal(dataToUpdate)
+
+    import com.beyondframework.rhino.RhinoConversions._
+    val scriptableDocument = saveQueryResult.map { document =>
+      beyondContextFactory.call { context: Context =>
+        ScriptableDocument(context, thisCollection.fields, document)
+      }
+    }
+    ScriptableFuture(context, scriptableDocument)
   }
 
   def jsConstructor(context: Context, args: JSArray, constructor: JSFunction, inNewExpr: Boolean): ScriptableCollection = {
@@ -140,9 +148,14 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
     collection.remove(query.query, firstMatchOnly = firstMatchOnly)
 
   // Cannot use name 'save', because static forwarder is not generated when the companion object and class have the same name method.
-  private def saveInternal(dataToBeUpdated: ScriptableDocument)(implicit ec: ExecutionContext): Future[LastError] = {
+  private def saveInternal(dataToBeUpdated: ScriptableDocument)(implicit ec: ExecutionContext): Future[BSONDocument] = {
     val objectID = BSONDocument("_id" -> dataToBeUpdated.objectID)
     val modifier = BSONDocument("$set" -> dataToBeUpdated.modifier)
-    collection.update(objectID, modifier)
+    collection.update(objectID, modifier).map {
+      case lastError if lastError.inError =>
+        throw new Exception(lastError.message)
+      case _ =>
+        dataToBeUpdated.currentBSONDocument
+    }
   }
 }

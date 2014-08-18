@@ -106,7 +106,9 @@ exports.save = function () {
             console.error(util.format("Cannot find data. ERROR: %s", result));
         }
     }).flatMap(function (result) {
-        return collection.save(result.value(newValue).time(new Date())).onComplete(console.log);
+        return collection.save(result.value(newValue).time(new Date())).onComplete(console.log).onSuccess(function (doc) {
+            console.log("%j", doc);
+        });
     });
 };
 
