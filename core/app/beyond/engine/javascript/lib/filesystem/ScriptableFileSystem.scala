@@ -1,9 +1,11 @@
 package beyond.engine.javascript.lib.filesystem
 
 import beyond.engine.javascript.BeyondContext
+import beyond.engine.javascript.BeyondContextFactory
 import beyond.engine.javascript.JSArray
 import beyond.engine.javascript.JSFunction
 import beyond.engine.javascript.lib.ScriptableFuture
+import java.io.File
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
@@ -36,6 +38,27 @@ object ScriptableFileSystem {
 
   val DefaultEncoding = "UTF-8"
   val DefaultMode = 438 // aka 0666
+
+  @JSStaticFunctionAnnotation
+  def readdir(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+
+    val path = args(0).asInstanceOf[String]
+
+    val readdirFuture = future {
+      val dir = new File(path)
+      dir.listFiles
+    }
+
+    import com.beyondframework.rhino.RhinoConversions._
+    val convertedReaddirFuture = readdirFuture.map { files =>
+      beyondContextFactory.call { context: Context =>
+        files.map(ScriptableFile(context, _))
+      }
+    }
+    ScriptableFuture(context, convertedReaddirFuture)
+  }
 
   @JSStaticFunctionAnnotation
   def readFile(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
