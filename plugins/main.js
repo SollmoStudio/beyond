@@ -127,6 +127,17 @@ exports.handle = function (req) {
             return result.map(function (data) {
                 return new Response(data);
             });
+        case "readdir":
+            var path = decodeURIComponent(tokens[0]);
+            var result = fs.readdir(path);
+            return result.map(function (files) {
+                return new Response(files.map(function (file) {
+                    var result = "[";
+                    result += file.isFile ? "file " : file.isDirectory ? "dir " : "";
+                    result += file.name + "]"
+                    return result;
+                }).toString());
+            });
         default:
             break;
     }
