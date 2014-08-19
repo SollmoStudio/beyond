@@ -9,6 +9,7 @@ import beyond.engine.javascript.lib.database.ScriptableCollection
 import beyond.engine.javascript.lib.database.ScriptableDocument
 import beyond.engine.javascript.lib.database.ScriptableQuery
 import beyond.engine.javascript.lib.database.ScriptableSchema
+import beyond.engine.javascript.lib.filesystem.ScriptableFile
 import beyond.engine.javascript.lib.filesystem.ScriptableFileSystem
 import java.io.File
 import java.net.URI
@@ -159,6 +160,7 @@ class BeyondGlobal extends ImporterTopLevel {
     ScriptableObject.defineClass(this, classOf[ScriptableCollection])
     ScriptableObject.defineClass(this, classOf[ScriptableConsole])
     ScriptableObject.defineClass(this, classOf[ScriptableDocument])
+    ScriptableObject.defineClass(this, classOf[ScriptableFile])
     ScriptableObject.defineClass(this, classOf[ScriptableFileSystem])
     ScriptableObject.defineClass(this, classOf[ScriptableFuture])
     ScriptableObject.defineClass(this, classOf[ScriptableQuery])
