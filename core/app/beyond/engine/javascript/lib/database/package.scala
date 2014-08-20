@@ -104,22 +104,13 @@ package object database {
   private[database] case class ReferenceField(override val name: String, collection: ScriptableCollection) extends Field
   private[database] case class EmbeddingField(override val name: String, schema: ScriptableSchema) extends Field
 
-  private[database] def convertScalaToJavaScript(value: AnyRef)(implicit context: Context, scope: Scriptable): Scriptable = value match {
-    case i: jl.Integer =>
-      val args: JSArray = Array(Double.box(i.toDouble))
-      context.newObject(scope, "Number", args)
-    case j: jl.Long =>
-      val args: JSArray = Array(Double.box(j.toDouble))
-      context.newObject(scope, "Number", args)
-    case d: jl.Double =>
-      val args: JSArray = Array(Double.box(d))
-      context.newObject(scope, "Number", args)
+  private[database] def convertScalaToJavaScript(value: AnyRef)(implicit context: Context, scope: Scriptable): AnyRef = value match {
+    case number: jl.Number =>
+      number
     case str: String =>
-      val args: JSArray = Array(str)
-      context.newObject(scope, "String", args)
-    case b: jl.Boolean =>
-      val args: JSArray = Array(b)
-      context.newObject(scope, "Boolean", args)
+      str
+    case boolean: jl.Boolean =>
+      boolean
     case date: Date =>
       val args: JSArray = Array(Long.box(date.getTime))
       context.newObject(scope, "Date", args)

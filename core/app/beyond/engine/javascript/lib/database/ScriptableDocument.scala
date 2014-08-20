@@ -102,7 +102,7 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) ex
 
   private def fieldByName(name: String): Field = fields.find(_.name == name).get
 
-  private def currentJavaScriptValue(name: String)(implicit context: Context, scope: Scriptable): Scriptable = {
+  private def currentJavaScriptValue(name: String)(implicit context: Context, scope: Scriptable): AnyRef = {
     val bsonValue = currentBSONValue(name)
     val scalaValue = AnyRefBSONHandler.read(bsonValue)
     convertScalaToJavaScript(scalaValue)(context, scope)
