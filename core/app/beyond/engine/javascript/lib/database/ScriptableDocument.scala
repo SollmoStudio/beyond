@@ -61,7 +61,7 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) ex
     objectIDOption.getOrElse(throw new NoSuchElementException("ObjectID does not exist"))
 
   @JSGetter
-  def getObjectID: String =
+  def getObjectId: String =
     objectID.stringify
 
   override val getMaxInstanceId: Int = fields.size
