@@ -18,9 +18,6 @@ import scala.collection.mutable.{ Map => MutableMap }
 import scalaz.syntax.std.boolean._
 
 object ScriptableDocument {
-  private type UpdatedValueTable = MutableMap[String, BSONValue]
-  private val emptyUpdatedValueTable = MutableMap.empty[String, BSONValue]
-
   // This constructor is used internally. Users are not allowed to construct an instance directly.
   // A user must get a ScriptableDocument from either ScriptableCollection.find() or ScriptableCollection.findOne().
   def jsConstructor(context: Context, args: JSArray, constructor: JSFunction, inNewExpr: Boolean): ScriptableDocument = {
@@ -42,6 +39,9 @@ object ScriptableDocument {
 }
 
 class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) extends IdScriptableObject {
+  private type UpdatedValueTable = MutableMap[String, BSONValue]
+  private val emptyUpdatedValueTable = MutableMap.empty[String, BSONValue]
+
   import ScriptableDocument._
 
   def this() = this(Seq.empty, BSONDocument.empty)
