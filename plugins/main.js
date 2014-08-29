@@ -1,5 +1,6 @@
 var console = require("console");
 var counter = require("counter");
+var crypto = require("examples/crypto");
 var db = require("examples/db");
 var fs = require("fs");
 var future = require("future");
@@ -147,6 +148,8 @@ exports.handle = function (req) {
             });
         case "path":
             return new Response(path.test());
+        case "crypto":
+            return new Response(crypto.test());
         default:
             break;
     }
