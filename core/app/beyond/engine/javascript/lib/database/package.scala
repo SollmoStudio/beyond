@@ -43,7 +43,7 @@ package object database {
       case seq: Seq[AnyRef] =>
         BSONArray(seq.map(write))
       case _: Undefined => BSONUndefined
-      case ObjectID(id) =>
+      case ObjectId(id) =>
         id
       case native: NativeJavaObject =>
         write(native.unwrap())
@@ -67,7 +67,7 @@ package object database {
       case array: BSONArray =>
         array.values.map(read)
       case BSONUndefined => Undefined.instance
-      case id: BSONObjectID => ObjectID(id)
+      case id: BSONObjectID => ObjectId(id)
       case _ =>
         throw new IllegalArgumentException(s"$bson cannot be a scala object")
     }
@@ -125,7 +125,7 @@ package object database {
     case seq: Seq[AnyRef] =>
       val args: JSArray = seq.map(convertScalaToJavaScript).toArray
       context.newObject(scope, "Array", args)
-    case objectID: ObjectID =>
+    case objectID: ObjectId =>
       context.getWrapFactory.wrapNewObject(context, scope, objectID)
     case _ =>
       throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a JavaScript Object")
@@ -149,8 +149,8 @@ package object database {
     case (_, DateField(_)) =>
       new Date(ScriptRuntime.toInteger(value).toLong)
     case (obj: ScriptableDocument, ReferenceField(_, _)) =>
-      ObjectID(obj.objectID)
-    case (objectID: ObjectID, ReferenceField(_, _)) =>
+      ObjectId(obj.objectID)
+    case (objectID: ObjectId, ReferenceField(_, _)) =>
       objectID
     case (value: ScriptableObject, EmbeddingField(_, schema)) =>
       convertJavaScriptObjectToScalaWithField(value)(schema.fields)

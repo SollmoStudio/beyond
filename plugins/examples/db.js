@@ -113,7 +113,7 @@ exports.save = function () {
 };
 
 exports.findOneWithKey = function (key) {
-    var query = db.query().eq("_id", db.ObjectID(key));
+    var query = db.query().eq("_id", db.ObjectId(key));
     return collection.findOne(query).onComplete(function (result, isSuccess) {
         if (isSuccess) {
             console.log("%j", result);

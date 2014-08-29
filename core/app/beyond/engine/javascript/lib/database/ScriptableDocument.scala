@@ -120,7 +120,7 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) ex
 
     val obj = context.newObject(scope)
     objectIDOption.foreach { objectID =>
-      obj.put("_id", obj, ObjectID(objectID))
+      obj.put("_id", obj, ObjectId(objectID))
     }
     fields.foreach { field =>
       val name = field.name
