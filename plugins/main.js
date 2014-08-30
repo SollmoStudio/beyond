@@ -2,6 +2,7 @@ var console = require("console");
 var counter = require("counter");
 var db = require("examples/db");
 var future = require("future");
+var path = require("examples/path");
 var Response = require("response").Response;
 var uuid = require("uuid");
 
@@ -114,6 +115,8 @@ exports.handle = function (req) {
         case "save":
             var saveResult = db.save.apply(db.save, tokens);
             return new Response(saveResult);
+        case "path":
+            return new Response(path.test());
         default:
             break;
     }
