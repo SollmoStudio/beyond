@@ -3,6 +3,7 @@ var counter = require("counter");
 var db = require("examples/db");
 var fs = require("fs");
 var future = require("future");
+var path = require("examples/path");
 var Response = require("response").Response;
 var uuid = require("uuid");
 
@@ -144,6 +145,8 @@ exports.handle = function (req) {
                     return result;
                 }).toString());
             });
+        case "path":
+            return new Response(path.test());
         default:
             break;
     }
