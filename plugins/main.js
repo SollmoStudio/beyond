@@ -4,6 +4,7 @@ var crypto = require("examples/crypto");
 var db = require("examples/db");
 var fs = require("fs");
 var future = require("future");
+var path = require("examples/path");
 var Response = require("response").Response;
 var uuid = require("uuid");
 
@@ -129,8 +130,8 @@ exports.handle = function (req) {
                 return new Response(data);
             });
         case "readdir":
-            var path = decodeURIComponent(tokens[0]);
-            var result = fs.readdir(path);
+            var dir = decodeURIComponent(tokens[0]);
+            var result = fs.readdir(dir);
             return result.map(function (files) {
                 return new Response(files.map(function (file) {
                     var result = "[";
@@ -141,6 +142,8 @@ exports.handle = function (req) {
             });
         case "crypto":
             return new Response(crypto.test());
+        case "path":
+            return new Response(path.test());
         default:
             break;
     }

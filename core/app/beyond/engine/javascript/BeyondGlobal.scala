@@ -12,6 +12,7 @@ import beyond.engine.javascript.lib.database.ScriptableQuery
 import beyond.engine.javascript.lib.database.ScriptableSchema
 import beyond.engine.javascript.lib.filesystem.ScriptableFile
 import beyond.engine.javascript.lib.filesystem.ScriptableFileSystem
+import beyond.engine.javascript.lib.filesystem.ScriptablePath
 import java.io.File
 import java.net.URI
 import org.mozilla.javascript.Context
@@ -165,6 +166,7 @@ class BeyondGlobal extends ImporterTopLevel {
     ScriptableObject.defineClass(this, classOf[ScriptableFile])
     ScriptableObject.defineClass(this, classOf[ScriptableFileSystem])
     ScriptableObject.defineClass(this, classOf[ScriptableFuture])
+    ScriptableObject.defineClass(this, classOf[ScriptablePath])
     ScriptableObject.defineClass(this, classOf[ScriptableQuery])
     ScriptableObject.defineClass(this, classOf[ScriptableSchema])
     ScriptableObject.defineClass(this, classOf[ScriptableUUID])
