@@ -1,7 +1,10 @@
 var console = require("console");
 var counter = require("counter");
+var crypto = require("examples/crypto");
 var db = require("examples/db");
+var fs = require("fs");
 var future = require("future");
+var path = require("examples/path");
 var Response = require("response").Response;
 var uuid = require("uuid");
 
@@ -114,6 +117,39 @@ exports.handle = function (req) {
         case "save":
             var saveResult = db.save.apply(db.save, tokens);
             return new Response(saveResult);
+        case "writeFile":
+            var fileName = decodeURIComponent(tokens[0]);
+            var content = req.bodyAsText;
+            var result = fs.writeFile(fileName, content, {
+                encoding: 'UTF-8',
+                mode: 0755
+            });
+            return result.map(function () {
+                return new Response(fileName + " written");
+            });
+        case "readFile":
+            var fileName = decodeURIComponent(tokens[0]);
+            var result = fs.readFile(fileName, {
+                encoding: 'UTF-8'
+            });
+            return result.map(function (data) {
+                return new Response(data);
+            });
+        case "readdir":
+            var dir = decodeURIComponent(tokens[0]);
+            var result = fs.readdir(dir);
+            return result.map(function (files) {
+                return new Response(files.map(function (file) {
+                    var result = "[";
+                    result += file.isFile ? "file " : file.isDirectory ? "dir " : "";
+                    result += file.name + "]"
+                    return result;
+                }).toString());
+            });
+        case "crypto":
+            return new Response(crypto.test());
+        case "path":
+            return new Response(path.test());
         default:
             break;
     }

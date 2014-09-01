@@ -5,10 +5,14 @@ import beyond.engine.javascript.lib.ScriptableFuture
 import beyond.engine.javascript.lib.ScriptableRequest
 import beyond.engine.javascript.lib.ScriptableResponse
 import beyond.engine.javascript.lib.ScriptableUUID
+import beyond.engine.javascript.lib.crypto.ScriptableCrypto
 import beyond.engine.javascript.lib.database.ScriptableCollection
 import beyond.engine.javascript.lib.database.ScriptableDocument
 import beyond.engine.javascript.lib.database.ScriptableQuery
 import beyond.engine.javascript.lib.database.ScriptableSchema
+import beyond.engine.javascript.lib.filesystem.ScriptableFile
+import beyond.engine.javascript.lib.filesystem.ScriptableFileSystem
+import beyond.engine.javascript.lib.filesystem.ScriptablePath
 import java.io.File
 import java.net.URI
 import org.mozilla.javascript.Context
@@ -157,8 +161,12 @@ class BeyondGlobal extends ImporterTopLevel {
     ScriptableObject.defineClass(this, classOf[ScriptableResponse])
     ScriptableObject.defineClass(this, classOf[ScriptableCollection])
     ScriptableObject.defineClass(this, classOf[ScriptableConsole])
+    ScriptableObject.defineClass(this, classOf[ScriptableCrypto])
     ScriptableObject.defineClass(this, classOf[ScriptableDocument])
+    ScriptableObject.defineClass(this, classOf[ScriptableFile])
+    ScriptableObject.defineClass(this, classOf[ScriptableFileSystem])
     ScriptableObject.defineClass(this, classOf[ScriptableFuture])
+    ScriptableObject.defineClass(this, classOf[ScriptablePath])
     ScriptableObject.defineClass(this, classOf[ScriptableQuery])
     ScriptableObject.defineClass(this, classOf[ScriptableSchema])
     ScriptableObject.defineClass(this, classOf[ScriptableUUID])
