@@ -47,7 +47,8 @@ object ScriptableCollection {
     import com.beyondframework.rhino.RhinoConversions._
     val convertedToScriptableDocumentFuture = queryResultFuture.map { documents =>
       beyondContextFactory.call { context: Context =>
-        documents.map(ScriptableDocument(context, thisCollection.fields, _)).toArray
+        val scope = beyondContextFactory.global
+        context.newArray(scope, documents.map(ScriptableDocument(context, thisCollection.fields, _).asInstanceOf[AnyRef]).toArray)
       }
     }
     ScriptableFuture(context, convertedToScriptableDocumentFuture)
