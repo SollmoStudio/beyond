@@ -158,16 +158,16 @@ object ScriptableFuture {
   def transform(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
+    val callbackOnSuccess = args(0).asInstanceOf[JSFunction]
+    val callbackOnFailure = args(1).asInstanceOf[JSFunction]
+
     val promise = Promise[AnyRef]()
     thisFuture.future.onComplete {
       case Success(result) =>
-        val callbackOnSuccess = args(0).asInstanceOf[JSFunction]
         promise.success(executeCallback(context.getFactory, callbackOnSuccess, result))
       case Failure(exception: RhinoException) =>
-        val callbackOnFailure = args(1).asInstanceOf[JSFunction]
         promise.failure(new Exception(executeCallback(context.getFactory, callbackOnFailure, exception.details).asInstanceOf[String]))
       case Failure(throwable) =>
-        val callbackOnFailure = args(1).asInstanceOf[JSFunction]
         promise.failure(new Exception(executeCallback(context.getFactory, callbackOnFailure, throwable.getMessage).asInstanceOf[String]))
     }
 
