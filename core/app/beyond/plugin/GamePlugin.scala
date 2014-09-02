@@ -4,7 +4,6 @@ import beyond.engine.javascript.BeyondJavaScriptEngine
 import beyond.engine.javascript.lib.ScriptableFuture
 import beyond.engine.javascript.lib.http.ScriptableResponse
 import beyond.engine.javascript.provider.JavaScriptConsoleProvider
-import beyond.engine.javascript.provider.JavaScriptTimerProvider
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
@@ -13,16 +12,15 @@ import org.mozilla.javascript.ScriptableObject
 import play.api.mvc.Request
 import play.api.mvc.Result
 import scala.concurrent.Future
-import scala.util.Try
 
 class NoHandlerFunctionFoundException extends Exception
 
-object GamePlugin extends JavaScriptTimerProvider with JavaScriptConsoleProvider with Logging {
+object GamePlugin extends JavaScriptConsoleProvider with Logging {
   import com.beyondframework.rhino.ContextOps._
   import com.beyondframework.rhino.RhinoConversions._
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  private val engine = new BeyondJavaScriptEngine(timer = this, console = this)
+  private val engine = new BeyondJavaScriptEngine(console = this)
 
   private val handler: Function = engine.contextFactory.call { cx: Context =>
     var mainFilename = "main.js"
@@ -60,11 +58,5 @@ object GamePlugin extends JavaScriptTimerProvider with JavaScriptConsoleProvider
   override def warn(message: String): Unit = logger.warn(message)
   override def debug(message: String): Unit = logger.debug(message)
   override def error(message: String): Unit = logger.error(message)
-
-  // JavaScriptTimerProvider methods
-  override def setTimeout(thisObj: Scriptable, args: Array[AnyRef], funObj: Function): Try[AnyRef] = ???
-  override def setInterval(thisObj: Scriptable, args: Array[AnyRef], funObj: Function): Try[AnyRef] = ???
-  override def clearTimeout(thisObj: Scriptable, args: Array[AnyRef], funObj: Function): Try[Unit] = ???
-  override def clearInterval(thisObj: Scriptable, args: Array[AnyRef], funObj: Function): Try[Unit] = ???
 }
 

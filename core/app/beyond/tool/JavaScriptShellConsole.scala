@@ -1,10 +1,8 @@
 package beyond.tool
 
 import akka.actor.ActorSystem
-import akka.actor.Cancellable
 import beyond.engine.javascript.BeyondJavaScriptEngine
 import beyond.engine.javascript.provider.JavaScriptConsoleProvider
-import beyond.engine.javascript.provider.JavaScriptTimerProvider
 import java.util
 import jline.console.ConsoleReader
 import jline.console.completer.Completer
@@ -16,11 +14,7 @@ import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.tools.ToolErrorReporter
 import scala.annotation.tailrec
-import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext
-import scala.util.Failure
-import scala.util.Success
-import scala.util.Try
 import scalax.file.Path
 
 class FlexibleCompletor(global: Scriptable) extends Completer {
@@ -108,7 +102,7 @@ object JavaScriptShellConsoleProvider extends JavaScriptConsoleProvider {
   }
 }
 
-object JavaScriptShellConsole extends App with JavaScriptTimerProvider {
+object JavaScriptShellConsole extends App {
   import com.beyondframework.rhino.RhinoConversions._
 
   implicit val system = ActorSystem("javascript-shell-console")
@@ -123,7 +117,7 @@ object JavaScriptShellConsole extends App with JavaScriptTimerProvider {
 
   val engine = {
     import ExecutionContext.Implicits.global
-    new BeyondJavaScriptEngine(scope, pluginPaths = pluginPaths, timer = this, console = JavaScriptShellConsoleProvider)(global)
+    new BeyondJavaScriptEngine(scope, pluginPaths = pluginPaths, console = JavaScriptShellConsoleProvider)(global)
   }
 
   val errorReporter = new ToolErrorReporter(false, System.err)
@@ -190,63 +184,5 @@ object JavaScriptShellConsole extends App with JavaScriptTimerProvider {
     Console.println()
     Console.flush()
   }
-
-  override def setTimeout(thisObj: Scriptable, args: Array[AnyRef], funObj: Function): Try[AnyRef] =
-    if (args.length < 2) {
-      Failure(new IllegalArgumentException("args.are.not.enough"))
-    } else if (!args(0).isInstanceOf[Function]) {
-      Failure(new IllegalArgumentException("first.arg.is.not.function"))
-    } else {
-      val callback = args(0).asInstanceOf[Function]
-      val callbackArgs = args.drop(2)
-      val delay = Duration(Context.toNumber(args(1)).toLong, "ms")
-
-      val cancellable = system.scheduler.scheduleOnce(delay) {
-        engine.contextFactory.call { cx: Context =>
-          callback.call(cx, scope, scope, callbackArgs)
-        }
-      }
-      Success(cancellable)
-    }
-
-  override def clearTimeout(thisObj: Scriptable, args: Array[AnyRef], funObj: Function): Try[Unit] =
-    if (args.length == 0) {
-      Failure(new IllegalArgumentException("args.length.is.zero"))
-    } else if (!args(0).isInstanceOf[Cancellable]) {
-      Failure(new IllegalArgumentException("first.arg.is.not.timeout.object"))
-    } else {
-      val cancellable = args(0).asInstanceOf[Cancellable]
-      cancellable.cancel()
-      Success(Unit)
-    }
-
-  override def setInterval(thisObj: Scriptable, args: Array[AnyRef], funObj: Function): Try[AnyRef] =
-    if (args.length < 2) {
-      Failure(new IllegalArgumentException("args.are.not.enough"))
-    } else if (!args(0).isInstanceOf[Function]) {
-      Failure(new IllegalArgumentException("first.arg.is.not.function"))
-    } else {
-      val callback = args(0).asInstanceOf[Function]
-      val callbackArgs = args.drop(2)
-      val delay = Duration(Context.toNumber(args(1)).toLong, "ms")
-
-      val cancellable = system.scheduler.schedule(delay, delay) {
-        engine.contextFactory.call { cx: Context =>
-          callback.call(cx, scope, scope, callbackArgs)
-        }
-      }
-      Success(cancellable)
-    }
-
-  override def clearInterval(thisObj: Scriptable, args: Array[AnyRef], funObj: Function): Try[Unit] =
-    if (args.length == 0) {
-      Failure(new IllegalArgumentException("args.length.is.zero"))
-    } else if (!args(0).isInstanceOf[Cancellable]) {
-      Failure(new IllegalArgumentException("first.arg.is.not.timeout.object"))
-    } else {
-      val cancellable = args(0).asInstanceOf[Cancellable]
-      cancellable.cancel()
-      Success(Unit)
-    }
 }
 

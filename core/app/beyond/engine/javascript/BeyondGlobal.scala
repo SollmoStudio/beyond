@@ -26,57 +26,9 @@ import org.mozilla.javascript.commonjs.module.RequireBuilder
 import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
 import org.mozilla.javascript.commonjs.module.provider.UrlModuleSourceProvider
 import org.mozilla.javascript.tools.ToolErrorReporter
-import scala.util.Failure
-import scala.util.Success
 import scalaz.syntax.std.boolean._
 
 object BeyondGlobal {
-  // setTimeout/clearTimeout and setInterval/clearInterval are equivalent to
-  // Node.js timers: http://nodejs.org/api/timers.html
-  def setTimeout(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function): AnyRef = {
-    val timer = cx.asInstanceOf[BeyondContext].timer
-    timer.setTimeout(thisObj, args, funObj) match {
-      case Failure(ex: IllegalArgumentException) =>
-        throw reportRuntimeError("msg.setTimeout." + ex.getMessage)
-      case Failure(ex: Throwable) =>
-        throw ex
-      case Success(timeoutObject) => timeoutObject
-    }
-  }
-
-  def clearTimeout(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function) {
-    val timer = cx.asInstanceOf[BeyondContext].timer
-    timer.clearTimeout(thisObj, args, funObj) match {
-      case Failure(ex: IllegalArgumentException) =>
-        throw reportRuntimeError("msg.clearTimeout." + ex.getMessage)
-      case Failure(ex: Throwable) =>
-        throw ex
-      case Success(_) => Unit
-    }
-  }
-
-  def setInterval(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function): AnyRef = {
-    val timer = cx.asInstanceOf[BeyondContext].timer
-    timer.setInterval(thisObj, args, funObj) match {
-      case Failure(ex: IllegalArgumentException) =>
-        throw reportRuntimeError("msg.setInterval." + ex.getMessage)
-      case Failure(ex: Throwable) =>
-        throw ex
-      case Success(intervalObject) => intervalObject
-    }
-  }
-
-  def clearInterval(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function) {
-    val timer = cx.asInstanceOf[BeyondContext].timer
-    timer.clearInterval(thisObj, args, funObj) match {
-      case Failure(ex: IllegalArgumentException) =>
-        throw reportRuntimeError("msg.clearInterval." + ex.getMessage)
-      case Failure(ex: Throwable) =>
-        throw ex
-      case Success(_) => Unit
-    }
-  }
-
   def seal(cx: Context, thisObj: Scriptable, args: Array[AnyRef], funObj: Function) {
     args.foreach { arg =>
       if (!(arg.isInstanceOf[ScriptableObject]) || arg == Undefined.instance) {
