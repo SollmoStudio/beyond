@@ -179,7 +179,7 @@ object ScriptableFuture {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[JSFunction]
     val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
-    val newFuture = thisFuture.future.flatMap { result =>
+    val newFuture = thisFuture.future.flatMap { _ =>
       executeCallback(context.getFactory, callback) match {
         case futureByCallback: ScriptableFuture =>
           val promise = Promise[AnyRef]()
