@@ -100,10 +100,6 @@ class BeyondGlobal extends ImporterTopLevel {
     val sealedStdLib = true
     initStandardObjects(cx, sealedStdLib)
     val names = Array[String](
-      "setTimeout",
-      "clearTimeout",
-      "setInterval",
-      "clearInterval",
       "defineClass",
       "seal"
     )
