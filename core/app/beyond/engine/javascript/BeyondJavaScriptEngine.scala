@@ -1,7 +1,6 @@
 package beyond.engine.javascript
 
 import beyond.BeyondConfiguration
-import beyond.engine.javascript.provider.JavaScriptConsoleProvider
 import com.beyondframework.rhino.ScriptableMap
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import org.mozilla.javascript.Context
@@ -12,11 +11,10 @@ import scala.concurrent.ExecutionContext
 import scalax.file.Path
 
 class BeyondJavaScriptEngine(val global: BeyondGlobal = new BeyondGlobal,
-    pluginPaths: Seq[Path] = BeyondConfiguration.pluginPaths,
-    console: JavaScriptConsoleProvider)(implicit val executionContext: ExecutionContext) extends Logging {
+    pluginPaths: Seq[Path] = BeyondConfiguration.pluginPaths)(implicit val executionContext: ExecutionContext) extends Logging {
   import com.beyondframework.rhino.RhinoConversions._
 
-  val contextFactory: BeyondContextFactory = new BeyondContextFactory(new BeyondContextFactoryConfig, global, console)
+  val contextFactory: BeyondContextFactory = new BeyondContextFactory(new BeyondContextFactoryConfig, global)
 
   private val require: Require = contextFactory.call { cx: Context =>
     global.init(cx)

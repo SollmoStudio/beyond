@@ -1,9 +1,9 @@
 package beyond.plugin
 
 import beyond.engine.javascript.BeyondJavaScriptEngine
+import beyond.engine.javascript.lib.ScriptableConsole
 import beyond.engine.javascript.lib.ScriptableFuture
 import beyond.engine.javascript.lib.http.ScriptableResponse
-import beyond.engine.javascript.provider.JavaScriptConsoleProvider
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
@@ -15,12 +15,13 @@ import scala.concurrent.Future
 
 class NoHandlerFunctionFoundException extends Exception
 
-object GamePlugin extends JavaScriptConsoleProvider with Logging {
+object GamePlugin extends Logging {
   import com.beyondframework.rhino.ContextOps._
   import com.beyondframework.rhino.RhinoConversions._
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  private val engine = new BeyondJavaScriptEngine(console = this)
+  private val engine = new BeyondJavaScriptEngine
+  ScriptableConsole.setRedirectConsoleToLogger(true)
 
   private val handler: Function = engine.contextFactory.call { cx: Context =>
     var mainFilename = "main.js"
@@ -51,12 +52,5 @@ object GamePlugin extends JavaScriptConsoleProvider with Logging {
         Future.successful(scriptableResponse.result)
     }
   }.asInstanceOf[Future[Result]]
-
-  // JavaScriptConsoleProvider methods
-  override def log(message: String): Unit = logger.info(message)
-  override def info(message: String): Unit = logger.info(message)
-  override def warn(message: String): Unit = logger.warn(message)
-  override def debug(message: String): Unit = logger.debug(message)
-  override def error(message: String): Unit = logger.error(message)
 }
 

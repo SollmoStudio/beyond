@@ -2,7 +2,6 @@ package beyond.tool
 
 import akka.actor.ActorSystem
 import beyond.engine.javascript.BeyondJavaScriptEngine
-import beyond.engine.javascript.provider.JavaScriptConsoleProvider
 import java.util
 import jline.console.ConsoleReader
 import jline.console.completer.Completer
@@ -75,33 +74,6 @@ class FlexibleCompletor(global: Scriptable) extends Completer {
   }
 }
 
-object JavaScriptShellConsoleProvider extends JavaScriptConsoleProvider {
-  override def log(message: String) {
-    Console.println(s"LOG: $message")
-    Console.flush()
-  }
-
-  override def info(message: String) {
-    Console.println(s"INFO: $message")
-    Console.flush()
-  }
-
-  override def warn(message: String) {
-    Console.println(s"WARN: $message")
-    Console.flush()
-  }
-
-  override def error(message: String) {
-    Console.println(s"ERROR: $message")
-    Console.flush()
-  }
-
-  override def debug(message: String) {
-    Console.println(s"DEBUG: $message")
-    Console.flush()
-  }
-}
-
 object JavaScriptShellConsole extends App {
   import com.beyondframework.rhino.RhinoConversions._
 
@@ -117,7 +89,7 @@ object JavaScriptShellConsole extends App {
 
   val engine = {
     import ExecutionContext.Implicits.global
-    new BeyondJavaScriptEngine(scope, pluginPaths = pluginPaths, console = JavaScriptShellConsoleProvider)(global)
+    new BeyondJavaScriptEngine(scope, pluginPaths = pluginPaths)(global)
   }
 
   val errorReporter = new ToolErrorReporter(false, System.err)
