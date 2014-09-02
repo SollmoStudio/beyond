@@ -22,11 +22,11 @@ import scala.util.Success
 object ScriptableFuture {
   import com.beyondframework.rhino.RhinoConversions._
 
-  private def executeCallback(contextFactory: ContextFactory, callback: JSFunction, callbackArgs: JSArray): AnyRef = {
+  private def executeCallback(contextFactory: ContextFactory, callback: JSFunction, callbackArgs: AnyRef*): AnyRef = {
     val beyondContextFactory = contextFactory.asInstanceOf[BeyondContextFactory]
     val scope = beyondContextFactory.global
     beyondContextFactory.call { context: Context =>
-      callback.call(context, scope, scope, callbackArgs)
+      callback.call(context, scope, scope, callbackArgs.toArray)
     }
   }
 
@@ -57,16 +57,13 @@ object ScriptableFuture {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[JSFunction]
     val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
-    thisFuture.future.onComplete { futureResult =>
-      val callbackArgs: JSArray = futureResult match {
-        case Success(result) =>
-          Array(result, new JavaBoolean(true))
-        case Failure(ex: RhinoException) =>
-          Array(ex.details(), new JavaBoolean(false))
-        case Failure(throwable) =>
-          Array(throwable.getMessage, new JavaBoolean(false))
-      }
-      executeCallback(context.getFactory, callback, callbackArgs)
+    thisFuture.future.onComplete {
+      case Success(result) =>
+        executeCallback(context.getFactory, callback, result, new JavaBoolean(true))
+      case Failure(ex: RhinoException) =>
+        executeCallback(context.getFactory, callback, ex.details(), new JavaBoolean(false))
+      case Failure(throwable) =>
+        executeCallback(context.getFactory, callback, throwable.getMessage, new JavaBoolean(false))
     }
     thisFuture
   }
@@ -78,8 +75,7 @@ object ScriptableFuture {
     val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
     thisFuture.future.onSuccess {
       case result =>
-        val callbackArgs: JSArray = Array(result)
-        executeCallback(context.getFactory, callback, callbackArgs)
+        executeCallback(context.getFactory, callback, result)
     }
     thisFuture
   }
@@ -91,11 +87,9 @@ object ScriptableFuture {
     val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
     thisFuture.future.onFailure {
       case ex: RhinoException =>
-        val callbackArgs: JSArray = Array(ex.details)
-        executeCallback(context.getFactory, callback, callbackArgs)
+        executeCallback(context.getFactory, callback, ex.details)
       case throwable: Throwable =>
-        val callbackArgs: JSArray = Array(throwable.getMessage)
-        executeCallback(context.getFactory, callback, callbackArgs)
+        executeCallback(context.getFactory, callback, throwable.getMessage)
     }
     thisFuture
   }
@@ -105,8 +99,7 @@ object ScriptableFuture {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[JSFunction]
     val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.map { result =>
-      val callbackArgs: JSArray = Array(result)
-      executeCallback(context.getFactory, callback, callbackArgs)
+      executeCallback(context.getFactory, callback, result)
     }
 
     ScriptableFuture(context, newFuture)
@@ -117,8 +110,7 @@ object ScriptableFuture {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[JSFunction]
     val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.flatMap { result =>
-      val callbackArgs: JSArray = Array(result)
-      executeCallback(context.getFactory, callback, callbackArgs) match {
+      executeCallback(context.getFactory, callback, result) match {
         case futureByCallback: ScriptableFuture =>
           val promise = Promise[AnyRef]()
           futureByCallback.future.onComplete {
@@ -141,8 +133,7 @@ object ScriptableFuture {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[JSFunction]
     val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.filter { result =>
-      val callbackArgs: JSArray = Array(result)
-      val filterResult = executeCallback(context.getFactory, callback, callbackArgs)
+      val filterResult = executeCallback(context.getFactory, callback, result)
       ScriptRuntime.toBoolean(filterResult)
     }
 
@@ -155,11 +146,9 @@ object ScriptableFuture {
     val callback = args(0).asInstanceOf[JSFunction]
     val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.recover {
       case exception: RhinoException =>
-        val callbackArgs: JSArray = Array(exception.details)
-        executeCallback(context.getFactory, callback, callbackArgs)
+        executeCallback(context.getFactory, callback, exception.details())
       case throwable: Throwable =>
-        val callbackArgs: JSArray = Array(throwable.getMessage)
-        executeCallback(context.getFactory, callback, callbackArgs)
+        executeCallback(context.getFactory, callback, throwable.getMessage)
     }
 
     ScriptableFuture(context, newFuture)
@@ -172,17 +161,14 @@ object ScriptableFuture {
     val promise = Promise[AnyRef]()
     thisFuture.future.onComplete {
       case Success(result) =>
-        val callbackArgs: JSArray = Array(result)
         val callbackOnSuccess = args(0).asInstanceOf[JSFunction]
-        promise.success(executeCallback(context.getFactory, callbackOnSuccess, callbackArgs))
+        promise.success(executeCallback(context.getFactory, callbackOnSuccess, result))
       case Failure(exception: RhinoException) =>
-        val callbackArgs: JSArray = Array(exception.details)
         val callbackOnFailure = args(1).asInstanceOf[JSFunction]
-        promise.failure(new Exception(executeCallback(context.getFactory, callbackOnFailure, callbackArgs).asInstanceOf[String]))
+        promise.failure(new Exception(executeCallback(context.getFactory, callbackOnFailure, exception.details).asInstanceOf[String]))
       case Failure(throwable) =>
-        val callbackArgs: JSArray = Array(throwable.getMessage)
         val callbackOnFailure = args(1).asInstanceOf[JSFunction]
-        promise.failure(new Exception(executeCallback(context.getFactory, callbackOnFailure, callbackArgs).asInstanceOf[String]))
+        promise.failure(new Exception(executeCallback(context.getFactory, callbackOnFailure, throwable.getMessage).asInstanceOf[String]))
     }
 
     ScriptableFuture(context, promise.future)
@@ -194,8 +180,7 @@ object ScriptableFuture {
     val callback = args(0).asInstanceOf[JSFunction]
     val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
     val newFuture = thisFuture.future.flatMap { result =>
-      val callbackArgs: JSArray = Array()
-      executeCallback(context.getFactory, callback, callbackArgs) match {
+      executeCallback(context.getFactory, callback) match {
         case futureByCallback: ScriptableFuture =>
           val promise = Promise[AnyRef]()
           futureByCallback.future.onComplete {
@@ -218,8 +203,7 @@ object ScriptableFuture {
     val newFuture = args(0) match {
       case callback: JSFunction =>
         Future {
-          val callbackArgs = Array.empty[AnyRef]
-          executeCallback(context.getFactory, callback, callbackArgs)
+          executeCallback(context.getFactory, callback)
         }
       case future: Future[_] =>
         // Cannot check Future[AnyRef] because of type erasure.
