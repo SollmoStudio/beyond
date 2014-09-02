@@ -1,12 +1,12 @@
-package beyond.engine.javascript.lib
+package beyond.engine.javascript.lib.http
 
 import beyond.engine.javascript.JSArray
 import beyond.engine.javascript.JSFunction
 import com.beyondframework.rhino.ScriptableMap
+import org.mozilla.javascript.annotations.JSGetter
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
-import org.mozilla.javascript.annotations.JSGetter
 import play.api.libs.json.JsNull
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json

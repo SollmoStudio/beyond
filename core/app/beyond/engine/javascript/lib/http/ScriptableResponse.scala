@@ -1,4 +1,4 @@
-package beyond.engine.javascript.lib
+package beyond.engine.javascript.lib.http
 
 import beyond.engine.javascript.JSArray
 import beyond.engine.javascript.JSFunction

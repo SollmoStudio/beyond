@@ -4,7 +4,7 @@ import akka.actor.Actor
 import akka.pattern.pipe
 import beyond.engine.javascript.BeyondJavaScriptEngine
 import beyond.engine.javascript.lib.ScriptableFuture
-import beyond.engine.javascript.lib.ScriptableResponse
+import beyond.engine.javascript.lib.http.ScriptableResponse
 import com.beyondframework.rhino.ContextOps._
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function

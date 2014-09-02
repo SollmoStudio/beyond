@@ -2,8 +2,6 @@ package beyond.engine.javascript
 
 import beyond.engine.javascript.lib.ScriptableConsole
 import beyond.engine.javascript.lib.ScriptableFuture
-import beyond.engine.javascript.lib.ScriptableRequest
-import beyond.engine.javascript.lib.ScriptableResponse
 import beyond.engine.javascript.lib.ScriptableUUID
 import beyond.engine.javascript.lib.database.ScriptableCollection
 import beyond.engine.javascript.lib.database.ScriptableDocument
@@ -12,6 +10,8 @@ import beyond.engine.javascript.lib.database.ScriptableSchema
 import beyond.engine.javascript.lib.filesystem.ScriptableFile
 import beyond.engine.javascript.lib.filesystem.ScriptableFileSystem
 import beyond.engine.javascript.lib.filesystem.ScriptablePath
+import beyond.engine.javascript.lib.http.ScriptableRequest
+import beyond.engine.javascript.lib.http.ScriptableResponse
 import java.io.File
 import java.net.URI
 import org.mozilla.javascript.Context
