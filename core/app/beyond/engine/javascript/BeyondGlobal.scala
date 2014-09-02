@@ -104,18 +104,22 @@ class BeyondGlobal extends ImporterTopLevel {
       "seal"
     )
     defineFunctionProperties(names, classOf[BeyondGlobal], ScriptableObject.DONTENUM)
-    ScriptableObject.defineClass(this, classOf[ScriptableRequest])
-    ScriptableObject.defineClass(this, classOf[ScriptableResponse])
-    ScriptableObject.defineClass(this, classOf[ScriptableCollection])
-    ScriptableObject.defineClass(this, classOf[ScriptableConsole])
-    ScriptableObject.defineClass(this, classOf[ScriptableDocument])
-    ScriptableObject.defineClass(this, classOf[ScriptableFile])
-    ScriptableObject.defineClass(this, classOf[ScriptableFileSystem])
-    ScriptableObject.defineClass(this, classOf[ScriptableFuture])
-    ScriptableObject.defineClass(this, classOf[ScriptablePath])
-    ScriptableObject.defineClass(this, classOf[ScriptableQuery])
-    ScriptableObject.defineClass(this, classOf[ScriptableSchema])
-    ScriptableObject.defineClass(this, classOf[ScriptableUUID])
+
+    val scriptableClasses = Array(
+      classOf[ScriptableRequest],
+      classOf[ScriptableResponse],
+      classOf[ScriptableCollection],
+      classOf[ScriptableConsole],
+      classOf[ScriptableDocument],
+      classOf[ScriptableFile],
+      classOf[ScriptableFileSystem],
+      classOf[ScriptableFuture],
+      classOf[ScriptablePath],
+      classOf[ScriptableQuery],
+      classOf[ScriptableSchema],
+      classOf[ScriptableUUID]
+    )
+    scriptableClasses.foreach(ScriptableObject.defineClass(this, _))
   }
 
   def installRequire(cx: Context, modulePaths: Seq[String], sandboxed: Boolean): Require = {
