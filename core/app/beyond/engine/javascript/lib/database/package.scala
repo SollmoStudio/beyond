@@ -181,8 +181,8 @@ package object database {
       new Date(ScriptRuntime.toInteger(value).toLong)
     case (obj: ScriptableDocument, ReferenceField(_, _, _, _)) =>
       ObjectId(obj.objectID)
-    case (objectID: ObjectId, ReferenceField(_, _, _, _)) =>
-      objectID
+    case (objectID: ScriptableObjectId, ReferenceField(_, _, _, _)) =>
+      ObjectId(objectID.bson)
     case (value: ScriptableObject, EmbeddingField(_, schema, _, _)) =>
       convertJavaScriptObjectToScalaWithField(value)(schema.fields)
     case (array: NativeArray, ArrayField(_, elementType, _, _)) =>
