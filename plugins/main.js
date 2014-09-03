@@ -5,7 +5,7 @@ var fs = require("fs");
 var future = require("future");
 var path = require("examples/path");
 var Response = require("response").Response;
-var uuid = require("uuid");
+var uuid = require("examples/uuid");
 
 exports.handle = function (req) {
     var tokens = req.uri.split("/");
@@ -20,7 +20,7 @@ exports.handle = function (req) {
                 return new Response('Hello future ' + req.uri + ' ' + counter.count());
             });
         case "uuid":
-            return new Response(uuid.v4());
+            return new Response(uuid.test());
         case "successful":
             var f = future.successful(1);
             return f.map(function (v) { return new Response(v); });
