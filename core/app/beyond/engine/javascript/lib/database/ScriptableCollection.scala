@@ -126,7 +126,13 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
   // Cannot use name 'insert', because static forwarder is not generated when the companion object and class have the same name method.
   private def insertInternal(obj: ScriptableObject)(implicit ec: ExecutionContext): Future[BSONDocument] = {
     val dataToBeInserted: BSONDocument = convertScriptableObjectToBSONDocument(obj)(schema.fields)
-    val documentToBeInserted = BSONDocument("_id" -> BSONObjectID.generate) ++ dataToBeInserted
+    val objectId = Option(obj.get("objectId")).map {
+      case objectId: ScriptableObjectId =>
+        objectId.bson
+      case somethingElse =>
+        throw new IllegalArgumentException(s"objectId should be ObjectId. $somethingElse is not ObjectId.")
+    }.getOrElse(BSONObjectID.generate)
+    val documentToBeInserted = BSONDocument("_id" -> objectId) ++ dataToBeInserted
     collection.insert(documentToBeInserted).map[BSONDocument] {
       case lastError if lastError.inError =>
         throw new Exception(lastError.message)
