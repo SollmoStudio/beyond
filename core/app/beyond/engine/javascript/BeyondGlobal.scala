@@ -5,6 +5,7 @@ import beyond.engine.javascript.lib.ScriptableFuture
 import beyond.engine.javascript.lib.ScriptableUUID
 import beyond.engine.javascript.lib.database.ScriptableCollection
 import beyond.engine.javascript.lib.database.ScriptableDocument
+import beyond.engine.javascript.lib.database.ScriptableObjectId
 import beyond.engine.javascript.lib.database.ScriptableQuery
 import beyond.engine.javascript.lib.database.ScriptableSchema
 import beyond.engine.javascript.lib.filesystem.ScriptableFile
@@ -114,6 +115,7 @@ class BeyondGlobal extends ImporterTopLevel {
       classOf[ScriptableFile],
       classOf[ScriptableFileSystem],
       classOf[ScriptableFuture],
+      classOf[ScriptableObjectId],
       classOf[ScriptablePath],
       classOf[ScriptableQuery],
       classOf[ScriptableSchema],

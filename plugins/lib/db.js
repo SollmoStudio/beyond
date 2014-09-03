@@ -5,7 +5,6 @@ exports.query = function () {
 exports.Collection = Collection;
 exports.Schema = Schema;
 
-importClass(Packages.beyond.engine.javascript.lib.database.ObjectId);
 exports.ObjectId = function(value) {
-    return new ObjectId(value);
+    return value ? new ObjectId(value) : new ObjectId();
 };
