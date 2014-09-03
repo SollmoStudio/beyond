@@ -25,7 +25,7 @@ object ScriptableDocument {
   def jsConstructor(context: Context, args: JSArray, constructor: JSFunction, inNewExpr: Boolean): ScriptableDocument = {
     val fields = args(0).asInstanceOf[Seq[Field]]
     val currentValueInDB = args(1).asInstanceOf[BSONDocument]
-    new ScriptableDocument(fields, currentValueInDB)
+    new ScriptableDocument(fields, currentValueInDB, context)
   }
 
   private[database] def apply(context: Context, fields: Seq[Field], document: BSONDocument): ScriptableDocument = {
@@ -39,13 +39,13 @@ object ScriptableDocument {
     thisObj.asInstanceOf[ScriptableDocument].toScriptable(context)
 }
 
-class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) extends IdScriptableObject {
+class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument, context: Context) extends IdScriptableObject {
   private type UpdatedValueTable = MutableMap[String, BSONValue]
   private val emptyUpdatedValueTable = MutableMap.empty[String, BSONValue]
 
   import ScriptableDocument._
 
-  def this() = this(Seq.empty, BSONDocument.empty)
+  def this() = this(Seq.empty, BSONDocument.empty, null)
 
   override val getClassName: String = "Document"
 
@@ -61,9 +61,12 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument) ex
   def objectID: BSONObjectID =
     objectIDOption.getOrElse(throw new NoSuchElementException("ObjectID does not exist"))
 
+  private val scriptableObjectId: Option[ScriptableObjectId] =
+    objectIDOption.map(ScriptableObjectId(context, _))
+
   @JSGetter
-  def getObjectId: String =
-    objectID.stringify
+  def getObjectId: ScriptableObjectId =
+    scriptableObjectId.getOrElse(throw new NoSuchElementException("ObjectID does not exist"))
 
   override val getMaxInstanceId: Int = fields.size
 
