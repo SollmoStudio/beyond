@@ -5,6 +5,7 @@ import beyond.engine.javascript.BeyondContextFactory
 import beyond.engine.javascript.JSArray
 import beyond.engine.javascript.JSFunction
 import beyond.engine.javascript.lib.ScriptableFuture
+import beyond.engine.javascript.lib.OptionParser
 import java.io.File
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
@@ -18,18 +19,6 @@ import scalax.io.Codec
 import scalax.io.Resource
 
 object ScriptableFileSystem {
-  private def parseOptions(args: JSArray, idx: Int): Configuration = {
-    if (!args.isDefinedAt(idx)) {
-      Configuration.empty
-    } else {
-      val options = args(idx).asInstanceOf[ScriptableObject]
-      Configuration.from(options.getIds.map { id =>
-        val key = id.asInstanceOf[String]
-        (key, options.get(key, options))
-      } toMap)
-    }
-  }
-
   private def setMode(fileName: String, mode: Int) {
     // FIXME: Doesn't work for Windows
     val modeStr = mode.toOctalString
@@ -65,7 +54,7 @@ object ScriptableFileSystem {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
 
     val fileName = args(0).asInstanceOf[String]
-    val options = parseOptions(args, 1)
+    val options = OptionParser.parse(args, 1)
 
     implicit val encoding = options.getString("encoding").getOrElse(DefaultEncoding)
 
@@ -82,7 +71,7 @@ object ScriptableFileSystem {
 
     val fileName = args(0).asInstanceOf[String]
     val data = args(1).asInstanceOf[String]
-    val options = parseOptions(args, 2)
+    val options: Configuration = OptionParser.parse(args, 2)
 
     implicit val encoding = options.getString("encoding").getOrElse(DefaultEncoding)
     val mode = options.getInt("mode").getOrElse(DefaultMode)
