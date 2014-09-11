@@ -157,11 +157,15 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
   private def saveInternal(dataToBeUpdated: ScriptableDocument)(implicit ec: ExecutionContext): Future[BSONDocument] = {
     val objectID = BSONDocument("_id" -> dataToBeUpdated.objectID)
     val modifier = BSONDocument("$set" -> dataToBeUpdated.modifier)
-    collection.update(objectID, modifier).map {
-      case lastError if lastError.inError =>
-        throw new Exception(lastError.message)
-      case _ =>
-        dataToBeUpdated.currentBSONDocument
+    if (modifier.isEmpty) {
+      Future.successful(dataToBeUpdated.currentBSONDocument)
+    } else {
+      collection.update(objectID, modifier).map {
+        case lastError if lastError.inError =>
+          throw new Exception(lastError.message)
+        case _ =>
+          dataToBeUpdated.currentBSONDocument
+      }
     }
   }
 }
