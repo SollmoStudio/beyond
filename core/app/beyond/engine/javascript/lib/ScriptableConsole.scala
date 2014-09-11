@@ -7,6 +7,7 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.annotations.{ JSStaticFunction => JSStaticFunctionAnnotation }
+import scalaz.syntax.std.boolean._
 
 object ScriptableConsole extends Logging {
   var redirectConsoleToLogger = false
@@ -18,46 +19,31 @@ object ScriptableConsole extends Logging {
   @JSStaticFunctionAnnotation
   def log(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction) {
     var message = args(0).asInstanceOf[String]
-    if (redirectConsoleToLogger)
-      logger.info(message)
-    else
-      Console.println(message)
+    redirectConsoleToLogger ? logger.info(message) | Console.println(message)
   }
 
   @JSStaticFunctionAnnotation
   def info(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction) {
     var message = args(0).asInstanceOf[String]
-    if (redirectConsoleToLogger)
-      logger.info(message)
-    else
-      Console.println(message)
+    redirectConsoleToLogger ? logger.info(message) | Console.println(message)
   }
 
   @JSStaticFunctionAnnotation
   def warn(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction) {
     var message = args(0).asInstanceOf[String]
-    if (redirectConsoleToLogger)
-      logger.warn(message)
-    else
-      Console.println(message)
+    redirectConsoleToLogger ? logger.warn(message) | Console.println(message)
   }
 
   @JSStaticFunctionAnnotation
   def debug(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction) {
     var message = args(0).asInstanceOf[String]
-    if (redirectConsoleToLogger)
-      logger.debug(message)
-    else
-      Console.println(message)
+    redirectConsoleToLogger ? logger.debug(message) | Console.println(message)
   }
 
   @JSStaticFunctionAnnotation
   def error(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction) {
     var message = args(0).asInstanceOf[String]
-    if (redirectConsoleToLogger)
-      logger.error(message)
-    else
-      Console.println(message)
+    redirectConsoleToLogger ? logger.error(message) | Console.println(message)
   }
 
   def jsConstructor(context: Context, args: JSArray, constructor: JSFunction, inNewExpr: Boolean): ScriptableConsole =
