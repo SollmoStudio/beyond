@@ -18,7 +18,7 @@ object ScriptableQuery {
   def jsEq(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableQuery = {
     val currentQuery: BSONDocument = thisObj.asInstanceOf[ScriptableQuery].query
     val field = args(0).asInstanceOf[String]
-    val value = args(1)
+    val value = parseValue(args(1))
     val newQuery: BSONDocument = currentQuery.add(field -> value)
     ScriptableQuery(context, newQuery)
   }
@@ -27,7 +27,7 @@ object ScriptableQuery {
   def neq(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableQuery = {
     val currentQuery: BSONDocument = thisObj.asInstanceOf[ScriptableQuery].query
     val field = args(0).asInstanceOf[String]
-    val value = args(1)
+    val value = parseValue(args(1))
     val newQuery: BSONDocument = currentQuery.add(field -> BSONDocument("$ne" -> value))
     ScriptableQuery(context, newQuery)
   }
@@ -36,7 +36,7 @@ object ScriptableQuery {
   def lt(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableQuery = {
     val currentQuery: BSONDocument = thisObj.asInstanceOf[ScriptableQuery].query
     val field = args(0).asInstanceOf[String]
-    val value = args(1)
+    val value = parseValue(args(1))
     val newQuery: BSONDocument = currentQuery.add(field -> BSONDocument("$lt" -> value))
     ScriptableQuery(context, newQuery)
   }
@@ -45,7 +45,7 @@ object ScriptableQuery {
   def lte(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableQuery = {
     val currentQuery: BSONDocument = thisObj.asInstanceOf[ScriptableQuery].query
     val field = args(0).asInstanceOf[String]
-    val value = args(1)
+    val value = parseValue(args(1))
     val newQuery: BSONDocument = currentQuery.add(field -> BSONDocument("$lte" -> value))
     ScriptableQuery(context, newQuery)
   }
@@ -54,7 +54,7 @@ object ScriptableQuery {
   def gt(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableQuery = {
     val currentQuery: BSONDocument = thisObj.asInstanceOf[ScriptableQuery].query
     val field = args(0).asInstanceOf[String]
-    val value = args(1)
+    val value = parseValue(args(1))
     val newQuery: BSONDocument = currentQuery.add(field -> BSONDocument("$gt" -> value))
     ScriptableQuery(context, newQuery)
   }
@@ -63,7 +63,7 @@ object ScriptableQuery {
   def gte(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableQuery = {
     val currentQuery: BSONDocument = thisObj.asInstanceOf[ScriptableQuery].query
     val field = args(0).asInstanceOf[String]
-    val value = args(1)
+    val value = parseValue(args(1))
     val newQuery: BSONDocument = currentQuery.add(field -> BSONDocument("$gte" -> value))
     ScriptableQuery(context, newQuery)
   }
@@ -100,6 +100,13 @@ object ScriptableQuery {
     val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val scope = beyondContextFactory.global
     context.newObject(scope, "Query", bson).asInstanceOf[ScriptableQuery]
+  }
+
+  private def parseValue(value: AnyRef): AnyRef = value match {
+    case obj: ScriptableObjectId =>
+      ObjectId(obj.bson)
+    case _ =>
+      value
   }
 }
 
