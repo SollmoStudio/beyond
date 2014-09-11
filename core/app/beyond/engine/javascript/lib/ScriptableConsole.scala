@@ -18,31 +18,31 @@ object ScriptableConsole extends Logging {
 
   @JSStaticFunctionAnnotation
   def log(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction) {
-    var message = args(0).asInstanceOf[String]
+    val message = args(0).asInstanceOf[String]
     redirectConsoleToLogger ? logger.info(message) | Console.println(message)
   }
 
   @JSStaticFunctionAnnotation
   def info(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction) {
-    var message = args(0).asInstanceOf[String]
+    val message = args(0).asInstanceOf[String]
     redirectConsoleToLogger ? logger.info(message) | Console.println(message)
   }
 
   @JSStaticFunctionAnnotation
   def warn(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction) {
-    var message = args(0).asInstanceOf[String]
+    val message = args(0).asInstanceOf[String]
     redirectConsoleToLogger ? logger.warn(message) | Console.println(message)
   }
 
   @JSStaticFunctionAnnotation
   def debug(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction) {
-    var message = args(0).asInstanceOf[String]
+    val message = args(0).asInstanceOf[String]
     redirectConsoleToLogger ? logger.debug(message) | Console.println(message)
   }
 
   @JSStaticFunctionAnnotation
   def error(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction) {
-    var message = args(0).asInstanceOf[String]
+    val message = args(0).asInstanceOf[String]
     redirectConsoleToLogger ? logger.error(message) | Console.println(message)
   }
 
