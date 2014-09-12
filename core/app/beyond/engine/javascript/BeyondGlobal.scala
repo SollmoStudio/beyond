@@ -108,18 +108,18 @@ class BeyondGlobal extends ImporterTopLevel {
     defineFunctionProperties(names, classOf[BeyondGlobal], ScriptableObject.DONTENUM)
 
     val scriptableClasses = Array(
-      classOf[ScriptableCrypto],
-      classOf[ScriptableRequest],
-      classOf[ScriptableResponse],
       classOf[ScriptableCollection],
       classOf[ScriptableConsole],
+      classOf[ScriptableCrypto],
       classOf[ScriptableDocument],
-      classOf[ScriptableFile],
       classOf[ScriptableFileSystem],
+      classOf[ScriptableFile],
       classOf[ScriptableFuture],
       classOf[ScriptableObjectId],
       classOf[ScriptablePath],
       classOf[ScriptableQuery],
+      classOf[ScriptableRequest],
+      classOf[ScriptableResponse],
       classOf[ScriptableSchema],
       classOf[ScriptableUUID]
     )
