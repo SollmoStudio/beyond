@@ -165,28 +165,28 @@ package object database {
       throw new IllegalArgumentException(s"$field is not optional field.")
     case (native: NativeJavaObject, field: Field) =>
       convertJavaScriptToScalaWithField(native.unwrap())(field)
-    case (_, IntField(_, _, _)) =>
+    case (_, _: IntField) =>
       Int.box(ScriptRuntime.toInt32(value))
-    case (_, DoubleField(_, _, _)) =>
+    case (_, _: DoubleField) =>
       Double.box(ScriptRuntime.toNumber(value))
-    case (_, LongField(_, _, _)) =>
+    case (_, _: LongField) =>
       Long.box(ScriptRuntime.toInteger(value).toLong)
-    case (_, StringField(_, _, _)) =>
+    case (_, _: StringField) =>
       ScriptRuntime.toString(value)
-    case (_, BooleanField(_, _, _)) =>
+    case (_, _: BooleanField) =>
       Boolean.box(ScriptRuntime.toBoolean(value))
-    case (date: Date, DateField(_, _, _)) =>
+    case (date: Date, _: DateField) =>
       date
-    case (_, DateField(_, _, _)) =>
+    case (_, _: DateField) =>
       new Date(ScriptRuntime.toInteger(value).toLong)
-    case (obj: ScriptableDocument, ReferenceField(_, _, _, _)) =>
+    case (obj: ScriptableDocument, _: ReferenceField) =>
       ObjectId(obj.objectID)
-    case (objectID: ScriptableObjectId, ReferenceField(_, _, _, _)) =>
+    case (objectID: ScriptableObjectId, _: ReferenceField) =>
       ObjectId(objectID.bson)
-    case (value: ScriptableObject, EmbeddingField(_, schema, _, _)) =>
-      convertJavaScriptObjectToScalaWithField(value)(schema.fields)
-    case (array: NativeArray, ArrayField(_, elementType, _, _)) =>
-      array.toArray.map(convertJavaScriptToScalaWithField(_)(elementType)).toSeq
+    case (value: ScriptableObject, embeddingField: EmbeddingField) =>
+      convertJavaScriptObjectToScalaWithField(value)(embeddingField.schema.fields)
+    case (array: NativeArray, arrayField: ArrayField) =>
+      array.toArray.map(convertJavaScriptToScalaWithField(_)(arrayField.elementType)).toSeq
     case (_, _) =>
       throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a Scala object with $field type")
   }
