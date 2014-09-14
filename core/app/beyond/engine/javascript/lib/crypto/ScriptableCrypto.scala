@@ -5,6 +5,7 @@ import beyond.engine.javascript.JSFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.ScriptRuntime
 import org.mozilla.javascript.annotations.{ JSStaticFunction => JSStaticFunctionAnnotation }
 import play.api.libs.Crypto
 
@@ -72,7 +73,8 @@ object ScriptableCrypto {
       val key: Array[Byte] = try {
         args(1).asInstanceOf[String].getBytes
       } catch {
-        case e: ClassCastException => args(1).asInstanceOf[Array[Int]].map(_.toByte)
+        case e: ClassCastException =>
+          ScriptRuntime.getArrayElements(args(1).asInstanceOf[Scriptable]).map(ScriptRuntime.toInt32).map(_.toByte)
       }
 
       Crypto.sign(message, key)
