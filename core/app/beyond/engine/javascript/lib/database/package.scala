@@ -88,11 +88,24 @@ package object database {
       val defaultValue = Option(option.get("default"))
       tpe match {
         case "string" => StringField(name, isOptional, defaultValue)
-        case "int" => IntField(name, isOptional, defaultValue)
+        case "int" =>
+          val validations: Seq[Validation[Int]] = (
+            Option(option.get("min")).map(ScriptRuntime.toInt32).map(MinValidation[Int]) ++
+            Option(option.get("max")).map(ScriptRuntime.toInt32).map(MaxValidation[Int])).toSeq
+          IntField(name, isOptional, defaultValue, validations)
         case "date" => DateField(name, isOptional, defaultValue)
-        case "long" => LongField(name, isOptional, defaultValue)
-        case "double" => DoubleField(name, isOptional, defaultValue)
-        case "boolean" => BooleanField(name, isOptional, defaultValue)
+        case "long" =>
+          val validations: Seq[Validation[Long]] = (
+            Option(option.get("min")).map(ScriptRuntime.toUint32).map(MinValidation[Long]) ++
+            Option(option.get("max")).map(ScriptRuntime.toUint32).map(MaxValidation[Long])).toSeq
+          LongField(name, isOptional, defaultValue, validations)
+        case "double" =>
+          val validations: Seq[Validation[Double]] = (
+            Option(option.get("min")).map(ScriptRuntime.toNumber).map(MinValidation[Double]) ++
+            Option(option.get("max")).map(ScriptRuntime.toNumber).map(MaxValidation[Double])).toSeq
+          DoubleField(name, isOptional, defaultValue, validations)
+        case "boolean" =>
+          BooleanField(name, isOptional, defaultValue)
         case "reference" =>
           val collection = Option(option.get("collection")).asInstanceOf[Option[ScriptableCollection]]
           ReferenceField(name, collection.getOrElse(throw new IllegalArgumentException("The reference type must have collection")), isOptional, defaultValue)
@@ -109,6 +122,16 @@ package object database {
     }
   }
 
+  private[database] trait Validation[T] {
+    def validate(input: T): Boolean
+  }
+  private[database] case class MinValidation[T <% Ordered[T]](min: T) extends Validation[T] {
+    override def validate(input: T): Boolean = min <= input
+  }
+  private[database] case class MaxValidation[T <% Ordered[T]](max: T) extends Validation[T] {
+    override def validate(input: T): Boolean = input <= max
+  }
+
   private[database] trait Field {
     val name: String
     val isOptional: Boolean
@@ -118,11 +141,14 @@ package object database {
   // FIXME: Support complex type(embedding, referencing, array).
   private[database] case class BooleanField(override val name: String, override val isOptional: Boolean,
     override val defaultValue: Option[AnyRef]) extends Field
-  private[database] case class IntField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef]) extends Field
+  private[database] case class IntField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef],
+    validations: Seq[Validation[Int]]) extends Field
   private[database] case class StringField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef]) extends Field
   private[database] case class DateField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef]) extends Field
-  private[database] case class DoubleField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef]) extends Field
-  private[database] case class LongField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef]) extends Field
+  private[database] case class DoubleField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef],
+    validations: Seq[Validation[Double]]) extends Field
+  private[database] case class LongField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef],
+    validations: Seq[Validation[Long]]) extends Field
   private[database] case class ReferenceField(override val name: String, collection: ScriptableCollection, override val isOptional: Boolean,
     override val defaultValue: Option[AnyRef]) extends Field
   private[database] case class EmbeddingField(override val name: String, schema: ScriptableSchema, override val isOptional: Boolean,
