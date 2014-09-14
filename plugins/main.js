@@ -1,3 +1,4 @@
+var buffer = require("examples/buffer");
 var console = require("console");
 var counter = require("counter");
 var crypto = require("examples/crypto");
@@ -150,6 +151,8 @@ exports.handle = function (req) {
             return new Response(path.test());
         case "crypto":
             return new Response(crypto.test());
+        case "buffer":
+            return new Response(buffer.test());
         default:
             break;
     }

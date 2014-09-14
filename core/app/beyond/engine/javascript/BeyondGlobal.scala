@@ -1,5 +1,6 @@
 package beyond.engine.javascript
 
+import beyond.engine.javascript.lib.ScriptableBuffer
 import beyond.engine.javascript.lib.ScriptableConsole
 import beyond.engine.javascript.lib.ScriptableFuture
 import beyond.engine.javascript.lib.ScriptableUUID
@@ -108,6 +109,7 @@ class BeyondGlobal extends ImporterTopLevel {
     defineFunctionProperties(names, classOf[BeyondGlobal], ScriptableObject.DONTENUM)
 
     val scriptableClasses = Array(
+      classOf[ScriptableBuffer],
       classOf[ScriptableCollection],
       classOf[ScriptableConsole],
       classOf[ScriptableCrypto],
