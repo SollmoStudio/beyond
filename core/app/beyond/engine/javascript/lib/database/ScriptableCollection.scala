@@ -13,7 +13,6 @@ import org.mozilla.javascript.annotations.{ JSFunction => JSFunctionAnnotation }
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONObjectID
-import reactivemongo.bson.BSONValue
 import reactivemongo.core.commands.LastError
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
