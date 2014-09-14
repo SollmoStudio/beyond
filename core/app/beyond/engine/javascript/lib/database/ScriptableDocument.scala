@@ -7,7 +7,6 @@ import com.beyondframework.rhino.ContextOps._
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.IdScriptableObject
-import org.mozilla.javascript.NativeJavaObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.annotations.{ JSFunction => JSFunctionAnnotation }
@@ -15,7 +14,6 @@ import org.mozilla.javascript.annotations.JSGetter
 import reactivemongo.bson.BSONValue
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONObjectID
-import reactivemongo.bson.BSONUndefined
 import scala.collection.mutable.{ Map => MutableMap }
 import scalaz.syntax.std.boolean._
 
@@ -42,8 +40,6 @@ object ScriptableDocument {
 class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument, context: Context) extends IdScriptableObject {
   private type UpdatedValueTable = MutableMap[String, BSONValue]
   private val emptyUpdatedValueTable = MutableMap.empty[String, BSONValue]
-
-  import ScriptableDocument._
 
   def this() = this(Seq.empty, BSONDocument.empty, null)
 
