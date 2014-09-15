@@ -131,12 +131,16 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
       case somethingElse =>
         throw new IllegalArgumentException(s"objectId should be ObjectId. $somethingElse is not ObjectId.")
     }.getOrElse(BSONObjectID.generate)
-    val documentToBeInserted = BSONDocument("_id" -> objectId) ++ dataToBeInserted
-    collection.insert(documentToBeInserted).map[BSONDocument] {
-      case lastError if lastError.inError =>
-        throw new Exception(lastError.message)
-      case _ =>
-        documentToBeInserted
+    if (validateDocument(dataToBeInserted)) {
+      val documentToBeInserted = BSONDocument("_id" -> objectId) ++ dataToBeInserted
+      collection.insert(documentToBeInserted).map[BSONDocument] {
+        case lastError if lastError.inError =>
+          throw new Exception(lastError.message)
+        case _ =>
+          documentToBeInserted
+      }
+    } else {
+      Future.failed(new IllegalArgumentException("Cannot pass validations."))
     }
   }
 
@@ -158,13 +162,33 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
     val modifier = BSONDocument("$set" -> dataToBeUpdated.modifier)
     if (modifier.isEmpty) {
       Future.successful(dataToBeUpdated.currentBSONDocument)
-    } else {
+    } else if (validateDocument(dataToBeUpdated.currentBSONDocument)) {
       collection.update(objectID, modifier).map {
         case lastError if lastError.inError =>
           throw new Exception(lastError.message)
         case _ =>
           dataToBeUpdated.currentBSONDocument
       }
+    } else {
+      Future.failed(new IllegalArgumentException("Cannot pass validations."))
     }
   }
+
+  private def validateDocument(document: BSONDocument): Boolean =
+    fields.forall {
+      case field: IntField =>
+        document.getAs[Int](field.name).forall { value =>
+          field.validations.forall(_.validate(value))
+        }
+      case field: DoubleField =>
+        document.getAs[Double](field.name).forall { value =>
+          field.validations.forall(_.validate(value))
+        }
+      case field: LongField =>
+        document.getAs[Long](field.name).forall { value =>
+          field.validations.forall(_.validate(value))
+        }
+      case _ =>
+        true
+    }
 }
