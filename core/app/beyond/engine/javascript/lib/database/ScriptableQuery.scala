@@ -93,6 +93,8 @@ object ScriptableQuery {
     args match {
       case Array() => new ScriptableQuery
       case Array(bson: BSONDocument) => new ScriptableQuery(bson)
+      case Array(key: String, value: AnyRef) =>
+        new ScriptableQuery(BSONDocument(key -> convertToInternalRepresentation(value)))
       case _ => throw new IllegalArgumentException
     }
 
