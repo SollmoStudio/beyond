@@ -1,5 +1,9 @@
 exports.query = function () {
-    return new Query();
+    if (arguments.length === 2) {
+        return new Query(arguments[0], arguments[1]);
+    } else {
+        return new Query();
+    }
 };
 
 exports.Collection = Collection;

@@ -41,7 +41,7 @@ exports.insert = function (key, value) {
 
 exports.find = function () {
     var queries = Array.prototype.slice.call(arguments, 0).map(function (arg) {
-        return db.query().eq("key", arg);
+        return db.query("key", arg);
     });
     var emptyQuery = db.query();
     var baseQuery = queries.shift();
@@ -60,7 +60,7 @@ exports.find = function () {
 
 exports.findOne = function () {
     var queries = Array.prototype.slice.call(arguments, 0).map(function (arg) {
-        return db.query().eq("key", arg);
+        return db.query("key", arg);
     });
     var emptyQuery = db.query();
     var baseQuery = queries.shift();
@@ -80,7 +80,7 @@ exports.findOne = function () {
 
 exports.remove = function () {
     var queries = Array.prototype.slice.call(arguments, 0).map(function (arg) {
-        return db.query().eq("key", arg);
+        return db.query("key", arg);
     });
     var emptyQuery = db.query();
     var baseQuery = queries.shift();
@@ -90,7 +90,7 @@ exports.remove = function () {
 
 exports.removeOne = function () {
     var queries = Array.prototype.slice.call(arguments, 0).map(function (arg) {
-        return db.query().eq("key", arg);
+        return db.query("key", arg);
     });
     var emptyQuery = db.query();
     var baseQuery = queries.shift();
@@ -100,7 +100,7 @@ exports.removeOne = function () {
 
 exports.save = function () {
     var queries = Array.prototype.slice.call(arguments, 1).map(function (arg) {
-        return db.query().eq("key", arg);
+        return db.query("key", arg);
     });
     var newValue = arguments[0];
     var emptyQuery = db.query();
@@ -120,7 +120,7 @@ exports.save = function () {
 };
 
 exports.findOneWithKey = function (key) {
-    var query = db.query().eq("_id", db.ObjectId(key));
+    var query = db.query("_id", db.ObjectId(key));
     return collection.findOne(query).onComplete(function (result, isSuccess) {
         if (isSuccess) {
             console.log("%j", result);
@@ -131,7 +131,7 @@ exports.findOneWithKey = function (key) {
 };
 
 exports.referenceInsert = function (key) {
-    var query = db.query().eq("key", key);
+    var query = db.query("key", key);
     return collection.findOne(query).onSuccess(function (result) {
         console.log("document1: %j", result);
     }).onFailure(function (message) {
@@ -146,9 +146,9 @@ exports.referenceInsert = function (key) {
 };
 
 exports.referenceFindOne = function (key) {
-    var query = db.query().eq("key", key);
+    var query = db.query("key", key);
     return collection2.findOne(query).flatMap(function (result) {
-        var query = db.query().eq("_id", result.ref())
+        var query = db.query("_id", result.ref())
         return collection.findOne(query);
     }).onSuccess(function (result) {
         console.log("Found data: %j", result);
@@ -158,8 +158,8 @@ exports.referenceFindOne = function (key) {
 };
 
 exports.referenceUpdate = function (key1, key2) {
-    var query1 = db.query().eq("key", key1);
-    var query2 = db.query().eq("key", key2);
+    var query1 = db.query("key", key1);
+    var query2 = db.query("key", key2);
 
     return collection.findOne(query1).onSuccess(function (result) {
         console.log("document1: %j", result);
@@ -171,7 +171,7 @@ exports.referenceUpdate = function (key1, key2) {
         }).onFailure(function (message) {
             console.error("Cannot find document2: %s", message);
         }).flatMap(function (document2) {
-            var query = db.query().eq("_id", document2.ref())
+            var query = db.query("_id", document2.ref())
             return collection.findOne(query).onSuccess(function (result) {
                 console.log("document2.ref: %j", result);
             }).onFailure(function (message) {
@@ -195,7 +195,7 @@ exports.embeddingInsert = function (key, value) {
 
 exports.embeddingFind = function () {
     var queries = Array.prototype.slice.call(arguments, 0).map(function (arg) {
-        return db.query().eq("embed.key", arg);
+        return db.query("embed.key", arg);
     });
     var emptyQuery = db.query();
     var baseQuery = queries.shift();
@@ -210,7 +210,7 @@ exports.embeddingFind = function () {
 
 exports.arrayInsert = function(refKey, key1, value1, key2, value2) {
     var values = Array.prototype.slice.call(arguments, 5);
-    var refQuery = db.query().eq('key', refKey);
+    var refQuery = db.query('key', refKey);
     return collection.find(refQuery).onComplete(console.log).flatMap(function (refDocs) {
         var e1 = { key: key1, value: value1 };
         var e2 = { key: key2, value: value2 };
@@ -221,7 +221,7 @@ exports.arrayInsert = function(refKey, key1, value1, key2, value2) {
 };
 
 exports.arrayFindOne = function(key) {
-    var query = db.query().eq('_id', db.ObjectID(key));
+    var query = db.query('_id', db.ObjectID(key));
     return arrayCollection.findOne(query).onComplete(console.log).onSuccess(function (doc) {
         console.log("%j", doc);
     });
