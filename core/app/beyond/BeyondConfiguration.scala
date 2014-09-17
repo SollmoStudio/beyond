@@ -30,6 +30,8 @@ object BeyondConfiguration {
     paths.map(Path.fromString)
   }
 
+  def encoding: String = configuration.getString("beyond.encoding").get
+
   def curatorConnectionPolicy: RetryPolicy = {
     val curatorPath = "beyond.curator.connection"
     val baseSleepTimeMs = Duration(configuration.getString(s"$curatorPath.base-sleep-time").get).toMillis.toInt
