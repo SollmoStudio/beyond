@@ -1,5 +1,6 @@
 package beyond.engine.javascript.lib.filesystem
 
+import beyond.BeyondConfiguration
 import beyond.engine.javascript.BeyondContext
 import beyond.engine.javascript.BeyondContextFactory
 import beyond.engine.javascript.JSArray
@@ -25,7 +26,6 @@ object ScriptableFileSystem {
     s"chmod $modeStr $fileName" !!
   }
 
-  val DefaultEncoding = "UTF-8"
   val DefaultMode = 438 // aka 0666
 
   @JSStaticFunctionAnnotation
@@ -56,7 +56,7 @@ object ScriptableFileSystem {
     val fileName = args(0).asInstanceOf[String]
     val options = OptionParser.parse(args, 1)
 
-    implicit val encoding = options.getString("encoding").getOrElse(DefaultEncoding)
+    implicit val encoding = options.getString("encoding").getOrElse(BeyondConfiguration.encoding)
 
     val readFuture = future {
       val in = Resource.fromFile(fileName)
@@ -73,7 +73,7 @@ object ScriptableFileSystem {
     val data = args(1).asInstanceOf[String]
     val options: Configuration = OptionParser.parse(args, 2)
 
-    implicit val encoding = options.getString("encoding").getOrElse(DefaultEncoding)
+    implicit val encoding = options.getString("encoding").getOrElse(BeyondConfiguration.encoding)
     val mode = options.getInt("mode").getOrElse(DefaultMode)
 
     val writeFuture = future {
