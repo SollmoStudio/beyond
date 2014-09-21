@@ -7,6 +7,7 @@ import beyond.engine.javascript.JSArray
 import beyond.engine.javascript.JSFunction
 import beyond.engine.javascript.lib.ScriptableFuture
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.ScriptRuntime
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.annotations.{ JSFunction => JSFunctionAnnotation }
@@ -17,6 +18,7 @@ import reactivemongo.core.commands.Count
 import reactivemongo.core.commands.LastError
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
+import scalaz.syntax.std.boolean._
 
 object ScriptableCollection {
   @JSFunctionAnnotation
@@ -42,7 +44,8 @@ object ScriptableCollection {
     val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
     val findQuery = args(0).asInstanceOf[ScriptableQuery]
-    val queryResultFuture = thisCollection.findInternal(findQuery)
+    val limitOption = (args.length >= 2) ? Option(ScriptRuntime.toInt32(args(1))) | None
+    val queryResultFuture = thisCollection.findInternal(findQuery, limitOption)
 
     import com.beyondframework.rhino.RhinoConversions._
     val convertedToScriptableDocumentFuture = queryResultFuture.map { documents =>
@@ -162,8 +165,8 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
   }
 
   // Cannot use name 'find', because static forwarder is not generated when the companion object and class have the same name method.
-  private def findInternal(query: ScriptableQuery)(implicit ec: ExecutionContext): Future[Seq[BSONDocument]] =
-    collection.find(query.query).cursor[BSONDocument].collect[Seq]()
+  private def findInternal(query: ScriptableQuery, limit: Option[Int])(implicit ec: ExecutionContext): Future[Seq[BSONDocument]] =
+    collection.find(query.query).cursor[BSONDocument].collect[Seq](upTo = limit.getOrElse(Int.MaxValue))
 
   // Cannot use name 'findOne', because static forwarder is not generated when the companion object and class have the same name method.
   private def findOneInternal(query: ScriptableQuery)(implicit ec: ExecutionContext): Future[Option[BSONDocument]] =
