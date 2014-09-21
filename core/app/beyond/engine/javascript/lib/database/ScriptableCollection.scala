@@ -85,7 +85,12 @@ object ScriptableCollection {
   def removeOne(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
-    val removeQuery = args(0).asInstanceOf[ScriptableQuery]
+    val removeQuery = args match {
+      case Array(query: ScriptableQuery) => query
+      case Array(document: ScriptableDocument) =>
+        ScriptableQuery(context, "_id", document.getObjectId)
+      case _ => throw new IllegalArgumentException("Collection.remove method can receive query and document")
+    }
     val removeResult = thisCollection.removeInternal(removeQuery, firstMatchOnly = true)
     ScriptableFuture(context, removeResult)
   }
