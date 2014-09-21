@@ -104,6 +104,12 @@ object ScriptableQuery {
     context.newObject(scope, "Query", bson).asInstanceOf[ScriptableQuery]
   }
 
+  private[database] def apply(context: Context, name: String, value: AnyRef): ScriptableQuery = {
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val scope = beyondContextFactory.global
+    context.newObject(scope, "Query", name, value).asInstanceOf[ScriptableQuery]
+  }
+
   private def convertToInternalRepresentation(value: AnyRef): AnyRef = value match {
     case obj: ScriptableObjectId =>
       ObjectId(obj.bson)
