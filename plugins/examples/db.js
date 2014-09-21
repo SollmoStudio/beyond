@@ -226,3 +226,13 @@ exports.arrayFindOne = function(key) {
         console.log("%j", doc);
     });
 };
+
+exports.count = function () {
+    var queries = Array.prototype.slice.call(arguments, 0).map(function (arg) {
+        return db.query("key", arg);
+    });
+    var emptyQuery = db.query();
+    var baseQuery = queries.shift();
+    var q = baseQuery.or.apply(baseQuery, queries);
+    return collection.count(q).onComplete(console.log);
+};

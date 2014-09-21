@@ -13,6 +13,7 @@ import org.mozilla.javascript.annotations.{ JSFunction => JSFunctionAnnotation }
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONObjectID
+import reactivemongo.core.commands.Count
 import reactivemongo.core.commands.LastError
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
@@ -70,6 +71,17 @@ object ScriptableCollection {
         }
     }
     ScriptableFuture(context, convertedToScriptableDocumentResult)
+  }
+
+  @JSFunctionAnnotation
+  def count(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
+    val countQuery = args(0).asInstanceOf[ScriptableQuery]
+    val countResult = thisCollection.countInternal(countQuery)
+
+    ScriptableFuture(context, countResult)
   }
 
   @JSFunctionAnnotation
@@ -178,6 +190,9 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
       Future.failed(new IllegalArgumentException("Cannot pass validations."))
     }
   }
+
+  private def countInternal(query: ScriptableQuery)(implicit ec: ExecutionContext): Future[Int] =
+    collection.db.command(Count(collectionName = name, query = Option(query.query)))
 
   private def validateDocument(document: BSONDocument): Boolean =
     fields.forall {
