@@ -84,6 +84,9 @@ exports.handle = function (req) {
         case "findOne":
             db.findOne.apply(db.findOne, tokens);
             break;
+        case "count":
+            db.count.apply(db.count, tokens);
+            break;
         case "referenceFindOne":
             db.referenceFindOne(tokens[0]);
             break;
