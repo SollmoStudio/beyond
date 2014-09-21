@@ -15,7 +15,9 @@ import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.core.commands.Count
+import reactivemongo.core.commands.FindAndModify
 import reactivemongo.core.commands.LastError
+import reactivemongo.core.commands.Remove
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scalaz.syntax.std.boolean._
@@ -85,6 +87,26 @@ object ScriptableCollection {
     val countResult = thisCollection.countInternal(countQuery)
 
     ScriptableFuture(context, countResult)
+  }
+
+  @JSFunctionAnnotation
+  def findOneAndRemove(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
+    val findQuery = args(0).asInstanceOf[ScriptableQuery]
+    val findResult = thisCollection.findOneAndRemoveInternal(findQuery)
+
+    import com.beyondframework.rhino.RhinoConversions._
+    val convertedToScriptableDocumentResult = findResult.map {
+      case None =>
+        null
+      case Some(document) =>
+        beyondContextFactory.call { context: Context =>
+          ScriptableDocument(context, thisCollection.fields, document)
+        }
+    }
+    ScriptableFuture(context, convertedToScriptableDocumentResult)
   }
 
   @JSFunctionAnnotation
@@ -171,6 +193,9 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
   // Cannot use name 'findOne', because static forwarder is not generated when the companion object and class have the same name method.
   private def findOneInternal(query: ScriptableQuery)(implicit ec: ExecutionContext): Future[Option[BSONDocument]] =
     collection.find(query.query).one[BSONDocument]
+
+  private def findOneAndRemoveInternal(query: ScriptableQuery)(implicit ec: ExecutionContext): Future[Option[BSONDocument]] =
+    collection.db.command(FindAndModify(collection = name, query = query.query, modify = Remove))
 
   // Cannot use name 'remove', because static forwarder is not generated when the companion object and class have the same name method.
   private def removeInternal(query: ScriptableQuery, firstMatchOnly: Boolean = false)(implicit ec: ExecutionContext): Future[LastError] =
