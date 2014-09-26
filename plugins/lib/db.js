@@ -1,3 +1,4 @@
+/* global Collection, ObjectId, Query, Schema */
 exports.query = function () {
     if (arguments.length === 2) {
         return new Query(arguments[0], arguments[1]);

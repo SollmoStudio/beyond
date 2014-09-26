@@ -1,3 +1,4 @@
+/* global RequestInternal */
 exports.Request = function (req) {
     var request = new RequestInternal(req);
     this.bodyAsText = request.bodyAsText;

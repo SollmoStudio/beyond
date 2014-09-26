@@ -1,3 +1,4 @@
+/* global PluginEvent */
 var util = require('util');
 importClass(Packages.beyond.engine.javascript.lib.PluginEvent);
 var nativeEvent = new PluginEvent();
@@ -15,6 +16,6 @@ exports.track = function (tag) {
         }
         tokens.unshift(formatString);
     }
-    message = util.format.apply(util.format, tokens);
+    var message = util.format.apply(util.format, tokens);
     nativeEvent.track(tag, message);
 };

@@ -1,3 +1,4 @@
+/* global Console */
 var util = require('util');
 
 exports.log = function () {
