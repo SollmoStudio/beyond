@@ -40,3 +40,5 @@ data
 # Modules
 /modules/*/project
 /modules/*/target
+# Node.js Modules
+/node_modules

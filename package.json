@@ -1,0 +1,27 @@
+{
+  "name": "beyond",
+  "version": "0.0.1",
+  "description": "The Scalable Game Server Framework",
+  "main": "gulp.js",
+  "scripts": {
+    "test": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SollmoStudio/beyond"
+  },
+  "keywords": [
+    "Reactive",
+    "Game",
+    "Server"
+  ],
+  "author": "Sollmo",
+  "license": "Apache License, Version 2.0",
+  "bugs": {
+    "url": "https://github.com/SollmoStudio/beyond/issues"
+  },
+  "homepage": "https://github.com/SollmoStudio/beyond",
+  "devDependencies": {
+    "gulp": "^3.8.8"
+  }
+}
