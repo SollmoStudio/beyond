@@ -23,6 +23,7 @@ exports.format = function (inputString) {
                 } catch (ex) {
                     return '...';
                 }
+                break;
             case '%%':
                 return '%';
             default:

@@ -1,3 +1,4 @@
+/* global ResponseInternal */
 exports.STATUS_CODES = {
   100 : 'Continue',
   101 : 'Switching Protocols',
@@ -60,7 +61,7 @@ exports.STATUS_CODES = {
 
 exports.Response = function (obj) {
     // FIXME: Extract this as a convenient method or use underscore.
-    var isString = Object.prototype.toString.call(obj) == '[object String]';
+    var isString = Object.prototype.toString.call(obj) === '[object String]';
     this._response = isString ? new ResponseInternal(obj) : new ResponseInternal(JSON.stringify(obj));
 };
 
