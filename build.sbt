@@ -39,6 +39,10 @@ testScalaStyle := {
 
 (test in Test) <<= (test in Test) dependsOn testScalaStyle
 
+lazy val jsConsole = TaskKey[Unit]("js-console", "JavaScript shell console in Beyond")
+
+fullRunTask(jsConsole, Compile, "beyond.tool.JavaScriptShellConsole")
+
 scalariformSettings
 
 Common.settings
