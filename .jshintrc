@@ -18,7 +18,9 @@
         "require",
         "module",
         "exports",
-        "Future"
+        "Future",
+        "describe", "it", "before", "after", "beforeEach", "afterEach",
+        "setTimeout", "clearTimeout", "setInterval", "clearInterval"
     ],
 
     "debug"         : false,

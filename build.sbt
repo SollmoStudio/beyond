@@ -39,6 +39,10 @@ testScalaStyle := {
 
 (test in Test) <<= (test in Test) dependsOn testScalaStyle
 
+lazy val pluginTest = TaskKey[Unit]("plugin-test", "Plugin JavaScript API Test")
+
+fullRunTask(pluginTest, Compile, "beyond.plugin.test.TestRunner")
+
 lazy val jsConsole = TaskKey[Unit]("js-console", "JavaScript shell console in Beyond")
 
 fullRunTask(jsConsole, Compile, "beyond.tool.JavaScriptShellConsole")
