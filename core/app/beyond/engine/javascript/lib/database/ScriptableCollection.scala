@@ -20,7 +20,6 @@ import reactivemongo.core.commands.LastError
 import reactivemongo.core.commands.Remove
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import scalaz.syntax.std.boolean._
 
 object ScriptableCollection {
   @JSFunctionAnnotation
@@ -46,8 +45,19 @@ object ScriptableCollection {
     val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
     val findQuery = args(0).asInstanceOf[ScriptableQuery]
-    val limitOption = (args.length >= 2) ? Option(ScriptRuntime.toInt32(args(1))) | None
-    val queryResultFuture = thisCollection.findInternal(findQuery, limitOption)
+    val (limitOption, orderByOption) = if (args.isDefinedAt(1)) {
+      args(1) match {
+        case option: ScriptableObject =>
+          (Option(option.get("limit")).map(ScriptRuntime.toInt32),
+            Option(option.get("orderBy").asInstanceOf[ScriptableObject]))
+        case limitNumber: AnyRef =>
+          (Option(ScriptRuntime.toInt32(limitNumber)), None)
+      }
+    } else {
+      (None, None)
+    }
+
+    val queryResultFuture = thisCollection.findInternal(findQuery, limitOption, orderByOption)
 
     import com.beyondframework.rhino.RhinoConversions._
     val convertedToScriptableDocumentFuture = queryResultFuture.map { documents =>
@@ -187,8 +197,17 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
   }
 
   // Cannot use name 'find', because static forwarder is not generated when the companion object and class have the same name method.
-  private def findInternal(query: ScriptableQuery, limit: Option[Int])(implicit ec: ExecutionContext): Future[Seq[BSONDocument]] =
-    collection.find(query.query).cursor[BSONDocument].collect[Seq](upTo = limit.getOrElse(Int.MaxValue))
+  private def findInternal(
+    query: ScriptableQuery, limit: Option[Int], orderBy: Option[ScriptableObject])(implicit ec: ExecutionContext): Future[Seq[BSONDocument]] = {
+    val unsortedFindResult = collection.find(query.query)
+    val applyingOrderByOptionIfNecessary = orderBy.map { orderBy =>
+      unsortedFindResult.sort(BSONDocument(orderBy.getIds.map { id =>
+        val key = ScriptRuntime.toString(id)
+        key -> AnyRefBSONHandler.write(Int.box(ScriptRuntime.toInt32(orderBy.get(key))))
+      }))
+    }.getOrElse(unsortedFindResult)
+    applyingOrderByOptionIfNecessary.cursor[BSONDocument].collect[Seq](upTo = limit.getOrElse(Int.MaxValue))
+  }
 
   // Cannot use name 'findOne', because static forwarder is not generated when the companion object and class have the same name method.
   private def findOneInternal(query: ScriptableQuery)(implicit ec: ExecutionContext): Future[Option[BSONDocument]] =

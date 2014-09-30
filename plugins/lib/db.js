@@ -12,3 +12,6 @@ exports.Schema = Schema;
 exports.ObjectId = function(value) {
     return value ? new ObjectId(value) : new ObjectId();
 };
+
+exports.ASC = 1;
+exports.DESC = -1;
