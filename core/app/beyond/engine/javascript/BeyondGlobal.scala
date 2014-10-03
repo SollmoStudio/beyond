@@ -13,6 +13,8 @@ import beyond.engine.javascript.lib.database.ScriptableSchema
 import beyond.engine.javascript.lib.filesystem.ScriptableFile
 import beyond.engine.javascript.lib.filesystem.ScriptableFileSystem
 import beyond.engine.javascript.lib.filesystem.ScriptablePath
+import beyond.engine.javascript.lib.http.ScriptableHttpClient
+import beyond.engine.javascript.lib.http.ScriptableHttpResult
 import beyond.engine.javascript.lib.http.ScriptableRequest
 import beyond.engine.javascript.lib.http.ScriptableResponse
 import java.io.File
@@ -117,6 +119,8 @@ class BeyondGlobal extends ImporterTopLevel {
       classOf[ScriptableFileSystem],
       classOf[ScriptableFile],
       classOf[ScriptableFuture],
+      classOf[ScriptableHttpClient],
+      classOf[ScriptableHttpResult],
       classOf[ScriptableObjectId],
       classOf[ScriptablePath],
       classOf[ScriptableQuery],
