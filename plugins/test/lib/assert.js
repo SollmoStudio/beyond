@@ -407,6 +407,15 @@ assert.doesNotThrow = function(block, /*optional*/message) {
 
 assert.ifError = function(err) { if (err) {throw err;}};
 
+assert.async = function(done, test) {
+  try {
+    test();
+    done();
+  } catch(e) {
+    done(e);
+  }
+};
+
 module.exports = assert;
 
 /* jshint ignore:end */

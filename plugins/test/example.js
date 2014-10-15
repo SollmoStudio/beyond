@@ -64,24 +64,18 @@ describe('Array (async)', function () {
     });
 
     it.will('return the correct index when the value is present', function (done) {
-      try {
+      assert.async(done, function () {
         assert.equal(0, arr.indexOf(1));
         assert.equal(1, arr.indexOf(2));
         assert.equal(2, arr.indexOf(3));
-        done();
-      } catch (e) {
-        done(e);
-      }
+      });
     });
 
     it.will('return -1 when the value is not present', function (done) {
-      try {
+      assert.async(done, function () {
         assert.equal(-1, arr.indexOf(5));
         assert.equal(-1, arr.indexOf(0));
-        done();
-      } catch (e) {
-        done(e);
-      }
+      });
     });
   });
 
@@ -91,12 +85,9 @@ describe('Array (async)', function () {
     });
 
     it.will('return an array mapped by the mapping function', function (done) {
-      try {
+      assert.async(done, function () {
         assert.deepEqual([2, 3, 4], arr.map(function (el) { return el + 1; }));
-        done();
-      } catch (e) {
-        done(e);
-      }
+      });
     });
   });
 });
