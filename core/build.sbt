@@ -3,6 +3,7 @@ name := "core"
 resolvers += "spray repo" at "http://repo.spray.io"
 
 libraryDependencies ++= Seq(
+  ws,
   "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.2",
   "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.2",
   "com.typesafe.akka" %% "akka-actor" % "2.2.4",
