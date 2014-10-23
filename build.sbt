@@ -30,15 +30,6 @@ lazy val rhinoScalaBinding = project
 
 org.scalastyle.sbt.ScalastylePlugin.Settings
 
-// Create a default Scala style task to run with tests
-lazy val testScalaStyle = taskKey[Unit]("testScalaStyle")
-
-testScalaStyle := {
-  org.scalastyle.sbt.PluginKeys.scalastyle.toTask("").value
-}
-
-(test in Test) <<= (test in Test) dependsOn testScalaStyle
-
 lazy val pluginTest = TaskKey[Unit]("plugin-test", "Plugin JavaScript API Test")
 
 fullRunTask(pluginTest, Compile, "beyond.plugin.test.TestRunner")
