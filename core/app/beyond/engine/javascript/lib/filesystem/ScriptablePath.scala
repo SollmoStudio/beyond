@@ -5,9 +5,9 @@ import beyond.engine.javascript.JSFunction
 import java.io.File
 import java.nio.file.FileSystems
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.FunctionObject
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
-import org.mozilla.javascript.annotations.JSGetter
 import org.mozilla.javascript.annotations.{ JSStaticFunction => JSStaticFunctionAnnotation }
 import scalaz.syntax.std.boolean._
 
@@ -89,11 +89,10 @@ object ScriptablePath {
     }
   }
 
-  @JSGetter
-  def getSep(thisObj: Scriptable): String = File.separator
-
-  @JSGetter
-  def getDelimiter(thisObj: Scriptable): String = File.pathSeparator
+  def finishInit(scope: Scriptable, ctor: FunctionObject, proto: Scriptable) {
+    ctor.defineProperty("sep", File.separator, ScriptableObject.READONLY)
+    ctor.defineProperty("delimiter", File.pathSeparator, ScriptableObject.READONLY)
+  }
 
   def jsConstructor(context: Context, args: JSArray, constructor: JSFunction, inNewExpr: Boolean): ScriptablePath =
     new ScriptablePath
