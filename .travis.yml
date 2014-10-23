@@ -4,4 +4,5 @@ before_script:
   - npm install -g gulp
 script:
   - sbt ++$TRAVIS_SCALA_VERSION test
+  - sbt ++$TRAVIS_SCALA_VERSION plugin-test
   - gulp
