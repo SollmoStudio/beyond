@@ -177,7 +177,7 @@ package object database {
       val args: JSArray = seq.map(convertScalaToJavaScript).toArray
       context.newObject(scope, "Array", args)
     case objectID: ObjectId =>
-      context.getWrapFactory.wrapNewObject(context, scope, objectID)
+      context.newObject(scope, "ObjectId", objectID.toString)
     case _ =>
       throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a JavaScript Object")
   }
