@@ -1,14 +1,23 @@
 package beyond
 
 import beyond.route.RouteAddress
+import java.io.File
 import org.apache.curator.RetryPolicy
 import org.apache.curator.retry.ExponentialBackoffRetry
+import play.api.Configuration
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.FiniteDuration
 import scalax.file.Path
 
 object BeyondConfiguration {
-  private def configuration = play.api.Play.current.configuration
+  private def configuration =
+    try {
+      play.api.Play.current.configuration
+    } catch {
+      // If there's no running Play app, just load it with the current app path.
+      // Mainly for tests or console
+      case _: RuntimeException => Configuration.load(new File("."))
+    }
 
   def requestTimeout: FiniteDuration =
     Duration(configuration.getString("beyond.request-timeout").get).asInstanceOf[FiniteDuration]
