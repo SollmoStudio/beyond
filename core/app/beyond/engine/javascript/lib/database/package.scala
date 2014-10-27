@@ -178,6 +178,8 @@ package object database {
       context.newObject(scope, "Array", args)
     case objectID: ObjectId =>
       context.newObject(scope, "ObjectId", objectID.toString)
+    case Unit =>
+      Undefined.instance
     case _ =>
       throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a JavaScript Object")
   }

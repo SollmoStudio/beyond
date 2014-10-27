@@ -8,7 +8,6 @@ import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.IdScriptableObject
 import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.annotations.{ JSFunction => JSFunctionAnnotation }
 import org.mozilla.javascript.annotations.JSGetter
 import reactivemongo.bson.BSONValue
@@ -103,7 +102,7 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument, co
   private def fieldByName(name: String): Field = fields.find(_.name == name).get
 
   private def currentJavaScriptValue(name: String)(implicit context: Context, scope: Scriptable): AnyRef = {
-    val scalaValue = currentBSONValue(name).map(AnyRefBSONHandler.read).getOrElse(fieldByName(name).defaultValue.getOrElse(Undefined.instance))
+    val scalaValue = currentBSONValue(name).map(AnyRefBSONHandler.read).getOrElse(fieldByName(name).defaultValue.getOrElse(Unit))
     convertScalaToJavaScript(scalaValue)(context, scope)
   }
 
