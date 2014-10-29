@@ -221,7 +221,7 @@ exports.arrayInsert = function(refKey, key1, value1, key2, value2) {
 };
 
 exports.arrayFindOne = function(key) {
-    var query = db.query('_id', db.ObjectID(key));
+    var query = db.query('_id', db.ObjectId(key));
     return arrayCollection.findOne(query).onComplete(console.log).onSuccess(function (doc) {
         console.log("%j", doc);
     });
