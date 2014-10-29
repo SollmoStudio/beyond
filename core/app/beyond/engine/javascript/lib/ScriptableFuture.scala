@@ -5,6 +5,7 @@ import beyond.engine.javascript.BeyondContextFactory
 import beyond.engine.javascript.JSArray
 import beyond.engine.javascript.JSFunction
 import com.beyondframework.rhino.ContextOps._
+import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import java.lang.{ Boolean => JavaBoolean }
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
@@ -19,14 +20,20 @@ import scala.concurrent.Promise
 import scala.util.Failure
 import scala.util.Success
 
-object ScriptableFuture {
+object ScriptableFuture extends Logging {
   import com.beyondframework.rhino.RhinoConversions._
 
   private def executeCallback(contextFactory: ContextFactory, callback: JSFunction, callbackArgs: AnyRef*): AnyRef = {
     val beyondContextFactory = contextFactory.asInstanceOf[BeyondContextFactory]
     val scope = beyondContextFactory.global
-    beyondContextFactory.call { context: Context =>
-      callback.call(context, scope, scope, callbackArgs.toArray)
+    try {
+      beyondContextFactory.call { context: Context =>
+        callback.call(context, scope, scope, callbackArgs.toArray)
+      }
+    } catch {
+      case ex: RhinoException =>
+        logger.debug(ex.getMessage, ex)
+        throw new Exception(ex.details())
     }
   }
 
@@ -60,8 +67,6 @@ object ScriptableFuture {
     thisFuture.future.onComplete {
       case Success(result) =>
         executeCallback(context.getFactory, callback, result, new JavaBoolean(true))
-      case Failure(ex: RhinoException) =>
-        executeCallback(context.getFactory, callback, ex.details(), new JavaBoolean(false))
       case Failure(throwable) =>
         executeCallback(context.getFactory, callback, throwable.getMessage, new JavaBoolean(false))
     }
@@ -86,8 +91,6 @@ object ScriptableFuture {
     val callback = args(0).asInstanceOf[JSFunction]
     val thisFuture = thisObj.asInstanceOf[ScriptableFuture]
     thisFuture.future.onFailure {
-      case ex: RhinoException =>
-        executeCallback(context.getFactory, callback, ex.details)
       case throwable: Throwable =>
         executeCallback(context.getFactory, callback, throwable.getMessage)
     }
@@ -145,8 +148,6 @@ object ScriptableFuture {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
     val callback = args(0).asInstanceOf[JSFunction]
     val newFuture = thisObj.asInstanceOf[ScriptableFuture].future.recover {
-      case exception: RhinoException =>
-        executeCallback(context.getFactory, callback, exception.details())
       case throwable: Throwable =>
         executeCallback(context.getFactory, callback, throwable.getMessage)
     }
@@ -165,8 +166,6 @@ object ScriptableFuture {
     thisFuture.future.onComplete {
       case Success(result) =>
         promise.success(executeCallback(context.getFactory, callbackOnSuccess, result))
-      case Failure(exception: RhinoException) =>
-        promise.failure(new Exception(executeCallback(context.getFactory, callbackOnFailure, exception.details).asInstanceOf[String]))
       case Failure(throwable) =>
         promise.failure(new Exception(executeCallback(context.getFactory, callbackOnFailure, throwable.getMessage).asInstanceOf[String]))
     }
