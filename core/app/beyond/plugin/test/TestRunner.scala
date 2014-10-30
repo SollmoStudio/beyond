@@ -5,11 +5,18 @@ import java.io.File
 import java.io.FileReader
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.EcmaError
+import play.api.DefaultApplication
+import play.api.Mode
 import scalax.file.Path
 import scalaz.syntax.std.boolean._
 
 object TestRunner extends App {
   import com.beyondframework.rhino.RhinoConversions._
+
+  private val testApp =
+    new DefaultApplication(new File("."), this.getClass.getClassLoader, None, Mode.Test)
+
+  play.api.Play.start(testApp)
 
   private val testPath = "plugins/test"
 
@@ -69,6 +76,7 @@ object TestRunner extends App {
   }
 
   def testEndsWith(code: Int) {
+    play.api.Play.stop()
     Runtime.getRuntime.halt(code)
   }
 

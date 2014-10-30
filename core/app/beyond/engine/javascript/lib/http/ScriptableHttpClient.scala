@@ -12,7 +12,6 @@ import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.annotations.{ JSFunction => JSFunctionAnnotation }
 import org.mozilla.javascript.annotations.JSStaticFunction
-import play.{ api => playApi }
 import play.api.libs.json._
 import play.api.libs.ws._
 import scala.concurrent.Future
@@ -160,15 +159,10 @@ object ScriptableHttpClient {
   @JSStaticFunction
   def patch(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableHttpClient =
     ScriptableHttpClient(context, args(0).asInstanceOf[String], "patch")
-
-  // If there's no running application, create one.
-  // Mainly for test and console
-  lazy private val testApp =
-    new playApi.DefaultApplication(new File("."), this.getClass.getClassLoader, None, playApi.Mode.Test)
 }
 
 class ScriptableHttpClient(url: String, method: String) extends ScriptableObject {
-  implicit private val app = playApi.Play.maybeApplication.getOrElse(ScriptableHttpClient.testApp)
+  import play.api.Play.current
 
   def this() = this("about:blank", "get")
   def this(url: String) = this(url, "get")
