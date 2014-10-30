@@ -71,6 +71,7 @@ class MongoDBLauncher extends {
       throw new LauncherInitializationException
     }
 
+    // FIXME: Currently, MongoDBLauncher launches a standalone MongoDB daemon.
     val processBuilder = Process(Seq(path, "--dbpath", dbPath.getCanonicalPath, "--pidfilepath", pidFilePath.path))
     processBuilder.run()
     log.info("MongoDB started")
@@ -80,6 +81,10 @@ class MongoDBLauncher extends {
 
   override def postStop() {
     super.postStop()
+
+    // FIXME: Currently, MongoDBLauncher launches a standalone MongoDB daemon.
+    terminateProcessIfExists(pidFilePath)
+
     log.info("MongoDBLauncher stopped")
   }
 

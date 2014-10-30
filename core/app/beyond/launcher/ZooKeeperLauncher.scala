@@ -62,6 +62,11 @@ class ZooKeeperLauncher extends {
   override def postStop() {
     connectCancellable.cancel()
     super.postStop()
+
+    // FIXME: Currently, ZooKeeperLauncher launches a standalone ZooKeeper server.
+    // Setup a ZooKeeper cluster instead.
+    terminateProcessIfExists(pidFilePath)
+
     log.info("ZooKeeperLauncher stopped")
   }
 
