@@ -59,7 +59,7 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument, co
   private val scriptableObjectId: Option[ScriptableObjectId] =
     objectIDOption.map(ScriptableObjectId(context, _))
 
-  @JSGetter
+  @JSGetter("_id")
   def getObjectId: ScriptableObjectId =
     scriptableObjectId.getOrElse(throw new NoSuchElementException("ObjectID does not exist"))
 
