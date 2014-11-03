@@ -19,6 +19,7 @@ import beyond.engine.javascript.lib.http.ScriptableRequest
 import beyond.engine.javascript.lib.http.ScriptableResponse
 import java.io.File
 import java.net.URI
+import java.nio.file.FileSystems
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.ImporterTopLevel
@@ -130,6 +131,9 @@ class BeyondGlobal extends ImporterTopLevel {
       classOf[ScriptableUUID]
     )
     scriptableClasses.foreach(ScriptableObject.defineClass(this, _))
+
+    val dirname = FileSystems.getDefault.getPath("").toAbsolutePath.toString
+    defineProperty("__dirname", dirname, ScriptableObject.DONTENUM | ScriptableObject.READONLY)
   }
 
   def installRequire(cx: Context, modulePaths: Seq[String], sandboxed: Boolean): Require = {
