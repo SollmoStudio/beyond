@@ -2,6 +2,7 @@ package beyond.tool
 
 import akka.actor.ActorSystem
 import beyond.engine.javascript.BeyondJavaScriptEngine
+import java.io.File
 import java.util
 import jline.console.ConsoleReader
 import jline.console.completer.Completer
@@ -12,6 +13,8 @@ import org.mozilla.javascript.Script
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.tools.ToolErrorReporter
+import play.api.DefaultApplication
+import play.api.Mode
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext
 import scalax.file.Path
@@ -76,6 +79,11 @@ class FlexibleCompletor(global: Scriptable) extends Completer {
 
 object JavaScriptShellConsole extends App {
   import com.beyondframework.rhino.RhinoConversions._
+
+  private val testApp =
+    new DefaultApplication(new File("."), this.getClass.getClassLoader, None, Mode.Test)
+
+  play.api.Play.start(testApp)
 
   implicit val system = ActorSystem("javascript-shell-console")
   import system.dispatcher
