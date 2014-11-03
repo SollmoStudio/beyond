@@ -108,7 +108,7 @@ package object database {
           BooleanField(name, isOptional, defaultValue)
         case "reference" =>
           val collection = Option(option.get("collection")).asInstanceOf[Option[ScriptableCollection]]
-          ReferenceField(name, collection.getOrElse(throw new IllegalArgumentException("The reference type must have collection")), isOptional, defaultValue)
+          ReferenceField(name, collection, isOptional, defaultValue)
         case "embedding" =>
           val schema = Option(option.get("schema")).asInstanceOf[Option[ScriptableSchema]]
           EmbeddingField(name, schema.getOrElse(throw new IllegalArgumentException("The embedding type must have schema")), isOptional, defaultValue)
@@ -149,7 +149,7 @@ package object database {
     validations: Seq[Validation[Double]]) extends Field
   private[database] case class LongField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef],
     validations: Seq[Validation[Long]]) extends Field
-  private[database] case class ReferenceField(override val name: String, collection: ScriptableCollection, override val isOptional: Boolean,
+  private[database] case class ReferenceField(override val name: String, collection: Option[ScriptableCollection], override val isOptional: Boolean,
     override val defaultValue: Option[AnyRef]) extends Field
   private[database] case class EmbeddingField(override val name: String, schema: ScriptableSchema, override val isOptional: Boolean,
     override val defaultValue: Option[AnyRef]) extends Field
