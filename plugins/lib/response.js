@@ -59,10 +59,11 @@ exports.STATUS_CODES = {
   511 : 'Network Authentication Required' // RFC 6585
 };
 
-exports.Response = function (obj, contentType) {
+exports.Response = function (obj, contentType, statusCode) {
     // FIXME: Extract this as a convenient method or use underscore.
     var isString = Object.prototype.toString.call(obj) === '[object String]';
     contentType = contentType || 'plain/text';
-    this._response = isString ? new ResponseInternal(obj, contentType) : new ResponseInternal(JSON.stringify(obj), contentType);
+    statusCode = statusCode || 200;
+    this._response = isString ? new ResponseInternal(obj, contentType, statusCode) : new ResponseInternal(JSON.stringify(obj), contentType, statusCode);
 };
 
