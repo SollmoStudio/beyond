@@ -59,7 +59,11 @@ object ScriptableFileSystem {
     implicit val encoding = Codec(options.getString("encoding").getOrElse(BeyondConfiguration.encoding))
 
     val readFuture = future {
-      val in = Resource.fromFile(fileName)
+      val file = new File(fileName)
+      if (!file.exists) {
+        throw new java.io.IOException("Can't find the file")
+      }
+      val in = Resource.fromFile(file)
       in.string
     }
     ScriptableFuture(context, readFuture)

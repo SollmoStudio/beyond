@@ -23,6 +23,17 @@ describe('file-system', function () {
         });
       });
     });
+
+    it.will('fire an exception when there is no file.', function (done) {
+      fs
+      .readFile('./plugins/test/assets/fs/nothing')
+      .onComplete(function (result, isSuccess) {
+        assert.async(done, function () {
+          assert.equal(isSuccess, false);
+          assert.equal(result, "Can't find the file");
+        });
+      });
+    });
   });
 
   describe('#writeFile()', function () {
