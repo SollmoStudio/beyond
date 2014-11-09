@@ -4,7 +4,7 @@ require('bdd').mount(this);
 
 describe('Response', function () {
   describe('#constructor()', function () {
-    it('should return a proper InternalResponse object.', function () {
+    it('should return a proper Response object.', function () {
       var res = new Response('hello');
       assert.equal(!!res, true);
     });

@@ -56,7 +56,7 @@ object ScriptableResponse {
 class ScriptableResponse(val result: Result) extends ScriptableObject {
   def this() = this(null)
 
-  override def getClassName: String = "ResponseInternal"
+  override def getClassName: String = "Response"
 
   @JSGetter
   def getBody: String =

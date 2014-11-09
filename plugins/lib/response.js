@@ -1,4 +1,4 @@
-/* global ResponseInternal */
+/* global Response */
 exports.STATUS_CODES = {
   100 : 'Continue',
   101 : 'Switching Protocols',
@@ -59,4 +59,4 @@ exports.STATUS_CODES = {
   511 : 'Network Authentication Required' // RFC 6585
 };
 
-exports.Response = ResponseInternal;
+exports.Response = Response;
