@@ -3,6 +3,7 @@ package beyond.plugin
 import beyond.engine.javascript.BeyondJavaScriptEngine
 import beyond.engine.javascript.lib.ScriptableConsole
 import beyond.engine.javascript.lib.ScriptableFuture
+import beyond.engine.javascript.lib.http.ScriptableRequest
 import beyond.engine.javascript.lib.http.ScriptableResponse
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import org.mozilla.javascript.Context
@@ -40,8 +41,7 @@ object GamePlugin extends Logging {
   def handle[A](request: Request[A]): Future[Result] = engine.contextFactory.call { cx: Context =>
     val scope = engine.global
 
-    val scriptableRequest: Scriptable = cx.newObject(scope, "Request", request)
-    val args: Array[AnyRef] = Array(scriptableRequest)
+    val args: Array[AnyRef] = Array(ScriptableRequest(cx, request))
     val response = handler.call(cx, scope, scope, args)
     response match {
       case f: ScriptableFuture =>

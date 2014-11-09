@@ -1,10 +1,14 @@
 package beyond.engine.javascript.lib.http
 
+import beyond.engine.javascript.BeyondContextFactory
 import beyond.engine.javascript.JSArray
 import beyond.engine.javascript.JSFunction
+import com.beyondframework.rhino.ContextOps._
 import com.beyondframework.rhino.ScriptableMap
 import org.mozilla.javascript.annotations.JSGetter
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.NativeJSON
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import play.api.libs.json.JsNull
@@ -14,6 +18,12 @@ import play.api.mvc.AnyContent
 import play.api.mvc.Request
 
 object ScriptableRequest {
+  def apply[A](context: Context, request: Request[A]): ScriptableRequest = {
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val scope = beyondContextFactory.global
+    context.newObject(scope, "Request", request).asInstanceOf[ScriptableRequest]
+  }
+
   def jsConstructor(context: Context, args: JSArray, constructor: JSFunction, inNewExpr: Boolean): ScriptableRequest = {
     var request = args(0).asInstanceOf[Request[AnyContent]]
     new ScriptableRequest(request)
@@ -24,7 +34,7 @@ object ScriptableRequest {
 class ScriptableRequest(val request: Request[AnyContent]) extends ScriptableObject {
   def this() = this(null)
 
-  override def getClassName: String = "RequestInternal"
+  override def getClassName: String = "Request"
 
   @JSGetter
   def getBodyAsText: String = request.body.asText.getOrElse("")
@@ -40,6 +50,16 @@ class ScriptableRequest(val request: Request[AnyContent]) extends ScriptableObje
   def getBodyAsJsonString: String = {
     val jsValue: JsValue = request.body.asJson.getOrElse(JsNull)
     Json.stringify(jsValue)
+  }
+
+  @JSGetter
+  def getBodyAsJson: AnyRef = {
+    val context = Context.getCurrentContext
+    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
+    val scope = beyondContextFactory.global
+    NativeJSON.parse(context, scope, getBodyAsJsonString, new Callable() {
+      override def call(cx: Context, scope: Scriptable, thisObj: Scriptable, args: JSArray): AnyRef = args(1)
+    })
   }
 
   @JSGetter
