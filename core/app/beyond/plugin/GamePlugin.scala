@@ -45,11 +45,10 @@ object GamePlugin extends Logging {
     val response = handler.call(cx, scope, scope, args)
     response match {
       case f: ScriptableFuture =>
-        f.future.mapTo[ScriptableObject].map(
-          ScriptableObject.getProperty(_, "_response").asInstanceOf[ScriptableResponse].result)
-      case obj: ScriptableObject =>
-        val scriptableResponse = ScriptableObject.getProperty(obj, "_response").asInstanceOf[ScriptableResponse]
-        Future.successful(scriptableResponse.result)
+        f.future.mapTo[ScriptableResponse].map(
+          _.asInstanceOf[ScriptableResponse].result)
+      case res: ScriptableResponse =>
+        Future.successful(res.result)
     }
   }.asInstanceOf[Future[Result]]
 }

@@ -35,10 +35,10 @@ object ScriptableResponse {
     obj match {
       case str: String =>
         str
-      case obj: Scriptable =>
+      case other =>
         val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
         val scope = beyondContextFactory.global
-        NativeJSON.stringify(context, scope, obj, null, null).asInstanceOf[String]
+        NativeJSON.stringify(context, scope, other, null, null).asInstanceOf[String]
     }
 
   def jsConstructor(context: Context, args: JSArray, constructor: JSFunction, inNewExpr: Boolean): ScriptableResponse = {
