@@ -69,8 +69,19 @@ object ScriptableQuery {
   }
 
   @JSFunctionAnnotation
-  def where(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableQuery =
-    ???
+  def where(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableQuery = {
+    val currentQuery: BSONDocument = thisObj.asInstanceOf[ScriptableQuery].query
+    val where: String = args match {
+      case Array(function: JSFunction) =>
+        context.decompileFunction(function, 0)
+      case Array(code: String) =>
+        code
+      case _ =>
+        throw new IllegalArgumentException
+    }
+    val newQuery: BSONDocument = currentQuery.add("$where" -> where)
+    ScriptableQuery(context, newQuery)
+  }
 
   @JSFunctionAnnotation
   def or(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableQuery = {
