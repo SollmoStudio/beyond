@@ -205,6 +205,7 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
 
     val queryOpts = QueryOpts()
     skip.map { skip => queryOpts.skip(skip) }
+    limit.map { limit => queryOpts.batchSize(limit) }
 
     val unsortedFindResult = collection.find(query.query).options(queryOpts)
     val applyingOrderByOptionIfNecessary = orderBy.map { orderBy =>
