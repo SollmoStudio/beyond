@@ -11,6 +11,7 @@ import org.mozilla.javascript.ScriptRuntime
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.annotations.{ JSFunction => JSFunctionAnnotation }
+import reactivemongo.api.QueryOpts
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONObjectID
@@ -45,19 +46,20 @@ object ScriptableCollection {
     val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
     val findQuery = args(0).asInstanceOf[ScriptableQuery]
-    val (limitOption, orderByOption) = if (args.isDefinedAt(1)) {
+    val (limitOption, orderByOption, skipOption) = if (args.isDefinedAt(1)) {
       args(1) match {
         case option: ScriptableObject =>
           (Option(option.get("limit")).map(ScriptRuntime.toInt32),
-            Option(option.get("orderBy").asInstanceOf[ScriptableObject]))
+            Option(option.get("orderBy").asInstanceOf[ScriptableObject]),
+            Option(option.get("skip")).map(ScriptRuntime.toInt32))
         case limitNumber: AnyRef =>
-          (Option(ScriptRuntime.toInt32(limitNumber)), None)
+          (Option(ScriptRuntime.toInt32(limitNumber)), None, None)
       }
     } else {
-      (None, None)
+      (None, None, None)
     }
 
-    val queryResultFuture = thisCollection.findInternal(findQuery, limitOption, orderByOption)
+    val queryResultFuture = thisCollection.findInternal(findQuery, limitOption, skipOption, orderByOption)
 
     import com.beyondframework.rhino.RhinoConversions._
     val convertedToScriptableDocumentFuture = queryResultFuture.map { documents =>
@@ -198,8 +200,13 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
 
   // Cannot use name 'find', because static forwarder is not generated when the companion object and class have the same name method.
   private def findInternal(
-    query: ScriptableQuery, limit: Option[Int], orderBy: Option[ScriptableObject])(implicit ec: ExecutionContext): Future[Seq[BSONDocument]] = {
-    val unsortedFindResult = collection.find(query.query)
+    query: ScriptableQuery, limit: Option[Int], skip: Option[Int], orderBy: Option[ScriptableObject])(
+      implicit ec: ExecutionContext): Future[Seq[BSONDocument]] = {
+
+    val queryOpts = QueryOpts()
+    skip.map { skip => queryOpts.skip(skip) }
+
+    val unsortedFindResult = collection.find(query.query).options(queryOpts)
     val applyingOrderByOptionIfNecessary = orderBy.map { orderBy =>
       unsortedFindResult.sort(BSONDocument(orderBy.getIds.map { id =>
         val key = ScriptRuntime.toString(id)
