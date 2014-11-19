@@ -5,6 +5,7 @@ import beyond.engine.javascript.JSArray
 import beyond.engine.javascript.JSFunction
 import com.beyondframework.rhino.ContextOps._
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.annotations.{ JSFunction => JSFunctionAnnotation }
@@ -82,6 +83,30 @@ object ScriptableQuery {
     val newQuery: BSONDocument = currentQuery.add("$where" -> where)
     ScriptableQuery(context, newQuery)
   }
+
+  @JSFunctionAnnotation
+  def nin(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableQuery =
+    args match {
+      case Array(field: String, nArray: NativeArray) =>
+        val currentQuery: BSONDocument = thisObj.asInstanceOf[ScriptableQuery].query
+        val value = nArray.toArray.toSeq.map(convertToInternalRepresentation)
+        val newQuery: BSONDocument = currentQuery.add(field -> BSONDocument("$nin" -> value))
+        ScriptableQuery(context, newQuery)
+      case _ =>
+        throw new IllegalArgumentException
+    }
+
+  @JSFunctionAnnotation
+  def in(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableQuery =
+    args match {
+      case Array(field: String, nArray: NativeArray) =>
+        val currentQuery: BSONDocument = thisObj.asInstanceOf[ScriptableQuery].query
+        val value = nArray.toArray.toSeq.map(convertToInternalRepresentation)
+        val newQuery: BSONDocument = currentQuery.add(field -> BSONDocument("$in" -> value))
+        ScriptableQuery(context, newQuery)
+      case _ =>
+        throw new IllegalArgumentException
+    }
 
   @JSFunctionAnnotation
   def or(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableQuery = {
