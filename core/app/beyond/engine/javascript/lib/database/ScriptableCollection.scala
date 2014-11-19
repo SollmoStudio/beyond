@@ -203,9 +203,7 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
     query: ScriptableQuery, limit: Option[Int], skip: Option[Int], orderBy: Option[ScriptableObject])(
       implicit ec: ExecutionContext): Future[Seq[BSONDocument]] = {
 
-    val queryOpts = QueryOpts()
-    skip.map { skip => queryOpts.skip(skip) }
-    limit.map { limit => queryOpts.batchSize(limit) }
+    val queryOpts = QueryOpts(skipN = skip.getOrElse(0), batchSizeN = limit.getOrElse(0))
 
     val unsortedFindResult = collection.find(query.query).options(queryOpts)
     val applyingOrderByOptionIfNecessary = orderBy.map { orderBy =>
