@@ -17,7 +17,11 @@ object BeyondSupervisor {
 
 class BeyondSupervisor extends Actor {
   context.actorOf(Props[LauncherSupervisor], LauncherSupervisor.Name)
-  context.actorOf(Props[SystemMetricsSupervisor], SystemMetricsSupervisor.Name)
+
+  if (BeyondConfiguration.enableMetrics) {
+    context.actorOf(Props[SystemMetricsSupervisor], SystemMetricsSupervisor.Name)
+  }
+
   if (!BeyondConfiguration.isStandaloneMode) {
     context.actorOf(Props[CuratorSupervisor], CuratorSupervisor.Name)
   }

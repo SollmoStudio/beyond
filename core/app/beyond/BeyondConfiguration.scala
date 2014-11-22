@@ -60,4 +60,7 @@ object BeyondConfiguration {
 
   def isStandaloneMode: Boolean =
     configuration.getBoolean("beyond.standalone-mode").getOrElse(false)
+
+  def enableMetrics: Boolean =
+    configuration.getBoolean("beyond.enable-metrics").getOrElse(true)
 }
