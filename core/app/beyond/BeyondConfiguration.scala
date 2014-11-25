@@ -57,4 +57,7 @@ object BeyondConfiguration {
 
     RouteAddress(hostAddress, port.toString)
   }
+
+  def isStandaloneMode: Boolean =
+    configuration.getBoolean("beyond.standalone-mode").getOrElse(false)
 }

@@ -18,7 +18,9 @@ object BeyondSupervisor {
 class BeyondSupervisor extends Actor {
   context.actorOf(Props[LauncherSupervisor], LauncherSupervisor.Name)
   context.actorOf(Props[SystemMetricsSupervisor], SystemMetricsSupervisor.Name)
-  context.actorOf(Props[CuratorSupervisor], CuratorSupervisor.Name)
+  if (!BeyondConfiguration.isStandaloneMode) {
+    context.actorOf(Props[CuratorSupervisor], CuratorSupervisor.Name)
+  }
 
   override def receive: Receive = Map.empty
 }

@@ -19,19 +19,21 @@ object LauncherSupervisor {
 class LauncherSupervisor extends Actor with ActorLogging {
   override def preStart() {
     def launchZooKeeperServerIfNecessary() {
-      import scala.collection.JavaConversions._
+      if (!BeyondConfiguration.isStandaloneMode) {
+        import scala.collection.JavaConversions._
 
-      val localAddresses = (for {
-        ni <- NetworkInterface.getNetworkInterfaces.toIterator
-        address <- ni.getInetAddresses
-      } yield address).toSet
-      log.info(s"Local addresses $localAddresses")
+        val localAddresses = (for {
+          ni <- NetworkInterface.getNetworkInterfaces.toIterator
+          address <- ni.getInetAddresses
+        } yield address).toSet
+        log.info(s"Local addresses $localAddresses")
 
-      val zooKeeperAddresses = BeyondConfiguration.zooKeeperServers.map(InetAddress.getByName)
-      log.info(s"ZooKeeper addresses $zooKeeperAddresses")
+        val zooKeeperAddresses = BeyondConfiguration.zooKeeperServers.map(InetAddress.getByName)
+        log.info(s"ZooKeeper addresses $zooKeeperAddresses")
 
-      if ((localAddresses & zooKeeperAddresses).nonEmpty) {
-        context.actorOf(Props[ZooKeeperLauncher], name = "zooKeeperLauncher")
+        if ((localAddresses & zooKeeperAddresses).nonEmpty) {
+          context.actorOf(Props[ZooKeeperLauncher], name = "zooKeeperLauncher")
+        }
       }
     }
 
