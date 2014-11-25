@@ -90,7 +90,7 @@ object JavaScriptShellConsole extends App {
 
   val pluginPaths = Seq(
     Path.fromString(System.getProperty("user.dir")) / "plugins",
-    Path.fromString(System.getProperty("user.dir")) / "plugins" / "lib"
+    Path.fromString(System.getProperty("user.dir")) / "core" / "public" / "js_lib"
   )
 
   val engine = {

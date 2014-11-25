@@ -27,7 +27,7 @@ object TestRunner extends App {
 
   private val pluginPaths = Seq(
     Path.fromString(System.getProperty("user.dir")) / "plugins",
-    Path.fromString(System.getProperty("user.dir")) / "plugins" / "lib",
+    Path.fromString(System.getProperty("user.dir")) / "core" / "public" / "js_lib",
     Path.fromString(System.getProperty("user.dir")) / "plugins" / "test" / "lib"
   )
 
