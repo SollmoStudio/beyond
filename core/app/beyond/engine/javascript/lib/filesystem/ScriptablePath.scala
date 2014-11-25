@@ -83,7 +83,7 @@ object ScriptablePath {
     val sepIndex = path.lastIndexOf(File.separator)
 
     if (extensionIndex > sepIndex) {
-      path.substring(extensionIndex);
+      path.substring(extensionIndex)
     } else {
       ""
     }

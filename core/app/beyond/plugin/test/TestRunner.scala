@@ -71,7 +71,7 @@ object TestRunner extends App {
       TestReporter.fileFinished(currentFile.getName)
     }
 
-    totalFailureCount += failureCount;
+    totalFailureCount += failureCount
     runNextFile()
   }
 
