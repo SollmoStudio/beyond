@@ -13,7 +13,6 @@ import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.annotations.{ JSStaticFunction => JSStaticFunctionAnnotation }
 import play.api.Configuration
-import scala.concurrent.ExecutionContext
 import scala.concurrent.future
 import scala.sys.process._
 import scalax.io.Codec

@@ -12,7 +12,6 @@ import beyond.BeyondRuntime
 import beyond.TickGenerator
 import java.net.InetSocketAddress
 import org.apache.zookeeper.server.ServerConfig
-import play.api.libs.concurrent.Akka
 import scala.concurrent.duration._
 import scala.sys.process.Process
 import scalax.file.Path

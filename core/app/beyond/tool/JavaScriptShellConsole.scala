@@ -16,7 +16,6 @@ import org.mozilla.javascript.tools.ToolErrorReporter
 import play.api.DefaultApplication
 import play.api.Mode
 import scala.annotation.tailrec
-import scala.concurrent.ExecutionContext
 import scalax.file.Path
 
 class FlexibleCompletor(global: Scriptable) extends Completer {
@@ -86,7 +85,6 @@ object JavaScriptShellConsole extends App {
   play.api.Play.start(testApp)
 
   implicit val system = ActorSystem("javascript-shell-console")
-  import system.dispatcher
 
   val scope = new BeyondShellGlobal
 
@@ -96,7 +94,7 @@ object JavaScriptShellConsole extends App {
   )
 
   val engine = {
-    import ExecutionContext.Implicits.global
+    import scala.concurrent.ExecutionContext.Implicits.global
     new BeyondJavaScriptEngine(scope, pluginPaths = pluginPaths)(global)
   }
 

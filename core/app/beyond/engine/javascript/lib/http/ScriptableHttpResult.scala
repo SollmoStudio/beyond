@@ -9,7 +9,6 @@ import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.annotations.JSGetter
 import play.api.libs.ws._
-import play.api.libs.ws.ning.NingAsyncHttpClientConfigBuilder
 
 object ScriptableHttpResult {
   private[lib] def apply(context: Context, res: WSResponse): ScriptableHttpResult = {

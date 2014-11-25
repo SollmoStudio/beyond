@@ -4,7 +4,6 @@ import akka.actor.Actor
 import akka.actor.ActorLogging
 import javax.management.JMX
 import javax.management.MBeanServerConnection
-import javax.management.ObjectName
 
 object RequestsCounter {
   case object Increase

@@ -6,7 +6,6 @@ import beyond.engine.javascript.JSFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeJSON
 import org.mozilla.javascript.ScriptRuntime
-import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.annotations.JSGetter
 import play.api.http.HeaderNames.CONTENT_TYPE

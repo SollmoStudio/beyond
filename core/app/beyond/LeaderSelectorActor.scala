@@ -2,12 +2,10 @@ package beyond
 
 import akka.actor.Actor
 import akka.actor.ActorLogging
-import java.io.Closeable
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.leader.LeaderSelector
 import org.apache.curator.framework.recipes.leader.LeaderSelectorListenerAdapter
 import play.api.libs.concurrent.Akka
-import scala.collection.mutable
 
 object LeaderSelectorActor {
   val Name: String = "leaderSelector"

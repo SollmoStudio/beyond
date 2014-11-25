@@ -8,8 +8,6 @@ import beyond.engine.javascript.lib.http.ScriptableResponse
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
-import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.ScriptableObject
 import play.api.mvc.Request
 import play.api.mvc.Result
 import scala.concurrent.Future
@@ -17,7 +15,6 @@ import scala.concurrent.Future
 class NoHandlerFunctionFoundException extends Exception
 
 object GamePlugin extends Logging {
-  import com.beyondframework.rhino.ContextOps._
   import com.beyondframework.rhino.RhinoConversions._
   import scala.concurrent.ExecutionContext.Implicits.global
 

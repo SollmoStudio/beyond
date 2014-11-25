@@ -1,6 +1,5 @@
 package beyond.engine.javascript.lib
 
-import beyond.engine.javascript.BeyondContext
 import beyond.engine.javascript.BeyondContextFactory
 import beyond.engine.javascript.JSArray
 import beyond.engine.javascript.JSFunction
@@ -13,7 +12,6 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.annotations.{ JSStaticFunction => JSStaticFunctionAnnotation }
-import play.api.Configuration
 
 object ScriptableUUID {
   private val defaultNode: Long = (new Random).nextLong & 0xFFFFFFFFFFFFL

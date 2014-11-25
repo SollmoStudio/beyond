@@ -5,7 +5,6 @@ import beyond.engine.javascript.JSArray
 import beyond.engine.javascript.JSFunction
 import beyond.engine.javascript.lib.ScriptableFuture
 import com.beyondframework.rhino.ContextOps._
-import java.io.File
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ScriptRuntime
 import org.mozilla.javascript.Scriptable
