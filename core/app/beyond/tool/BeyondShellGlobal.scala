@@ -1,16 +1,17 @@
 package beyond.tool
 
+import beyond.engine.javascript.BeyondGlobal
 import java.io.IOException
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Function
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.ScriptRuntime
+import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProvider
 import org.mozilla.javascript.tools.ToolErrorReporter
 import scala.annotation.switch
 import scala.io.Codec
 import scala.io.Source
-import beyond.engine.javascript.BeyondGlobal
 
 object BeyondShellGlobal {
   private def loadFile(cx: Context, scope: Scriptable, path: String) {
@@ -45,7 +46,7 @@ object BeyondShellGlobal {
   }
 }
 
-class BeyondShellGlobal extends BeyondGlobal {
+class BeyondShellGlobal(libraryProvider: ModuleSourceProvider) extends BeyondGlobal(libraryProvider) {
   override def init(cx: Context) {
     super.init(cx)
 

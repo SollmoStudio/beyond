@@ -9,7 +9,7 @@ import org.mozilla.javascript.commonjs.module.Require
 import scala.concurrent.ExecutionContext
 import scalax.file.Path
 
-class BeyondJavaScriptEngine(val global: BeyondGlobal = new BeyondGlobal,
+class BeyondJavaScriptEngine(val global: BeyondGlobal,
     pluginPaths: Seq[Path] = BeyondConfiguration.pluginPaths)(implicit val executionContext: ExecutionContext) extends Logging {
   import com.beyondframework.rhino.RhinoConversions._
 

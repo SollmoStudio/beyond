@@ -1,5 +1,7 @@
 package beyond.plugin
 
+import beyond.engine.javascript.AssetsModuleSourceProvider
+import beyond.engine.javascript.BeyondGlobal
 import beyond.engine.javascript.BeyondJavaScriptEngine
 import beyond.engine.javascript.lib.ScriptableConsole
 import beyond.engine.javascript.lib.ScriptableFuture
@@ -18,7 +20,10 @@ object GamePlugin extends Logging {
   import com.beyondframework.rhino.RhinoConversions._
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  private val engine = new BeyondJavaScriptEngine
+  private val engine = {
+    val library = new AssetsModuleSourceProvider
+    new BeyondJavaScriptEngine(new BeyondGlobal(library))
+  }
   ScriptableConsole.setRedirectConsoleToLogger(true)
 
   private val handler: Function = engine.contextFactory.call { cx: Context =>

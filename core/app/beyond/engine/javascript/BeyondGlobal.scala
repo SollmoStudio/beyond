@@ -28,7 +28,10 @@ import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.Wrapper
 import org.mozilla.javascript.commonjs.module.Require
 import org.mozilla.javascript.commonjs.module.RequireBuilder
+import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProvider
+import org.mozilla.javascript.commonjs.module.provider.MultiModuleScriptProvider
 import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
+import org.mozilla.javascript.commonjs.module.provider.StrongCachingModuleScriptProvider
 import org.mozilla.javascript.commonjs.module.provider.UrlModuleSourceProvider
 import org.mozilla.javascript.tools.ToolErrorReporter
 import scalaz.syntax.std.boolean._
@@ -97,7 +100,7 @@ object BeyondGlobal {
   }
 }
 
-class BeyondGlobal extends ImporterTopLevel {
+class BeyondGlobal(libraryProvider: ModuleSourceProvider) extends ImporterTopLevel {
 
   def init(cx: Context) {
     // Define some global functions particular to the beyond. Note
@@ -148,9 +151,13 @@ class BeyondGlobal extends ImporterTopLevel {
       uri.toString.endsWith("/") ? uri | new URI(uri + "/")
     }
 
-    rb.setModuleScriptProvider(
-      new SoftCachingModuleScriptProvider(
-        new UrlModuleSourceProvider(uris.asJava, null)))
+    val providers = Seq(
+      new SoftCachingModuleScriptProvider(new UrlModuleSourceProvider(uris.asJava, null)),
+      new StrongCachingModuleScriptProvider(libraryProvider)
+    )
+
+    import scala.collection.JavaConversions.asJavaIterable
+    rb.setModuleScriptProvider(new MultiModuleScriptProvider(providers))
     val require: Require = rb.createRequire(cx, this)
     require.install(this)
     require

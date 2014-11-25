@@ -3,8 +3,10 @@ package beyond.plugin.test
 import beyond.engine.javascript.BeyondJavaScriptEngine
 import java.io.File
 import java.io.FileReader
+import java.net.URI
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.EcmaError
+import org.mozilla.javascript.commonjs.module.provider.UrlModuleSourceProvider
 import play.api.DefaultApplication
 import play.api.Mode
 import scalax.file.Path
@@ -23,11 +25,26 @@ object TestRunner extends App {
   private val testFiles: Array[File] =
     new File(testPath).listFiles.filter { f => f.isFile && f.getName.endsWith(".js") }
 
-  private val scope = new BeyondTestGlobal
+  val library = {
+    val libraryPath: Seq[URI] =
+      Seq(
+        Path.fromString(System.getProperty("user.dir")) / "core" / "public" / "js_lib"
+      ).map { path =>
+          val uri = new URI(path.path)
+          // call resolve("") to canonify the path
+          uri.isAbsolute ? uri | new File(path.path).toURI.resolve("")
+        }.map { uri =>
+          // make sure URI always terminates with slash to avoid loading from unintended locations
+          uri.toString.endsWith("/") ? uri | new URI(uri + "/")
+        }
+    import scala.collection.JavaConversions.asJavaIterable
+    new UrlModuleSourceProvider(libraryPath, null)
+  }
+
+  private val scope = new BeyondTestGlobal(library)
 
   private val pluginPaths = Seq(
     Path.fromString(System.getProperty("user.dir")) / "plugins",
-    Path.fromString(System.getProperty("user.dir")) / "core" / "public" / "js_lib",
     Path.fromString(System.getProperty("user.dir")) / "plugins" / "test" / "lib"
   )
 

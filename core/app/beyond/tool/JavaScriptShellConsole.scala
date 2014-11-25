@@ -3,6 +3,7 @@ package beyond.tool
 import akka.actor.ActorSystem
 import beyond.engine.javascript.BeyondJavaScriptEngine
 import java.io.File
+import java.net.URI
 import java.util
 import jline.console.ConsoleReader
 import jline.console.completer.Completer
@@ -12,11 +13,13 @@ import org.mozilla.javascript.RhinoException
 import org.mozilla.javascript.Script
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.commonjs.module.provider.UrlModuleSourceProvider
 import org.mozilla.javascript.tools.ToolErrorReporter
 import play.api.DefaultApplication
 import play.api.Mode
 import scala.annotation.tailrec
 import scalax.file.Path
+import scalaz.syntax.std.boolean._
 
 class FlexibleCompletor(global: Scriptable) extends Completer {
   private object DottedName {
@@ -86,11 +89,25 @@ object JavaScriptShellConsole extends App {
 
   implicit val system = ActorSystem("javascript-shell-console")
 
-  val scope = new BeyondShellGlobal
+  val library = {
+    val libraryPath: Seq[URI] =
+      Seq(
+        Path.fromString(System.getProperty("user.dir")) / "core" / "public" / "js_lib"
+      ).map { path =>
+          val uri = new URI(path.path)
+          // call resolve("") to canonify the path
+          uri.isAbsolute ? uri | new File(path.path).toURI.resolve("")
+        }.map { uri =>
+          // make sure URI always terminates with slash to avoid loading from unintended locations
+          uri.toString.endsWith("/") ? uri | new URI(uri + "/")
+        }
+    import scala.collection.JavaConversions.asJavaIterable
+    new UrlModuleSourceProvider(libraryPath, null)
+  }
+  val scope = new BeyondShellGlobal(library)
 
   val pluginPaths = Seq(
-    Path.fromString(System.getProperty("user.dir")) / "plugins",
-    Path.fromString(System.getProperty("user.dir")) / "core" / "public" / "js_lib"
+    Path.fromString(System.getProperty("user.dir")) / "plugins"
   )
 
   val engine = {
