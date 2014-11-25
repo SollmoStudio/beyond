@@ -30,7 +30,7 @@ class LauncherSupervisor extends Actor with ActorLogging {
       val zooKeeperAddresses = BeyondConfiguration.zooKeeperServers.map(InetAddress.getByName)
       log.info(s"ZooKeeper addresses $zooKeeperAddresses")
 
-      if (!(localAddresses & zooKeeperAddresses).isEmpty) {
+      if ((localAddresses & zooKeeperAddresses).nonEmpty) {
         context.actorOf(Props[ZooKeeperLauncher], name = "zooKeeperLauncher")
       }
     }

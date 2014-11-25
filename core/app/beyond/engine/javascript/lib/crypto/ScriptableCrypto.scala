@@ -54,7 +54,7 @@ object ScriptableCrypto {
   def extractSignedToken(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): String = {
     val token = args(0).asInstanceOf[String]
 
-    Crypto.extractSignedToken(token).getOrElse(null)
+    Crypto.extractSignedToken(token).orNull
   }
 
   @JSStaticFunctionAnnotation
