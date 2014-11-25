@@ -141,7 +141,7 @@ object ScriptableBuffer {
     val sourceStart = optionalArgInt(args, 2).getOrElse(0)
     val sourceEnd = optionalArgInt(args, 3).getOrElse(thisBuffer.getLength)
 
-    var length = sourceEnd - sourceStart
+    val length = sourceEnd - sourceStart
     val bytes = thisBuffer.getBytes(sourceStart, length)
     targetBuffer.putBytes(bytes, targetStart, length)
   }

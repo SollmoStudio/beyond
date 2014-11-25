@@ -25,7 +25,7 @@ object GamePlugin extends Logging {
   ScriptableConsole.setRedirectConsoleToLogger(true)
 
   private val handler: Function = engine.contextFactory.call { cx: Context =>
-    var mainFilename = "main.js"
+    val mainFilename = "main.js"
     val exports = engine.loadMain(mainFilename)
     // FIXME: Don't hardcode the name of handler function.
     val handler = exports.get("handle", exports)

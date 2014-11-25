@@ -25,7 +25,7 @@ object ScriptableRequest {
   }
 
   def jsConstructor(context: Context, args: JSArray, constructor: JSFunction, inNewExpr: Boolean): ScriptableRequest = {
-    var request = args(0).asInstanceOf[Request[AnyContent]]
+    val request = args(0).asInstanceOf[Request[AnyContent]]
     new ScriptableRequest(request)
   }
 }
