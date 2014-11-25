@@ -93,7 +93,6 @@ object ScriptableCollection {
   @JSFunctionAnnotation
   def count(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
-    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
     val countQuery = args(0).asInstanceOf[ScriptableQuery]
     val countResult = thisCollection.countInternal(countQuery)
