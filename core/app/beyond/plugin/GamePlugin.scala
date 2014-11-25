@@ -45,8 +45,7 @@ object GamePlugin extends Logging {
     val response = handler.call(cx, scope, scope, args)
     response match {
       case f: ScriptableFuture =>
-        f.future.mapTo[ScriptableResponse].map(
-          _.asInstanceOf[ScriptableResponse].result)
+        f.future.mapTo[ScriptableResponse].map(_.result)
       case res: ScriptableResponse =>
         Future.successful(res.result)
     }
