@@ -3,6 +3,7 @@ package beyond.engine.javascript.lib.http
 import beyond.engine.javascript.BeyondContextFactory
 import beyond.engine.javascript.JSArray
 import beyond.engine.javascript.JSFunction
+import beyond.engine.javascript.lib.filesystem.ScriptableFile
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeJSON
 import org.mozilla.javascript.ScriptRuntime
@@ -12,6 +13,7 @@ import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.Status.ACCEPTED
 import play.api.libs.iteratee.Iteratee
 import play.api.mvc.Result
+import play.api.mvc.Results.Ok
 import play.api.mvc.Results.Status
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -41,14 +43,21 @@ object ScriptableResponse {
     }
 
   def jsConstructor(context: Context, args: JSArray, constructor: JSFunction, inNewExpr: Boolean): ScriptableResponse = {
-    val body = stringify(context, args(0))
-    val contentType = optionalArg[String](args, 1).getOrElse(DefaultContentType)
-    val statusCode = optionalArgInt(args, 2).getOrElse(DefaultStatusCode)
+    val result = args(0) match {
+      case file: ScriptableFile =>
+        Ok.sendFile(file.internal, inline = true)
+      case other =>
+        val body = stringify(context, other)
+        val contentType = optionalArg[String](args, 1).getOrElse(DefaultContentType)
+        val statusCode = optionalArgInt(args, 2).getOrElse(DefaultStatusCode)
 
-    // FIXME: Support other HTTP status codes.
-    // FIXME: Currently, the default type of contentType is plain/text,
-    // but the play framework supports contentType inference. Fix it to use this feature.
-    new ScriptableResponse(new Status(statusCode)(body).as(contentType))
+        // FIXME: Support other HTTP status codes.
+        // FIXME: Currently, the default type of contentType is plain/text,
+        // but the play framework supports contentType inference. Fix it to use this feature.
+        new Status(statusCode)(body).as(contentType)
+    }
+
+    new ScriptableResponse(result)
   }
 }
 

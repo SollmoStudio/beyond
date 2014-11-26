@@ -30,20 +30,20 @@ object ScriptableFile {
   }
 }
 
-class ScriptableFile(file: File) extends ScriptableObject {
+class ScriptableFile(val internal: File) extends ScriptableObject {
   def this() = this(null)
 
   override def getClassName: String = "File"
 
   @JSGetter
-  def getName: String = file.getName
+  def getName: String = internal.getName
 
   @JSGetter
-  def getPath: String = file.getPath
+  def getPath: String = internal.getPath
 
   @JSGetter
-  def getIsFile: Boolean = file.isFile
+  def getIsFile: Boolean = internal.isFile
 
   @JSGetter
-  def getIsDirectory: Boolean = file.isDirectory
+  def getIsDirectory: Boolean = internal.isDirectory
 }

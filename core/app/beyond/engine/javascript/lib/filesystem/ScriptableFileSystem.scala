@@ -49,6 +49,10 @@ object ScriptableFileSystem {
   }
 
   @JSStaticFunctionAnnotation
+  def read(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFile =
+    ScriptableFile(context, new File(args(0).asInstanceOf[String]))
+
+  @JSStaticFunctionAnnotation
   def readFile(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
 

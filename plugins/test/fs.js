@@ -162,4 +162,27 @@ describe('file-system', function () {
       });
     });
   });
+
+  describe('#read()', function () {
+    it('returns a file object.', function () {
+      var file = fs.read('./plugins/test/assets/fs/hello');
+      assert.equal(typeof file, 'object');
+    });
+
+    it('returns an object containing its information.', function () {
+      var file = fs.read('./plugins/test/assets/fs/hello');
+      assert.equal(file.name, 'hello');
+      assert.equal(file.path, './plugins/test/assets/fs/hello');
+      assert.equal(file.isFile, true);
+      assert.equal(file.isDirectory, false);
+    });
+
+    it('returns an object representing a directory.', function () {
+      var file = fs.read('./plugins/test/assets/fs/dir');
+      assert.equal(file.name, 'dir');
+      assert.equal(file.path, './plugins/test/assets/fs/dir');
+      assert.equal(file.isFile, false);
+      assert.equal(file.isDirectory, true);
+    });
+  });
 });

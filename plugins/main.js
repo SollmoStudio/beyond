@@ -158,6 +158,10 @@ exports.handle = function (req) {
             return new Response(crypto.test());
         case "buffer":
             return new Response(buffer.test());
+        case "static":
+            var staticPath = './plugins/test/assets/fs/';
+            fileName = decodeURIComponent(tokens[0]);
+            return new Response(fs.read(staticPath + fileName));
         default:
             break;
     }
