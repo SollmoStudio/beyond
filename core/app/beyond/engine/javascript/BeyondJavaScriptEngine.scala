@@ -22,7 +22,8 @@ class BeyondJavaScriptEngine(val global: BeyondGlobal,
     // Sandboxed means that the require function doesn't have the "paths"
     // property, and also that the modules it loads don't export the
     // "module.uri" property.
-    val sandboxed = true
+    // FIXME: Currently, AssetsModuleSourceProvider doesn't sandboxed. Make it sandboxed.
+    val sandboxed = false
     global.installRequire(cx, pluginPaths.map(_.path), sandboxed)
   }.asInstanceOf[Require]
 
