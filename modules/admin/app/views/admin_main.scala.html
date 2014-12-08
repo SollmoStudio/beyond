@@ -5,7 +5,7 @@
     <script type="text/jsx">
         /** @@jsx React.DOM */
         require(["react", "jsx!header"], function (React, Header) {
-            var headerMenus = { "Home" : "#", "AdminUser" : "/admin/user", "Logout" : "/admin/logout" };
+            var headerMenus = { "Home" : "/admin", "AdminUser" : "/admin/user", "SystemMetrics" : "/admin/metrics", "Logout" : "/admin/logout" };
 
             React.renderComponent(
                 <Header projectName="Beyond Framework" menus={headerMenus} />,

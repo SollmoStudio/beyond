@@ -1,0 +1,34 @@
+@(metrics: String)
+
+@admin_metrics_main("SwapMemoryUsage") {
+<h1 class="page-header">Swap Memory Usage</h1>
+<div id="swapMemoryUsageTable"></div>
+<script type="text/jsx">
+    /** @@jsx React.DOM */
+    require(["react", "jsx!listtable"], function (React, ListTable) {
+        var metricsData = @Html(metrics);
+
+        var metricColumns = [{
+            key: "hostname",
+            name: "Hostname"
+        }, {
+            key: "date",
+            name: "Date"
+        }, {
+            key: "free",
+            name: "Free (MB)"
+        }, {
+            key: "total",
+            name: "Total (MB)"
+        }, {
+            key: "used",
+            name: "Used (MB)"
+        }];
+
+        React.renderComponent(
+            <ListTable data={metricsData} columns={metricColumns} />,
+            document.getElementById('swapMemoryUsageTable')
+        );
+    });
+    </script>
+}

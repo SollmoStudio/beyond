@@ -1,0 +1,37 @@
+@(metrics: String)
+
+@admin_metrics_main("NonHeapMemoryUsage") {
+<h1 class="page-header">Non Heap Memory Usage</h1>
+<div id="nonHeapMemoryUsageTable"></div>
+<script type="text/jsx">
+    /** @@jsx React.DOM */
+    require(["react", "jsx!listtable", "underscore"], function (React, ListTable, _) {
+        var metricsData = @Html(metrics);
+
+        var metricColumns = [{
+            key: "hostname",
+            name: "Hostname"
+        }, {
+            key: "date",
+            name: "Date"
+        }, {
+            key: "init",
+            name: "Init (MB)"
+        }, {
+            key: "used",
+            name: "Used (MB)"
+        }, {
+            key: "committed",
+            name: "Committed (MB)"
+        }, {
+            key: "max",
+            name: "Max (MB)"
+        }];
+
+        React.renderComponent(
+            <ListTable data={metricsData} columns={metricColumns} />,
+            document.getElementById('nonHeapMemoryUsageTable')
+        );
+    });
+    </script>
+}

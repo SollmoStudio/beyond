@@ -1,0 +1,37 @@
+@(title: String)(content: Html)
+
+@admin_main("Metrics > " + title) {
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-3 col-md-2 sidebar" id="sidebar"></div>
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 content" id="content">
+                <div id="table"></div>
+            </div>
+        </div>
+    </div>
+    <script type="text/jsx">
+    /** @@jsx React.DOM */
+    require(["react", "jsx!sidebar", "jsx!listtable", "jquery"], function (React, Sidebar, ListTable, $) {
+        $(document).ready(function() {
+            console.log( "document loaded" );
+        });
+
+        var sidebarMenus = {
+            "SystemLoadAverage" : "/admin/metrics/#systemLoadAverage",
+            "HeapMemoryUsage" : "/admin/metrics/#heapMemoryUsage",
+            "NonHeapMemoryUsage" : "/admin/metrics/#nonHeapMemoryUsage",
+            "SwapMemoryUsage" : "/admin/metrics/#swapMemoryUsage",
+            "NumberOfRequestsPerSecond" : "/admin/metrics/#numberOfRequests"
+        };
+
+        React.renderComponent(
+            <Sidebar title="SystemMetrics" menus={sidebarMenus} selectedMenu="@title" />,
+            $('#sidebar')[0]
+        );
+        React.renderComponent(
+            <ListTable data={res.data} columns={res.columns} />,
+            $('#table')[0]
+        );
+    });
+    </script>
+}

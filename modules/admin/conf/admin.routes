@@ -12,3 +12,10 @@ GET     /logout                     controllers.admin.Admin.logout
 
 GET     /user                       controllers.admin.Admin.userIndex
 GET     /user/list                  controllers.admin.Admin.userList
+
+GET     /metrics                    controllers.admin.Admin.metricsIndex
+GET     /metrics/systemLoadAverage  controllers.admin.Admin.systemLoadAverage
+GET     /metrics/heapMemoryUsage    controllers.admin.Admin.heapMemoryUsage
+GET     /metrics/nonHeapMemoryUsage controllers.admin.Admin.nonHeapMemoryUsage
+GET     /metrics/swapMemoryUsage    controllers.admin.Admin.swapMemoryUsage
+GET     /metrics/numberOfRequests   controllers.admin.Admin.numberOfRequests

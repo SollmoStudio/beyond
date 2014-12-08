@@ -1,0 +1,28 @@
+@(metrics: String)
+
+@admin_metrics_main("NumberOfRequestsPerSecond") {
+<h1 class="page-header">Number Of Requests Per Second</h1>
+<div id="numberOfRequestsTable"></div>
+<script type="text/jsx">
+    /** @@jsx React.DOM */
+    require(["react", "jsx!listtable"], function (React, ListTable) {
+        var metricsData = @Html(metrics);
+
+        var metricColumns = [{
+            key: "hostname",
+            name: "Hostname"
+        }, {
+            key: "date",
+            name: "Date"
+        }, {
+            key: "numberOfRequests",
+            name: "NumberOfRequestsPerSecond"
+        }];
+
+        React.renderComponent(
+            <ListTable data={metricsData} columns={metricColumns} />,
+            document.getElementById('numberOfRequestsTable')
+        );
+    });
+    </script>
+}
