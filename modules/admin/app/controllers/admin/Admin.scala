@@ -14,7 +14,7 @@ import scala.concurrent.Future
 import scala.util.Properties
 
 object Admin extends Controller with MongoController {
-  private def collection: JSONCollection = db.collection[JSONCollection]("admin.password")
+  private def userCollection: JSONCollection = db.collection[JSONCollection]("admin.password")
 
   private case class AdminUser(username: String, password: String)
   private implicit val adminUserFormat = Json.format[AdminUser]
@@ -75,7 +75,7 @@ object Admin extends Controller with MongoController {
   def userList: Action[AnyContent] = AuthenticatedAction.async { request =>
     import play.api.libs.concurrent.Execution.Implicits._
 
-    val cursor: Cursor[AdminUser] = collection.find(Json.obj()).cursor[AdminUser]
+    val cursor: Cursor[AdminUser] = userCollection.find(Json.obj()).cursor[AdminUser]
     val result: Future[List[AdminUser]] = cursor.collect[List]()
     result.map { users =>
       Ok(views.html.admin_user_list(Json.stringify(Json.toJson(users))))
@@ -92,7 +92,7 @@ object Admin extends Controller with MongoController {
       loginData => {
         import play.api.libs.concurrent.Execution.Implicits._
 
-        val cursor: Cursor[AdminUser] = collection.find(Json.obj("username" -> loginData.username)).cursor[AdminUser]
+        val cursor: Cursor[AdminUser] = userCollection.find(Json.obj("username" -> loginData.username)).cursor[AdminUser]
         val result: Future[List[AdminUser]] = cursor.collect[List]()
         result.map {
           case List() => BadRequest(views.html.admin_login("No such username"))
