@@ -6,6 +6,8 @@ import akka.actor.OneForOneStrategy
 import akka.actor.Props
 import akka.actor.SupervisorStrategy._
 import beyond.BeyondConfiguration
+import beyond.launcher.mongodb.MongoDBInstanceType
+import beyond.launcher.mongodb.MongoDBStandaloneLauncher
 import java.net.InetAddress
 import java.net.NetworkInterface
 
@@ -17,28 +19,38 @@ object LauncherSupervisor {
 }
 
 class LauncherSupervisor extends Actor with ActorLogging {
-  override def preStart() {
-    def launchZooKeeperServerIfNecessary() {
-      if (!BeyondConfiguration.isStandaloneMode) {
-        import scala.collection.JavaConversions._
+  private def launchZooKeeperServerIfNecessary() {
+    if (!BeyondConfiguration.isStandaloneMode) {
+      import scala.collection.JavaConversions._
 
-        val localAddresses = (for {
-          ni <- NetworkInterface.getNetworkInterfaces.toIterator
-          address <- ni.getInetAddresses
-        } yield address).toSet
-        log.info(s"Local addresses $localAddresses")
+      val localAddresses = (for {
+        ni <- NetworkInterface.getNetworkInterfaces.toIterator
+        address <- ni.getInetAddresses
+      } yield address).toSet
+      log.info(s"Local addresses $localAddresses")
 
-        val zooKeeperAddresses = BeyondConfiguration.zooKeeperServers.map(InetAddress.getByName)
-        log.info(s"ZooKeeper addresses $zooKeeperAddresses")
+      val zooKeeperAddresses = BeyondConfiguration.zooKeeperServers.map(InetAddress.getByName)
+      log.info(s"ZooKeeper addresses $zooKeeperAddresses")
 
-        if ((localAddresses & zooKeeperAddresses).nonEmpty) {
-          context.actorOf(Props[ZooKeeperLauncher], name = "zooKeeperLauncher")
-        }
+      if ((localAddresses & zooKeeperAddresses).nonEmpty) {
+        context.actorOf(Props[ZooKeeperLauncher], name = "zooKeeperLauncher")
       }
     }
+  }
 
+  private def launchMongoDBServerIfNecessary() {
+    BeyondConfiguration.mongodbType match {
+      case MongoDBInstanceType.Standalone =>
+        context.actorOf(Props[MongoDBStandaloneLauncher], name = "mongoDBStandaloneLauncher")
+      case _ =>
+        // FIXME: launch a proper MongoDB instance for sharding.
+        ???
+    }
+  }
+
+  override def preStart() {
     launchZooKeeperServerIfNecessary()
-    context.actorOf(Props[MongoDBLauncher], name = "mongoDBLauncher")
+    launchMongoDBServerIfNecessary()
   }
 
   override val supervisorStrategy =

@@ -1,5 +1,6 @@
 package beyond
 
+import beyond.launcher.mongodb.MongoDBInstanceType
 import beyond.route.RouteAddress
 import java.io.File
 import org.apache.curator.RetryPolicy
@@ -63,4 +64,15 @@ object BeyondConfiguration {
 
   def enableMetrics: Boolean =
     configuration.getBoolean("beyond.enable-metrics").getOrElse(true)
+
+  lazy val mongodbType: MongoDBInstanceType.Value =
+    configuration.getString("beyond.mongodb.type")
+      .map {
+        case "standalone" => MongoDBInstanceType.Standalone
+        case "config" => MongoDBInstanceType.Config
+        case "routing" => MongoDBInstanceType.Routing
+        case "shard" => MongoDBInstanceType.Shard
+        case _ => throw new IllegalArgumentException("wrong.mongodb.type")
+      }
+      .getOrElse(MongoDBInstanceType.default)
 }

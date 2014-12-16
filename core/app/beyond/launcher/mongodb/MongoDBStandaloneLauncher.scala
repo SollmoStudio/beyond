@@ -1,4 +1,4 @@
-package beyond.launcher
+package beyond.launcher.mongodb
 
 import akka.actor.Actor
 import akka.actor.ActorLogging
@@ -17,19 +17,21 @@ import scala.util.Success
 import scala.util.Try
 import scalax.file.Path
 
-object MongoDBLauncher {
+object MongoDBStandaloneLauncher {
   val ServerNotRespondingTimeout = 30.seconds
   val RetryDelay = 5.seconds
 
   val RetryDelayAtInitialization = 3.seconds
 }
 
-// FIXME: Extract ProcessLauncher trait from MongoDBLauncher and reuse it
+// FIXME: Extract ProcessLauncher trait from MongoDBStandaloneLauncher and reuse it
 // once we have more than one process launchers.
-class MongoDBLauncher extends {
+class MongoDBStandaloneLauncher extends {
   override protected val initialDelay = 10.seconds
   override protected val tickInterval = 1.second
 } with Actor with TickGenerator with ActorLogging with MongoMixin {
+  import beyond.launcher._
+
   private val pidFilePath: Path = Path.fromString(BeyondConfiguration.pidDirectory) / "mongo.pid"
 
   private def mongodPath: Option[String] = try {
@@ -47,7 +49,7 @@ class MongoDBLauncher extends {
     terminateProcessIfExists(pidFilePath)
   }
 
-  import MongoDBLauncher._
+  import MongoDBStandaloneLauncher._
 
   private def healthCheck(delay: FiniteDuration) {
     import play.api.Play.current
@@ -61,7 +63,7 @@ class MongoDBLauncher extends {
   }
 
   override def preStart() {
-    log.info("MongoDBLauncher started")
+    log.info("MongoDBStandaloneLauncher started")
     val dbPath = new File(BeyondConfiguration.mongoDBPath)
     if (!dbPath.exists()) {
       dbPath.mkdirs()
@@ -71,7 +73,6 @@ class MongoDBLauncher extends {
       throw new LauncherInitializationException
     }
 
-    // FIXME: Currently, MongoDBLauncher launches a standalone MongoDB daemon.
     val processBuilder = Process(Seq(path, "--dbpath", dbPath.getCanonicalPath, "--pidfilepath", pidFilePath.path))
     processBuilder.run()
     log.info("MongoDB started")
@@ -81,11 +82,8 @@ class MongoDBLauncher extends {
 
   override def postStop() {
     super.postStop()
-
-    // FIXME: Currently, MongoDBLauncher launches a standalone MongoDB daemon.
     terminateProcessIfExists(pidFilePath)
-
-    log.info("MongoDBLauncher stopped")
+    log.info("MongoDBStandaloneLauncher stopped")
   }
 
   override def receive: Receive = initializing
