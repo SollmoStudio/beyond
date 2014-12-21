@@ -29,7 +29,7 @@ import reactivemongo.bson.BSONValue
 package object database extends Logging {
 
   private[database] implicit object AnyRefBSONHandler extends BSONHandler[BSONValue, AnyRef] {
-    override def write(value: AnyRef): BSONValue = value match {
+    override def write(value: AnyRef): BSONValue = value match { // scalastyle:ignore cyclomatic.complexity
       case i: jl.Integer => BSONInteger(i)
       case j: jl.Long => BSONLong(j)
       case d: jl.Double => BSONDouble(d)
@@ -54,7 +54,7 @@ package object database extends Logging {
         throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a BSONValue")
     }
 
-    override def read(bson: BSONValue): AnyRef = bson match {
+    override def read(bson: BSONValue): AnyRef = bson match { // scalastyle:ignore cyclomatic.complexity
       case BSONInteger(i) => Int.box(i)
       case BSONLong(j) => Long.box(j)
       case BSONDouble(d) => Double.box(d)
