@@ -38,7 +38,7 @@ object TestRunner extends App {
           uri.toString.endsWith("/") ? uri | new URI(uri + "/")
         }
     import scala.collection.JavaConversions.asJavaIterable
-    new UrlModuleSourceProvider(libraryPath, null)
+    new UrlModuleSourceProvider(libraryPath, null) // scalastyle:ignore null
   }
 
   private val scope = new BeyondTestGlobal(library)
@@ -64,8 +64,8 @@ object TestRunner extends App {
         TestReporter.fileStart(currentFile.getName)
 
         val scriptScope = cx.initStandardObjects(scope)
-        cx.compileReader(new FileReader(currentFile), currentFile.getName, 0, null).exec(cx, scriptScope)
-        cx.compileString("run()", currentFile.getName, 0, null).exec(cx, scriptScope)
+        cx.compileReader(new FileReader(currentFile), currentFile.getName, 0, null).exec(cx, scriptScope) // scalastyle:ignore null
+        cx.compileString("run()", currentFile.getName, 0, null).exec(cx, scriptScope) // scalastyle:ignore null
       } catch {
         case e: EcmaError =>
           TestReporter.fileRuntimeError(currentFile.getName, e.getErrorMessage, e.getScriptStackTrace)

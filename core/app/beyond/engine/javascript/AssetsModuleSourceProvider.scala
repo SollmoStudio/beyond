@@ -16,7 +16,7 @@ class AssetsModuleSourceProvider extends ModuleSourceProvider with StrictLogging
       resource =>
         val stream = resource.openStream()
         val source = Source.fromInputStream(stream).getLines().mkString("\n")
-        new ModuleSource(new StringReader(source), null, resource.toURI, resource.toURI, validator)
+        new ModuleSource(new StringReader(source), null, resource.toURI, resource.toURI, validator) // scalastyle:ignore null
     }.orNull
   }
 

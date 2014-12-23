@@ -88,7 +88,7 @@ object ScriptableCollection {
 
     val convertedToScriptableDocumentResult = findResult.map {
       case None =>
-        null
+        null // scalastyle:ignore null
       case Some(document) =>
         convertDocumentToJsObject(context, thisCollection, document)
     }
@@ -114,7 +114,7 @@ object ScriptableCollection {
 
     val convertedToScriptableDocumentResult = findResult.map {
       case None =>
-        null
+        null // scalastyle:ignore null
       case Some(document) =>
         convertDocumentToJsObject(context, thisCollection, document)
     }

@@ -39,7 +39,7 @@ object ScriptableResponse {
       case other =>
         val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
         val scope = beyondContextFactory.global
-        NativeJSON.stringify(context, scope, other, null, null).asInstanceOf[String]
+        NativeJSON.stringify(context, scope, other, null, null).asInstanceOf[String] // scalastyle:ignore null
     }
 
   def jsConstructor(context: Context, args: JSArray, constructor: JSFunction, inNewExpr: Boolean): ScriptableResponse = {

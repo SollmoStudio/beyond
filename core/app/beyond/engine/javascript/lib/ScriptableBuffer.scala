@@ -183,7 +183,7 @@ class ScriptableBuffer(val internal: ByteBuffer) extends ScriptableObject {
     try {
       new Integer(internal.get(index) & 0xFF)
     } catch {
-      case _: IndexOutOfBoundsException => null
+      case _: IndexOutOfBoundsException => null // scalastyle:ignore null
     }
   }
 

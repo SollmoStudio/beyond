@@ -103,7 +103,7 @@ object JavaScriptShellConsole extends App {
           uri.toString.endsWith("/") ? uri | new URI(uri + "/")
         }
     import scala.collection.JavaConversions.asJavaIterable
-    new UrlModuleSourceProvider(libraryPath, null)
+    new UrlModuleSourceProvider(libraryPath, null) // scalastyle:ignore null
   }
   val scope = new BeyondShellGlobal(library)
 
@@ -153,7 +153,7 @@ object JavaScriptShellConsole extends App {
   }
 
   def compileSource(cx: Context, source: Source): Script = {
-    cx.compileString(source.text, "<stdin>", source.lineNumber, null)
+    cx.compileString(source.text, "<stdin>", source.lineNumber, null) // scalastyle:ignore null
   }
 
   def evaluateScript(cx: Context, script: Script): AnyRef = {

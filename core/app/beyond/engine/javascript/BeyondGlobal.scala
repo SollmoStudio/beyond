@@ -152,7 +152,7 @@ class BeyondGlobal(libraryProvider: ModuleSourceProvider) extends ImporterTopLev
     }
 
     val providers = Seq(
-      new SoftCachingModuleScriptProvider(new UrlModuleSourceProvider(uris.asJava, null)),
+      new SoftCachingModuleScriptProvider(new UrlModuleSourceProvider(uris.asJava, null)), // scalastyle:ignore null
       new StrongCachingModuleScriptProvider(libraryProvider)
     )
 

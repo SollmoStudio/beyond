@@ -16,7 +16,7 @@ import scala.io.Source
 object BeyondShellGlobal {
   private def loadFile(cx: Context, scope: Scriptable, path: String) {
     val src = Source.fromFile(path)(Codec.UTF8).getLines().mkString("\n")
-    val script = cx.compileString(src, path, 1, null)
+    val script = cx.compileString(src, path, 1, null) // scalastyle:ignore null
     script.exec(cx, scope)
   }
 

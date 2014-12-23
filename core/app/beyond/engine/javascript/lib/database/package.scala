@@ -48,7 +48,7 @@ package object database extends Logging {
         id
       case native: NativeJavaObject =>
         write(native.unwrap())
-      case null =>
+      case null => // scalastyle:ignore null
         BSONNull
       case _ =>
         throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a BSONValue")
@@ -71,7 +71,7 @@ package object database extends Logging {
         array.values.map(read)
       case id: BSONObjectID => ObjectId(id)
       case BSONNull =>
-        null
+        null // scalastyle:ignore null
       case _ =>
         throw new IllegalArgumentException(s"$bson cannot be a scala object")
     }
@@ -185,18 +185,18 @@ package object database extends Logging {
       context.newObject(scope, "Array", args)
     case objectID: ObjectId =>
       context.newObject(scope, "ObjectId", objectID.toString)
-    case null =>
-      null
+    case null => // scalastyle:ignore null
+      null // scalastyle:ignore null
     case _ =>
       throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a JavaScript Object")
   }
 
   private[database] def convertJavaScriptToScalaWithField(value: AnyRef)(implicit field: Field): AnyRef = (value, field) match {
-    case (null, field: Field) if field.defaultValue.isDefined =>
-      null
-    case (null, field: Field) if field.isNullable =>
-      null
-    case (null, field: Field) =>
+    case (null, field: Field) if field.defaultValue.isDefined => // scalastyle:ignore null
+      null // scalastyle:ignore null
+    case (null, field: Field) if field.isNullable => // scalastyle:ignore null
+      null // scalastyle:ignore null
+    case (null, field: Field) => // scalastyle:ignore null
       throw new IllegalArgumentException(s"$field is not optional field.")
     case (native: NativeJavaObject, field: Field) =>
       convertJavaScriptToScalaWithField(native.unwrap())(field)
