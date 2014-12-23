@@ -1,6 +1,7 @@
 package beyond.tool
 
 import akka.actor.ActorSystem
+import beyond.NullOps.asNullOps
 import beyond.engine.javascript.BeyondJavaScriptEngine
 import java.io.File
 import java.net.URI
@@ -133,7 +134,7 @@ object JavaScriptShellConsole extends App {
     @tailrec
     def readSourceAsCompilableUnitHelper(builder: StringBuilder, lineNumber: Int, prompt: String = prompt): Source = {
       val newLine = consoleReader.readLine(prompt)
-      if (newLine == null) {
+      if (newLine.isNull) {
         hitEOF = true
         Source(builder.toString(), lineNumber)
       } else {

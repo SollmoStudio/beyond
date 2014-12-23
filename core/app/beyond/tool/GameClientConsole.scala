@@ -3,6 +3,7 @@ package beyond.tool
 import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.io.IO
+import beyond.NullOps.asNullOps
 import jline.console.ConsoleReader
 import jline.console.completer.StringsCompleter
 import scala.concurrent.duration._
@@ -94,7 +95,7 @@ object GameClientConsole extends App {
     try {
       val input = consoleReader.readLine(prompt)
       // ConsoleReader.readLine returns null if the end of the input stream has been reached.
-      if (input == "exit" || input == null) {
+      if (input == "exit" || input.isNull) {
         ExitCommand
       } else if (input.startsWith("/")) {
         parseActionCommand(input)

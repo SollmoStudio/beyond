@@ -1,9 +1,11 @@
 package beyond
 
+import beyond.NullOps.asNullOps
+
 class ThrowableOps(t: Throwable) {
   def getRootCause: Throwable = {
     var rootCause = t
-    while (rootCause.getCause != null) {
+    while (rootCause.getCause.notNull) {
       rootCause = rootCause.getCause
     }
     rootCause

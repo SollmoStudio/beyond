@@ -1,5 +1,6 @@
 package beyond.engine.javascript
 
+import beyond.NullOps.asNullOps
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.ErrorReporter
@@ -16,7 +17,7 @@ class BeyondContextFactory(config: BeyondContextFactoryConfig, val global: Beyon
   override def onContextCreated(cx: Context) {
     super.onContextCreated(cx)
     cx.setWrapFactory(BeyondWrapFactory)
-    if (errorReporter != null) {
+    if (errorReporter.notNull) {
       cx.setErrorReporter(errorReporter)
     }
   }
@@ -45,7 +46,7 @@ class BeyondContextFactory(config: BeyondContextFactoryConfig, val global: Beyon
   }
 
   def setErrorReporter(errorReporter: ErrorReporter) {
-    if (errorReporter == null) {
+    if (errorReporter.isNull) {
       throw new IllegalArgumentException
     }
     this.errorReporter = errorReporter
