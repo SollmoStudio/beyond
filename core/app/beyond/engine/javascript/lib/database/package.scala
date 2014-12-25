@@ -25,6 +25,7 @@ import reactivemongo.bson.BSONNull
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.bson.BSONString
 import reactivemongo.bson.BSONValue
+import scala.annotation.tailrec
 
 package object database extends Logging {
 
@@ -144,18 +145,94 @@ package object database extends Logging {
     val name: String
     val isNullable: Boolean
     val defaultValue: Option[AnyRef]
+
+    protected def convertJavaScriptToScalaImpl(value: AnyRef): Option[AnyRef]
+    @tailrec
+    final def convertJavaScriptToScala(value: AnyRef): AnyRef = value match {
+      case null if defaultValue.isDefined => // scalastyle:ignore null
+        null // scalastyle:ignore null
+      case null if isNullable => // scalastyle:ignore null
+        null // scalastyle:ignore null
+      case null => // scalastyle:ignore null
+        throw new IllegalArgumentException(s"$this is not nullable field.")
+      case native: NativeJavaObject =>
+        convertJavaScriptToScala(native.unwrap())
+      case _ =>
+        convertJavaScriptToScalaImpl(value).getOrElse {
+          throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a Scala object with $this type")
+        }
+    }
   }
 
-  private[database] case class BooleanField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef]) extends Field
-  private[database] case class IntField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef], validations: Seq[Validation[Int]]) extends Field
-  private[database] case class StringField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef]) extends Field
-  private[database] case class DateField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef]) extends Field
-  private[database] case class DoubleField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef], validations: Seq[Validation[Double]]) extends Field
-  private[database] case class LongField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef], validations: Seq[Validation[Long]]) extends Field
+  private[database] case class BooleanField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef]) extends Field {
+    override protected def convertJavaScriptToScalaImpl(value: AnyRef): Option[AnyRef] =
+      Some(Boolean.box(ScriptRuntime.toBoolean(value)))
+  }
+
+  private[database] case class IntField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef], validations: Seq[Validation[Int]]) extends Field {
+    override protected def convertJavaScriptToScalaImpl(value: AnyRef): Option[AnyRef] =
+      Some(Int.box(ScriptRuntime.toInt32(value)))
+  }
+
+  private[database] case class StringField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef]) extends Field {
+    override protected def convertJavaScriptToScalaImpl(value: AnyRef): Option[AnyRef] =
+      Some(ScriptRuntime.toString(value))
+  }
+
+  private[database] case class DateField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef]) extends Field {
+    override protected def convertJavaScriptToScalaImpl(value: AnyRef): Option[AnyRef] =
+      Some(value match {
+        case date: Date =>
+          date
+        case _ =>
+          new Date(ScriptRuntime.toInteger(value).toLong)
+      })
+  }
+
+  private[database] case class DoubleField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef], validations: Seq[Validation[Double]])
+      extends Field {
+    override protected def convertJavaScriptToScalaImpl(value: AnyRef): Option[AnyRef] =
+      Some(Double.box(ScriptRuntime.toNumber(value)))
+  }
+
+  private[database] case class LongField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef], validations: Seq[Validation[Long]]) extends Field {
+    override protected def convertJavaScriptToScalaImpl(value: AnyRef): Option[AnyRef] =
+      Some(Long.box(ScriptRuntime.toInteger(value).toLong))
+  }
+
   private[database] case class ReferenceField(name: String, collection: Option[ScriptableCollection], isNullable: Boolean, defaultValue: Option[AnyRef])
-    extends Field
-  private[database] case class EmbeddingField(name: String, schema: ScriptableSchema, isNullable: Boolean, defaultValue: Option[AnyRef]) extends Field
-  private[database] case class ArrayField(name: String, elementType: Field, isNullable: Boolean, defaultValue: Option[AnyRef]) extends Field
+      extends Field {
+    override protected def convertJavaScriptToScalaImpl(value: AnyRef): Option[AnyRef] =
+      value match {
+        case document: ScriptableDocument =>
+          Some(ObjectId(document.objectID))
+        case objectId: ScriptableObjectId =>
+          Some(ObjectId(objectId.bson))
+        case _ =>
+          None
+      }
+  }
+
+  private[database] case class EmbeddingField(name: String, schema: ScriptableSchema, isNullable: Boolean, defaultValue: Option[AnyRef]) extends Field {
+    override protected def convertJavaScriptToScalaImpl(value: AnyRef): Option[AnyRef] =
+      value match {
+        case value: ScriptableObject =>
+          Some(convertJavaScriptObjectToScalaWithField(value)(schema.fields))
+        case _ =>
+          None
+      }
+
+  }
+
+  private[database] case class ArrayField(name: String, elementType: Field, isNullable: Boolean, defaultValue: Option[AnyRef]) extends Field {
+    override protected def convertJavaScriptToScalaImpl(value: AnyRef): Option[AnyRef] =
+      value match {
+        case value: NativeArray =>
+          Some(value.toArray.map(elementType.convertJavaScriptToScala).toSeq)
+        case _ =>
+          None
+      }
+  }
 
   private[database] def convertScalaToJavaScript(value: AnyRef)(implicit context: Context, scope: Scriptable): AnyRef = value match {
     case number: jl.Number =>
@@ -185,45 +262,10 @@ package object database extends Logging {
       throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a JavaScript Object")
   }
 
-  private[database] def convertJavaScriptToScalaWithField(value: AnyRef)(implicit field: Field): AnyRef = (value, field) match {
-    case (null, field: Field) if field.defaultValue.isDefined => // scalastyle:ignore null
-      null // scalastyle:ignore null
-    case (null, field: Field) if field.isNullable => // scalastyle:ignore null
-      null // scalastyle:ignore null
-    case (null, field: Field) => // scalastyle:ignore null
-      throw new IllegalArgumentException(s"$field is not optional field.")
-    case (native: NativeJavaObject, field: Field) =>
-      convertJavaScriptToScalaWithField(native.unwrap())(field)
-    case (_, _: IntField) =>
-      Int.box(ScriptRuntime.toInt32(value))
-    case (_, _: DoubleField) =>
-      Double.box(ScriptRuntime.toNumber(value))
-    case (_, _: LongField) =>
-      Long.box(ScriptRuntime.toInteger(value).toLong)
-    case (_, _: StringField) =>
-      ScriptRuntime.toString(value)
-    case (_, _: BooleanField) =>
-      Boolean.box(ScriptRuntime.toBoolean(value))
-    case (date: Date, _: DateField) =>
-      date
-    case (_, _: DateField) =>
-      new Date(ScriptRuntime.toInteger(value).toLong)
-    case (obj: ScriptableDocument, _: ReferenceField) =>
-      ObjectId(obj.objectID)
-    case (objectID: ScriptableObjectId, _: ReferenceField) =>
-      ObjectId(objectID.bson)
-    case (value: ScriptableObject, embeddingField: EmbeddingField) =>
-      convertJavaScriptObjectToScalaWithField(value)(embeddingField.schema.fields)
-    case (array: NativeArray, arrayField: ArrayField) =>
-      array.toArray.map(convertJavaScriptToScalaWithField(_)(arrayField.elementType)).toSeq
-    case (_, _) =>
-      throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a Scala object with $field type")
-  }
-
   private[database] def convertJavaScriptObjectToScalaWithField(obj: ScriptableObject)(implicit fields: Seq[Field]): Map[String, AnyRef] =
-    fields.map { implicit field =>
+    fields.map { field =>
       val name = field.name
-      val value = convertJavaScriptToScalaWithField(obj.get(name))
+      val value = field.convertJavaScriptToScala(obj.get(name))
       name -> value
     }.toMap
 

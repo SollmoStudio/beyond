@@ -88,8 +88,8 @@ class ScriptableDocument(fields: Seq[Field], currentValuesInDB: BSONDocument, co
         case Array() =>
           currentJavaScriptValue(name)(cx, scope)
         case Array(arg) =>
-          implicit val field = fieldByName(name)
-          val scalaValue = convertJavaScriptToScalaWithField(arg)
+          val field = fieldByName(name)
+          val scalaValue = field.convertJavaScriptToScala(arg)
           updatedValues.update(name, AnyRefBSONHandler.write(scalaValue))
           thisObj
         case _ =>
