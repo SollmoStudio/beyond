@@ -146,22 +146,16 @@ package object database extends Logging {
     val defaultValue: Option[AnyRef]
   }
 
-  private[database] case class BooleanField(override val name: String, override val isNullable: Boolean,
-    override val defaultValue: Option[AnyRef]) extends Field
-  private[database] case class IntField(override val name: String, override val isNullable: Boolean, override val defaultValue: Option[AnyRef],
-    validations: Seq[Validation[Int]]) extends Field
-  private[database] case class StringField(override val name: String, override val isNullable: Boolean, override val defaultValue: Option[AnyRef]) extends Field
-  private[database] case class DateField(override val name: String, override val isNullable: Boolean, override val defaultValue: Option[AnyRef]) extends Field
-  private[database] case class DoubleField(override val name: String, override val isNullable: Boolean, override val defaultValue: Option[AnyRef],
-    validations: Seq[Validation[Double]]) extends Field
-  private[database] case class LongField(override val name: String, override val isNullable: Boolean, override val defaultValue: Option[AnyRef],
-    validations: Seq[Validation[Long]]) extends Field
-  private[database] case class ReferenceField(override val name: String, collection: Option[ScriptableCollection], override val isNullable: Boolean,
-    override val defaultValue: Option[AnyRef]) extends Field
-  private[database] case class EmbeddingField(override val name: String, schema: ScriptableSchema, override val isNullable: Boolean,
-    override val defaultValue: Option[AnyRef]) extends Field
-  private[database] case class ArrayField(override val name: String, elementType: Field, override val isNullable: Boolean,
-    override val defaultValue: Option[AnyRef]) extends Field
+  private[database] case class BooleanField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef]) extends Field
+  private[database] case class IntField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef], validations: Seq[Validation[Int]]) extends Field
+  private[database] case class StringField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef]) extends Field
+  private[database] case class DateField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef]) extends Field
+  private[database] case class DoubleField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef], validations: Seq[Validation[Double]]) extends Field
+  private[database] case class LongField(name: String, isNullable: Boolean, defaultValue: Option[AnyRef], validations: Seq[Validation[Long]]) extends Field
+  private[database] case class ReferenceField(name: String, collection: Option[ScriptableCollection], isNullable: Boolean, defaultValue: Option[AnyRef])
+    extends Field
+  private[database] case class EmbeddingField(name: String, schema: ScriptableSchema, isNullable: Boolean, defaultValue: Option[AnyRef]) extends Field
+  private[database] case class ArrayField(name: String, elementType: Field, isNullable: Boolean, defaultValue: Option[AnyRef]) extends Field
 
   private[database] def convertScalaToJavaScript(value: AnyRef)(implicit context: Context, scope: Scriptable): AnyRef = value match {
     case number: jl.Number =>
