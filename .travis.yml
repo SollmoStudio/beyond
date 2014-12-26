@@ -2,6 +2,7 @@ language: scala
 before_script:
   - npm install
   - npm install -g gulp
+  - mv -f conf/application-logger.test.xml conf/application-logger.xml
 script:
   - sbt ++$TRAVIS_SCALA_VERSION scalastyle
   - sbt ++$TRAVIS_SCALA_VERSION test
