@@ -6,6 +6,7 @@ libraryDependencies ++= Seq(
   jdbc,
   anorm,
   cache,
+  "ch.qos.logback.contrib" % "logback-mongodb-classic" % "0.1.2",
   "org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.akka23-SNAPSHOT",
   "org.reactivemongo" %% "reactivemongo" % "0.10.5.akka23-SNAPSHOT"
 )
