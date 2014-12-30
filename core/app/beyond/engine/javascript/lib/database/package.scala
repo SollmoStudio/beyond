@@ -11,7 +11,6 @@ import org.mozilla.javascript.NativeJavaObject
 import org.mozilla.javascript.ScriptRuntime
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
-import org.mozilla.javascript.Undefined
 import reactivemongo.bson.BSONArray
 import reactivemongo.bson.BSONBoolean
 import reactivemongo.bson.BSONDateTime
@@ -21,9 +20,9 @@ import reactivemongo.bson.BSONHandler
 import reactivemongo.bson.BSONInteger
 import reactivemongo.bson.BSONJavaScript
 import reactivemongo.bson.BSONLong
+import reactivemongo.bson.BSONNull
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.bson.BSONString
-import reactivemongo.bson.BSONUndefined
 import reactivemongo.bson.BSONValue
 
 package object database {
@@ -44,11 +43,12 @@ package object database {
         })
       case seq: Seq[AnyRef] =>
         BSONArray(seq.map(write))
-      case _: Undefined => BSONUndefined
       case ObjectId(id) =>
         id
       case native: NativeJavaObject =>
         write(native.unwrap())
+      case null =>
+        BSONNull
       case _ =>
         throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a BSONValue")
     }
@@ -68,8 +68,9 @@ package object database {
         }.toMap
       case array: BSONArray =>
         array.values.map(read)
-      case BSONUndefined => Undefined.instance
       case id: BSONObjectID => ObjectId(id)
+      case BSONNull =>
+        null
       case _ =>
         throw new IllegalArgumentException(s"$bson cannot be a scala object")
     }
@@ -178,8 +179,8 @@ package object database {
       context.newObject(scope, "Array", args)
     case objectID: ObjectId =>
       context.newObject(scope, "ObjectId", objectID.toString)
-    case Unit =>
-      Undefined.instance
+    case null =>
+      null
     case _ =>
       throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a JavaScript Object")
   }
