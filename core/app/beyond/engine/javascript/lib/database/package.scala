@@ -2,6 +2,7 @@ package beyond.engine.javascript.lib
 
 import beyond.engine.javascript.JSArray
 import com.beyondframework.rhino.ContextOps._
+import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import java.util.Date
 import java.{ lang => jl }
 import org.mozilla.javascript.Context
@@ -25,7 +26,7 @@ import reactivemongo.bson.BSONObjectID
 import reactivemongo.bson.BSONString
 import reactivemongo.bson.BSONValue
 
-package object database {
+package object database extends Logging {
 
   private[database] implicit object AnyRefBSONHandler extends BSONHandler[BSONValue, AnyRef] {
     override def write(value: AnyRef): BSONValue = value match {
@@ -86,39 +87,45 @@ package object database {
     private def apply(name: String, tpe: String, option: ScriptableObject): Field = {
       // ScriptRuntime treats null as false.
       val isOptional = ScriptRuntime.toBoolean(option.get("optional"))
+      val isNullable = if (isOptional) {
+        logger.warn(s"You are using 'optional' for a $name field, but 'optional' is deprecated. Use 'nullable' instead of 'optional'.")
+        true
+      } else {
+        ScriptRuntime.toBoolean(option.get("nullable"))
+      }
       val defaultValue = Option(option.get("default"))
       tpe match {
-        case "string" => StringField(name, isOptional, defaultValue)
+        case "string" => StringField(name, isNullable, defaultValue)
         case "int" =>
           val validations: Seq[Validation[Int]] = (
             Option(option.get("min")).map(ScriptRuntime.toInt32).map(MinValidation[Int]) ++
             Option(option.get("max")).map(ScriptRuntime.toInt32).map(MaxValidation[Int])).toSeq
-          IntField(name, isOptional, defaultValue, validations)
-        case "date" => DateField(name, isOptional, defaultValue)
+          IntField(name, isNullable, defaultValue, validations)
+        case "date" => DateField(name, isNullable, defaultValue)
         case "long" =>
           val validations: Seq[Validation[Long]] = (
             Option(option.get("min")).map(ScriptRuntime.toUint32).map(MinValidation[Long]) ++
             Option(option.get("max")).map(ScriptRuntime.toUint32).map(MaxValidation[Long])).toSeq
-          LongField(name, isOptional, defaultValue, validations)
+          LongField(name, isNullable, defaultValue, validations)
         case "double" =>
           val validations: Seq[Validation[Double]] = (
             Option(option.get("min")).map(ScriptRuntime.toNumber).map(MinValidation[Double]) ++
             Option(option.get("max")).map(ScriptRuntime.toNumber).map(MaxValidation[Double])).toSeq
-          DoubleField(name, isOptional, defaultValue, validations)
+          DoubleField(name, isNullable, defaultValue, validations)
         case "boolean" =>
-          BooleanField(name, isOptional, defaultValue)
+          BooleanField(name, isNullable, defaultValue)
         case "reference" =>
           val collection = Option(option.get("collection")).asInstanceOf[Option[ScriptableCollection]]
-          ReferenceField(name, collection, isOptional, defaultValue)
+          ReferenceField(name, collection, isNullable, defaultValue)
         case "embedding" =>
           val schema = Option(option.get("schema")).asInstanceOf[Option[ScriptableSchema]]
-          EmbeddingField(name, schema.getOrElse(throw new IllegalArgumentException("The embedding type must have schema")), isOptional, defaultValue)
+          EmbeddingField(name, schema.getOrElse(throw new IllegalArgumentException("The embedding type must have schema")), isNullable, defaultValue)
         case "array" =>
           val elementType = Option(option.get("elementType"))
             .getOrElse(throw new IllegalArgumentException("The array type must have elementType"))
             .asInstanceOf[ScriptableObject]
           val elementField = Field(NoName, elementType)
-          ArrayField(name, elementField, isOptional, defaultValue)
+          ArrayField(name, elementField, isNullable, defaultValue)
       }
     }
   }
@@ -135,26 +142,26 @@ package object database {
 
   private[database] trait Field {
     val name: String
-    val isOptional: Boolean
+    val isNullable: Boolean
     val defaultValue: Option[AnyRef]
   }
 
   // FIXME: Support complex type(embedding, referencing, array).
-  private[database] case class BooleanField(override val name: String, override val isOptional: Boolean,
+  private[database] case class BooleanField(override val name: String, override val isNullable: Boolean,
     override val defaultValue: Option[AnyRef]) extends Field
-  private[database] case class IntField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef],
+  private[database] case class IntField(override val name: String, override val isNullable: Boolean, override val defaultValue: Option[AnyRef],
     validations: Seq[Validation[Int]]) extends Field
-  private[database] case class StringField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef]) extends Field
-  private[database] case class DateField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef]) extends Field
-  private[database] case class DoubleField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef],
+  private[database] case class StringField(override val name: String, override val isNullable: Boolean, override val defaultValue: Option[AnyRef]) extends Field
+  private[database] case class DateField(override val name: String, override val isNullable: Boolean, override val defaultValue: Option[AnyRef]) extends Field
+  private[database] case class DoubleField(override val name: String, override val isNullable: Boolean, override val defaultValue: Option[AnyRef],
     validations: Seq[Validation[Double]]) extends Field
-  private[database] case class LongField(override val name: String, override val isOptional: Boolean, override val defaultValue: Option[AnyRef],
+  private[database] case class LongField(override val name: String, override val isNullable: Boolean, override val defaultValue: Option[AnyRef],
     validations: Seq[Validation[Long]]) extends Field
-  private[database] case class ReferenceField(override val name: String, collection: Option[ScriptableCollection], override val isOptional: Boolean,
+  private[database] case class ReferenceField(override val name: String, collection: Option[ScriptableCollection], override val isNullable: Boolean,
     override val defaultValue: Option[AnyRef]) extends Field
-  private[database] case class EmbeddingField(override val name: String, schema: ScriptableSchema, override val isOptional: Boolean,
+  private[database] case class EmbeddingField(override val name: String, schema: ScriptableSchema, override val isNullable: Boolean,
     override val defaultValue: Option[AnyRef]) extends Field
-  private[database] case class ArrayField(override val name: String, elementType: Field, override val isOptional: Boolean,
+  private[database] case class ArrayField(override val name: String, elementType: Field, override val isNullable: Boolean,
     override val defaultValue: Option[AnyRef]) extends Field
 
   private[database] def convertScalaToJavaScript(value: AnyRef)(implicit context: Context, scope: Scriptable): AnyRef = value match {
@@ -188,7 +195,7 @@ package object database {
   private[database] def convertJavaScriptToScalaWithField(value: AnyRef)(implicit field: Field): AnyRef = (value, field) match {
     case (null, field: Field) if field.defaultValue.isDefined =>
       null
-    case (null, field: Field) if field.isOptional =>
+    case (null, field: Field) if field.isNullable =>
       null
     case (null, field: Field) =>
       throw new IllegalArgumentException(s"$field is not optional field.")
@@ -225,9 +232,6 @@ package object database {
       val name = field.name
       val value = convertJavaScriptToScalaWithField(obj.get(name))
       name -> value
-    }.filter {
-      case (name, value) =>
-        value != null
     }.toMap
 
   private[database] def convertScriptableObjectToBSONDocument(obj: ScriptableObject)(implicit fields: Seq[Field]): BSONDocument =
