@@ -146,7 +146,6 @@ package object database extends Logging {
     val defaultValue: Option[AnyRef]
   }
 
-  // FIXME: Support complex type(embedding, referencing, array).
   private[database] case class BooleanField(override val name: String, override val isNullable: Boolean,
     override val defaultValue: Option[AnyRef]) extends Field
   private[database] case class IntField(override val name: String, override val isNullable: Boolean, override val defaultValue: Option[AnyRef],
@@ -191,7 +190,7 @@ package object database extends Logging {
     case _ =>
       throw new IllegalArgumentException(s"$value(${value.getClass} cannot be a JavaScript Object")
   }
-  // FIXME: Handle default and optional value.
+
   private[database] def convertJavaScriptToScalaWithField(value: AnyRef)(implicit field: Field): AnyRef = (value, field) match {
     case (null, field: Field) if field.defaultValue.isDefined =>
       null
