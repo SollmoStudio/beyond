@@ -30,5 +30,5 @@ class WorkerRegistrationActor(curatorFramework: CuratorFramework) extends Actor 
     log.info("WorkerRegistrationActor stopped")
   }
 
-  override def receive: Receive = Map.empty
+  override def receive: Receive = Actor.emptyBehavior
 }

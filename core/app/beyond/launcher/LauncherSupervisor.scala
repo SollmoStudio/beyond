@@ -64,6 +64,6 @@ class LauncherSupervisor extends Actor with ActorLogging {
         super.supervisorStrategy.decider.applyOrElse(t, (_: Any) => Escalate)
     }
 
-  override def receive: Receive = Map.empty
+  override def receive: Receive = Actor.emptyBehavior
 }
 

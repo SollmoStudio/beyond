@@ -38,6 +38,6 @@ class RoutingTableWatcher(curatorFramework: CuratorFramework) extends NodeCacheL
     log.info("RoutingTableUpdateActor stopped")
   }
 
-  override def receive: Receive = Map.empty
+  override def receive: Receive = Actor.emptyBehavior
 }
 

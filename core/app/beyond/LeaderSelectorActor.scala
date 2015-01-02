@@ -53,6 +53,6 @@ class LeaderSelectorActor(curatorFramework: CuratorFramework) extends LeaderSele
     }
   }
 
-  override def receive: Receive = Map.empty
+  override def receive: Receive = Actor.emptyBehavior
 }
 

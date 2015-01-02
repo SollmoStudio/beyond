@@ -38,6 +38,6 @@ class CuratorSupervisor extends Actor with ActorLogging {
     curatorFramework.close()
   }
 
-  override def receive: Receive = Map.empty
+  override def receive: Receive = Actor.emptyBehavior
 }
 

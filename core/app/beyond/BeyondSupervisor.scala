@@ -26,6 +26,6 @@ class BeyondSupervisor extends Actor {
     context.actorOf(Props[CuratorSupervisor], CuratorSupervisor.Name)
   }
 
-  override def receive: Receive = Map.empty
+  override def receive: Receive = Actor.emptyBehavior
 }
 

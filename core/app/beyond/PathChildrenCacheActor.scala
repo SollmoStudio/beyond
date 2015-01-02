@@ -43,6 +43,6 @@ class PathChildrenCacheActor(curatorFramework: CuratorFramework, path: String) e
     }
   }
 
-  override def receive: Receive = Map.empty
+  override def receive: Receive = Actor.emptyBehavior
 }
 
