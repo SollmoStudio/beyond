@@ -33,7 +33,7 @@ abstract class MongoDBLauncher extends {
   protected val launcherName: String
   protected val pidFileName: String
 
-  protected val pidFilePath: Path = Path.fromString(BeyondConfiguration.pidDirectory) / pidFileName
+  protected lazy val pidFilePath: Path = Path.fromString(BeyondConfiguration.pidDirectory) / pidFileName
 
   private def mongoBinPath(bin: String): Option[String] = try {
     Some((s"which $bin" !!).trim) // Locate Unix mongod path
