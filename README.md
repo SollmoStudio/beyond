@@ -1,17 +1,17 @@
-beyond
+Beyond
 ======
 
-[![Build Status](https://travis-ci.org/SollmoStudio/beyond.png?branch=master)](https://travis-ci.org/SollmoStudio/beyond)
+[![Build Status](https://travis-ci.org/SollmoStudio/beyond.svg?branch=master)](https://travis-ci.org/SollmoStudio/beyond)
 [![Stories in Ready](https://badge.waffle.io/sollmostudio/beyond.png?label=ready&title=Ready)](https://waffle.io/sollmostudio/beyond)
 
 Beyond: The Scalable Game Server Framework
 
-### Running Beyond
+## Running Beyond
 
-Beyond requires a recent version of [Scala] and [Play Framework].
+Beyond requires a recent version of [Scala] and [Typesafe Activator].
 
 [Scala]: http://www.scala-lang.org/
-[Play Framework]:http://www.playframework.com/
+[Typesafe Activator]: http://typesafe.com/get-started
 
 If you have these installed, running Beyond is straightforward:
 
@@ -19,15 +19,15 @@ Check out Beyond using Git:
 
     git clone git@github.com:SollmoStudio/beyond.git
 
-Change to the beyond directory and run play:
+Change to the beyond directory and run it with Activator:
 
-    play run
+    activator run
 
-### Licence
+## Licence
 
 This software is licensed under the Apache 2 license, quoted below.
 
-Copyright 2014 Company100 (http://www.company100.com).
+Copyright 2015 Company100 (http://www.company100.com).
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this project except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
 
