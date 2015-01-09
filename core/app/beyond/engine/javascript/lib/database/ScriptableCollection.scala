@@ -23,27 +23,39 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
 object ScriptableCollection {
+  private def convertDocumentToJsObject(ctx: Context, collection: ScriptableCollection, doc: BSONDocument): AnyRef = {
+    val beyondContextFactory = ctx.getFactory.asInstanceOf[BeyondContextFactory]
+
+    import com.beyondframework.rhino.RhinoConversions._
+    beyondContextFactory.call { context: Context =>
+      ScriptableDocument(context, collection.fields, doc)
+    }
+  }
+
   @JSFunctionAnnotation
   def insert(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
-    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
-    val dataToInsert = args(0).asInstanceOf[ScriptableObject]
-    val insertQueryResult = thisCollection.insertInternal(dataToInsert)
 
-    import com.beyondframework.rhino.RhinoConversions._
-    val scriptableDocument = insertQueryResult.map { document =>
-      beyondContextFactory.call { context: Context =>
-        ScriptableDocument(context, thisCollection.fields, document)
-      }
+    val result = if (args.length == 1) {
+      var dataToInsert = args(0).asInstanceOf[ScriptableObject];
+      val insertQueryResult = thisCollection.insertInternal(dataToInsert)
+      insertQueryResult.map(convertDocumentToJsObject(context, thisCollection, _))
+    } else {
+      Future.sequence(args.toSeq.map {
+        case dataToInsert: ScriptableObject =>
+          val insertQueryResult = thisCollection.insertInternal(dataToInsert)
+          insertQueryResult.map(convertDocumentToJsObject(context, thisCollection, _))
+        case _ =>
+          throw new IllegalArgumentException("Only object can be inserted.")
+      }).map(_.toArray)
     }
-    ScriptableFuture(context, scriptableDocument)
+    ScriptableFuture(context, result)
   }
 
   @JSFunctionAnnotation
   def find(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
-    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
     val findQuery = args(0).asInstanceOf[ScriptableQuery]
     val (limitOption, orderByOption, skipOption) = if (args.isDefinedAt(1)) {
@@ -61,11 +73,8 @@ object ScriptableCollection {
 
     val queryResultFuture = thisCollection.findInternal(findQuery, limitOption, skipOption, orderByOption)
 
-    import com.beyondframework.rhino.RhinoConversions._
     val convertedToScriptableDocumentFuture = queryResultFuture.map { documents =>
-      beyondContextFactory.call { context: Context =>
-        documents.map(ScriptableDocument(context, thisCollection.fields, _)).toArray
-      }
+      documents.map(convertDocumentToJsObject(context, thisCollection, _)).toArray
     }
     ScriptableFuture(context, convertedToScriptableDocumentFuture)
   }
@@ -73,19 +82,15 @@ object ScriptableCollection {
   @JSFunctionAnnotation
   def findOne(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
-    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
     val findQuery = args(0).asInstanceOf[ScriptableQuery]
     val findResult = thisCollection.findOneInternal(findQuery)
 
-    import com.beyondframework.rhino.RhinoConversions._
     val convertedToScriptableDocumentResult = findResult.map {
       case None =>
         null
       case Some(document) =>
-        beyondContextFactory.call { context: Context =>
-          ScriptableDocument(context, thisCollection.fields, document)
-        }
+        convertDocumentToJsObject(context, thisCollection, document)
     }
     ScriptableFuture(context, convertedToScriptableDocumentResult)
   }
@@ -103,19 +108,15 @@ object ScriptableCollection {
   @JSFunctionAnnotation
   def findOneAndRemove(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
-    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
     val findQuery = args(0).asInstanceOf[ScriptableQuery]
     val findResult = thisCollection.findOneAndRemoveInternal(findQuery)
 
-    import com.beyondframework.rhino.RhinoConversions._
     val convertedToScriptableDocumentResult = findResult.map {
       case None =>
         null
       case Some(document) =>
-        beyondContextFactory.call { context: Context =>
-          ScriptableDocument(context, thisCollection.fields, document)
-        }
+        convertDocumentToJsObject(context, thisCollection, document)
     }
     ScriptableFuture(context, convertedToScriptableDocumentResult)
   }
@@ -146,17 +147,11 @@ object ScriptableCollection {
   @JSFunctionAnnotation
   def save(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
     implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
-    val beyondContextFactory = context.getFactory.asInstanceOf[BeyondContextFactory]
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
     val dataToUpdate = args(0).asInstanceOf[ScriptableDocument]
     val saveQueryResult = thisCollection.saveInternal(dataToUpdate)
 
-    import com.beyondframework.rhino.RhinoConversions._
-    val scriptableDocument = saveQueryResult.map { document =>
-      beyondContextFactory.call { context: Context =>
-        ScriptableDocument(context, thisCollection.fields, document)
-      }
-    }
+    val scriptableDocument = saveQueryResult.map(convertDocumentToJsObject(context, thisCollection, _))
     ScriptableFuture(context, scriptableDocument)
   }
 
