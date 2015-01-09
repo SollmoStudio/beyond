@@ -8,6 +8,7 @@ import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProvider
 class BeyondTestGlobal(libraryProvider: ModuleSourceProvider) extends BeyondGlobal(libraryProvider) {
   override def init(cx: Context) {
     super.init(cx)
+    ScriptableObject.defineClass(this, classOf[TestHelper])
     ScriptableObject.defineClass(this, classOf[TestReporter])
   }
 }
