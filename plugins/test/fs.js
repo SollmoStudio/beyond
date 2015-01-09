@@ -1,38 +1,27 @@
 var assert = require('assert');
 var fs = require('fs');
+var wait = require('test-helper').wait;
 require('bdd').mount(this);
 
 describe('file-system', function () {
   describe('#readFile()', function () {
-    it.will('return the data of the file.', function (done) {
-      fs
-      .readFile('./plugins/test/assets/fs/beyond')
-      .onComplete(function (data) {
-        assert.async(done, function () {
-          assert.equal(data, 'Beyond framework\n');
-        });
-      });
+    it('return the data of the file.', function () {
+      var data = wait(fs.readFile('./plugins/test/assets/fs/beyond'));
+      assert.equal(data, 'Beyond framework\n');
     });
 
-    it.will('return the data of the file with a specific encoding.', function (done) {
-      fs
-      .readFile('./plugins/test/assets/fs/hello', {encoding: 'EUC-KR'})
-      .onComplete(function (data) {
-        assert.async(done, function () {
-          assert.equal(data, '안녕, 세계!\n');
-        });
-      });
+    it('return the data of the file with a specific encoding.', function () {
+      var data = wait(fs.readFile('./plugins/test/assets/fs/hello', {encoding: 'EUC-KR'}));
+      assert.equal(data, '안녕, 세계!\n');
     });
 
-    it.will('fire an exception when there is no file.', function (done) {
-      fs
-      .readFile('./plugins/test/assets/fs/nothing')
-      .onComplete(function (result, isSuccess) {
-        assert.async(done, function () {
-          assert.equal(isSuccess, false);
-          assert.equal(result, "Can't find the file");
-        });
-      });
+    it('fire an exception when there is no file.', function () {
+      try {
+        wait(fs.readFile('./plugins/test/assets/fs/nothing'));
+        throw new Error('no error!');
+      } catch (e) {
+        assert.equal(e.message, "java.io.IOException: Can't find the file");
+      }
     });
   });
 
@@ -50,7 +39,7 @@ describe('file-system', function () {
     beforeEach(removeTestFile);
     afterEach(removeTestFile);
 
-    function contentEqualTo(expected, done, options) {
+    function contentEqualTo(expected, options) {
       var future;
       if (typeof options === 'undefined') {
         future = fs.readFile(testFilePath);
@@ -58,57 +47,34 @@ describe('file-system', function () {
         future = fs.readFile(testFilePath, options);
       }
 
-      future
-      .onComplete(function (data) {
-        assert.async(done, function () {
-          assert.equal(data, expected);
-        });
-      });
+      var data = wait(future);
+      assert.equal(data, expected);
     }
 
-    function permissionEqualTo(expected, done) {
-      assert.async(done, function () {
-        var error = !!exec(["sh", "-c", "find " + testFilePath + " -perm " + expected + " | grep '.*'"]);
-        assert.equal(error, false);
-      });
+    function permissionEqualTo(expected) {
+      var error = !!exec(["sh", "-c", "find " + testFilePath + " -perm " + expected + " | grep '.*'"]);
+      assert.equal(error, false);
     }
 
-    it.will('write data to a file.', function (done) {
-      fs
-      .writeFile(testFilePath, "Hello, world!")
-      .onComplete(function () {
-        contentEqualTo("Hello, world!", done);
-      });
+    it('write data to a file.', function () {
+      wait(fs.writeFile(testFilePath, "Hello, world!"));
+      contentEqualTo("Hello, world!");
     });
 
-    it.will('write data to a file with encoding.', function (done) {
-      fs
-      .writeFile(testFilePath, "안녕, 세계!", {encoding: 'EUC-KR'})
-      .onComplete(function () {
-        contentEqualTo("안녕, 세계!", done, {encoding: 'EUC-KR'});
-      });
+    it('write data to a file with encoding.', function () {
+      wait(fs.writeFile(testFilePath, "안녕, 세계!", {encoding: 'EUC-KR'}));
+      contentEqualTo("안녕, 세계!", {encoding: 'EUC-KR'});
     });
 
-    it.will('write data to a file with mode.', function (done) {
-      fs
-      .writeFile(testFilePath, "Hello, world!", {mode: 0765})
-      .onComplete(function () {
-        permissionEqualTo('765', done);
-      });
+    it('write data to a file with mode.', function () {
+      wait(fs.writeFile(testFilePath, "Hello, world!", {mode: 0765}));
+      permissionEqualTo('765');
     });
 
-    it.will('write data to a file with encoding and mode.', function (done) {
-      fs
-      .writeFile(testFilePath, "안녕, 세계!", {encoding: 'EUC-KR', mode: 0657})
-      .onComplete(function () {
-        permissionEqualTo('657', function (err) {
-          if (err) {
-            done(err);
-          } else {
-            contentEqualTo("안녕, 세계!", done, {encoding: 'EUC-KR'});
-          }
-        });
-      });
+    it('write data to a file with encoding and mode.', function () {
+      wait(fs.writeFile(testFilePath, "안녕, 세계!", {encoding: 'EUC-KR', mode: 0657}));
+      permissionEqualTo('657');
+      contentEqualTo("안녕, 세계!", {encoding: 'EUC-KR'});
     });
   });
 
@@ -124,42 +90,30 @@ describe('file-system', function () {
       })[0];
     }
 
-    it.will('return the list of files with the correct length.', function (done) {
-      future
-      .onComplete(function (files) {
-        assert.async(done, function () {
-          assert.equal(files.length, 3);
-        });
-      });
+    it('return the list of files with the correct length.', function () {
+      var files = wait(future);
+      assert.equal(files.length, 3);
     });
 
-    it.will('return the list of files containing static files', function (done) {
-      future
-      .onComplete(function (files) {
-        assert.async(done, function () {
-          assert.equal(findWithName(files, 'hello').name, 'hello');
-          assert.equal(findWithName(files, 'hello').path, './plugins/test/assets/fs/hello');
-          assert.equal(findWithName(files, 'hello').isFile, true);
-          assert.equal(findWithName(files, 'hello').isDirectory, false);
+    it('return the list of files containing static files', function () {
+      var files = wait(future);
+      assert.equal(findWithName(files, 'hello').name, 'hello');
+      assert.equal(findWithName(files, 'hello').path, './plugins/test/assets/fs/hello');
+      assert.equal(findWithName(files, 'hello').isFile, true);
+      assert.equal(findWithName(files, 'hello').isDirectory, false);
 
-          assert.equal(findWithName(files, 'beyond').name, 'beyond');
-          assert.equal(findWithName(files, 'beyond').path, './plugins/test/assets/fs/beyond');
-          assert.equal(findWithName(files, 'beyond').isFile, true);
-          assert.equal(findWithName(files, 'beyond').isDirectory, false);
-        });
-      });
+      assert.equal(findWithName(files, 'beyond').name, 'beyond');
+      assert.equal(findWithName(files, 'beyond').path, './plugins/test/assets/fs/beyond');
+      assert.equal(findWithName(files, 'beyond').isFile, true);
+      assert.equal(findWithName(files, 'beyond').isDirectory, false);
     });
 
-    it.will('return the list of files containing the directory', function (done) {
-      future
-      .onComplete(function (files) {
-        assert.async(done, function () {
-          assert.equal(findWithName(files, 'dir').name, 'dir');
-          assert.equal(findWithName(files, 'dir').path, './plugins/test/assets/fs/dir');
-          assert.equal(findWithName(files, 'dir').isFile, false);
-          assert.equal(findWithName(files, 'dir').isDirectory, true);
-        });
-      });
+    it('return the list of files containing the directory', function () {
+      var files = wait(future);
+      assert.equal(findWithName(files, 'dir').name, 'dir');
+      assert.equal(findWithName(files, 'dir').path, './plugins/test/assets/fs/dir');
+      assert.equal(findWithName(files, 'dir').isFile, false);
+      assert.equal(findWithName(files, 'dir').isDirectory, true);
     });
   });
 
