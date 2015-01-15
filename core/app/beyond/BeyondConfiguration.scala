@@ -2,6 +2,7 @@ package beyond
 
 import beyond.launcher.mongodb.MongoDBInstanceType
 import beyond.route.RouteAddress
+import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import java.io.File
 import org.apache.curator.RetryPolicy
 import org.apache.curator.retry.ExponentialBackoffRetry
@@ -10,7 +11,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.duration.FiniteDuration
 import scalax.file.Path
 
-object BeyondConfiguration {
+object BeyondConfiguration extends Logging {
   private def configuration =
     try {
       play.api.Play.current.configuration
@@ -34,8 +35,20 @@ object BeyondConfiguration {
     configuration.getStringList("beyond.zookeeper.servers").map(_.asScala).get.toSet
   }
 
-  def pluginPaths: Seq[Path] =
+  private val DeprecatedPluginPathsMessage =
+    "`beyond.plugin.path` is deprecated. Use `beyond.plugin.paths.`"
+  @deprecated(message = DeprecatedPluginPathsMessage)
+  def deprecatedPluginPaths: Seq[Path] = {
+    logger.warn(DeprecatedPluginPathsMessage)
     configuration.getStringSeq("beyond.plugin.path").getOrElse(Seq.empty).map(Path.fromString)
+  }
+
+  def pluginPaths: Map[String, Seq[Path]] =
+    configuration.getConfig("beyond.plugin.paths").map { config =>
+      config.keys.toSeq.map { pluginName =>
+        pluginName -> config.getStringSeq(pluginName).get.map(Path.fromString)
+      }.toMap[String, Seq[Path]]
+    } getOrElse Map.empty
 
   def encoding: String = configuration.getString("beyond.encoding").get
 
