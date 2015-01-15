@@ -34,11 +34,8 @@ object BeyondConfiguration {
     configuration.getStringList("beyond.zookeeper.servers").map(_.asScala).get.toSet
   }
 
-  def pluginPaths: Seq[Path] = {
-    import scala.collection.JavaConverters._
-    val paths: Seq[String] = configuration.getStringList("beyond.plugin.path").map(_.asScala).get
-    paths.map(Path.fromString)
-  }
+  def pluginPaths: Seq[Path] =
+    configuration.getStringSeq("beyond.plugin.path").getOrElse(Seq.empty).map(Path.fromString)
 
   def encoding: String = configuration.getString("beyond.encoding").get
 
