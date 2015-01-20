@@ -38,7 +38,7 @@ object ScriptableCollection {
     val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
 
     val result = if (args.length == 1) {
-      var dataToInsert = args(0).asInstanceOf[ScriptableObject];
+      val dataToInsert = args(0).asInstanceOf[ScriptableObject]
       val insertQueryResult = thisCollection.insertInternal(dataToInsert)
       insertQueryResult.map(convertDocumentToJsObject(context, thisCollection, _))
     } else {
