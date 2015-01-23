@@ -2,12 +2,12 @@ package beyond.launcher
 
 import beyond.BeyondRuntime
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
-import org.apache.zookeeper.server.ZooKeeperServerMain
+import org.apache.zookeeper.server.quorum.QuorumPeerMain
 import scalax.file.Path
 import scalax.io.Codec
 import scalax.io.Resource
 
-object ZooKeeperServerMainWithPIDFile extends ZooKeeperServerMain with Logging {
+object ZooKeeperServerMainWithPIDFile extends QuorumPeerMain with Logging {
   def main(args: Array[String]) {
     val pidPath = Path.fromString(args(0))
     for { file <- pidPath.createFile(createParents = true).fileOption } {
@@ -21,8 +21,8 @@ object ZooKeeperServerMainWithPIDFile extends ZooKeeperServerMain with Logging {
       }
     })
 
-    ZooKeeperServerMain.main(args.drop(1))
+    QuorumPeerMain.main(args.drop(1))
   }
 }
 
-class ZooKeeperServerMainWithPIDFile extends ZooKeeperServerMain
+class ZooKeeperServerMainWithPIDFile extends QuorumPeerMain
