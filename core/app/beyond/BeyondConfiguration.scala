@@ -1,30 +1,18 @@
 package beyond
 
-import beyond.launcher.mongodb.MongoDBInstanceType
 import beyond.route.RouteAddress
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
-import java.io.File
 import org.apache.curator.RetryPolicy
 import org.apache.curator.retry.ExponentialBackoffRetry
-import play.api.Configuration
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.FiniteDuration
 import scalax.file.Path
 
-object BeyondConfiguration extends Logging {
-  private def configuration =
-    try {
-      play.api.Play.current.configuration
-    } catch {
-      // If there's no running Play app, just load it with the current app path.
-      // Mainly for tests or console
-      case _: RuntimeException => Configuration.load(new File("."))
-    }
+object BeyondConfiguration extends Logging with ConfigurationMixin {
+  lazy val mongo = MongoConfiguration
 
   def requestTimeout: FiniteDuration =
     Duration(configuration.getString("beyond.request-timeout").get).asInstanceOf[FiniteDuration]
-
-  def mongoDBPath: String = configuration.getString("beyond.mongodb.dbpath").get
 
   def zooKeeperConfigPath: String = configuration.getString("beyond.zookeeper.config-path").get
 
@@ -74,15 +62,4 @@ object BeyondConfiguration extends Logging {
 
   def enableMetrics: Boolean =
     configuration.getBoolean("beyond.enable-metrics").getOrElse(true)
-
-  lazy val mongodbType: MongoDBInstanceType.Value =
-    configuration.getString("beyond.mongodb.type")
-      .map {
-        case "standalone" => MongoDBInstanceType.Standalone
-        case "config" => MongoDBInstanceType.Config
-        case "routing" => MongoDBInstanceType.Routing
-        case "shard" => MongoDBInstanceType.Shard
-        case _ => throw new IllegalArgumentException("wrong.mongodb.type")
-      }
-      .getOrElse(MongoDBInstanceType.default)
 }

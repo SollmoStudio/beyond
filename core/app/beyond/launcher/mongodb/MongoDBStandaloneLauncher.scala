@@ -11,7 +11,7 @@ class MongoDBStandaloneLauncher extends MongoDBLauncher {
   override protected val pidFileName: String = "mongo-standalone.pid"
 
   override protected def launchProcess() {
-    val dbPath = new File(BeyondConfiguration.mongoDBPath)
+    val dbPath = new File(BeyondConfiguration.mongo.dbPath)
     if (!dbPath.exists()) {
       dbPath.mkdirs()
     }

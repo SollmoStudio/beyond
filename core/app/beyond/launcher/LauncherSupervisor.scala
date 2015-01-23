@@ -39,7 +39,7 @@ class LauncherSupervisor extends Actor with ActorLogging {
   }
 
   private def launchMongoDBServerIfNecessary() {
-    BeyondConfiguration.mongodbType match {
+    BeyondConfiguration.mongo.instanceType match {
       case MongoDBInstanceType.Standalone =>
         context.actorOf(Props[MongoDBStandaloneLauncher], name = "mongoDBStandaloneLauncher")
       case _ =>
