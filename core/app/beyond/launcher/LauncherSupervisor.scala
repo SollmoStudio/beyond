@@ -6,6 +6,7 @@ import akka.actor.OneForOneStrategy
 import akka.actor.Props
 import akka.actor.SupervisorStrategy._
 import beyond.BeyondConfiguration
+import beyond.launcher.mongodb.MongoDBConfigLauncher
 import beyond.launcher.mongodb.MongoDBInstanceType
 import beyond.launcher.mongodb.MongoDBStandaloneLauncher
 import java.net.InetAddress
@@ -42,6 +43,8 @@ class LauncherSupervisor extends Actor with ActorLogging {
     BeyondConfiguration.mongo.instanceType match {
       case MongoDBInstanceType.Standalone =>
         context.actorOf(Props[MongoDBStandaloneLauncher], name = "mongoDBStandaloneLauncher")
+      case MongoDBInstanceType.Config =>
+        context.actorOf(Props[MongoDBConfigLauncher], name = "mongoDBConfigLauncher")
       case _ =>
         // FIXME: launch a proper MongoDB instance for sharding.
         ???
