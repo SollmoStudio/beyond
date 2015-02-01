@@ -14,14 +14,7 @@ object BeyondConfiguration extends Logging {
   def requestTimeout: FiniteDuration =
     Duration(configuration.getString("request-timeout").get).asInstanceOf[FiniteDuration]
 
-  def zooKeeperConfigPath: String = configuration.getString("zookeeper.config-path").get
-
   def pidDirectory: String = configuration.getString("pid-dir").get
-
-  def zooKeeperServers: Set[String] = {
-    import scala.collection.JavaConverters._
-    configuration.getStringList("zookeeper.servers").map(_.asScala).get.toSet
-  }
 
   private val DeprecatedPluginPathsMessage =
     "`beyond.plugin.path` is deprecated. Use `beyond.plugin.paths.`"

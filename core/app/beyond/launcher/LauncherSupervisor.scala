@@ -7,6 +7,7 @@ import akka.actor.Props
 import akka.actor.SupervisorStrategy._
 import beyond.config.BeyondConfiguration
 import beyond.config.MongoConfiguration
+import beyond.config.ZooKeeperConfiguration
 import beyond.launcher.mongodb.MongoDBConfigLauncher
 import beyond.launcher.mongodb.MongoDBInstanceType
 import beyond.launcher.mongodb.MongoDBStandaloneLauncher
@@ -31,7 +32,7 @@ class LauncherSupervisor extends Actor with ActorLogging {
       } yield address).toSet
       log.info(s"Local addresses $localAddresses")
 
-      val zooKeeperAddresses = BeyondConfiguration.zooKeeperServers.map(InetAddress.getByName)
+      val zooKeeperAddresses = ZooKeeperConfiguration.servers.map(InetAddress.getByName)
       log.info(s"ZooKeeper addresses $zooKeeperAddresses")
 
       if ((localAddresses & zooKeeperAddresses).nonEmpty) {

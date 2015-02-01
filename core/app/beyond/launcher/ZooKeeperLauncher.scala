@@ -10,6 +10,7 @@ import akka.util.ByteString
 import beyond.BeyondRuntime
 import beyond.TickGenerator
 import beyond.config.BeyondConfiguration
+import beyond.config.ZooKeeperConfiguration
 import java.net.InetSocketAddress
 import org.apache.zookeeper.server.ServerConfig
 import scala.concurrent.duration._
@@ -49,7 +50,7 @@ class ZooKeeperLauncher extends {
           BeyondRuntime.javaPath,
           mainClassOfZooKeeperServer,
           pidFilePath.path,
-          BeyondConfiguration.zooKeeperConfigPath),
+          ZooKeeperConfiguration.filePath),
         cwd = None,
         extraEnv = "CLASSPATH" -> BeyondRuntime.classPath)
       zooKeeperServer.run()
@@ -74,7 +75,7 @@ class ZooKeeperLauncher extends {
       import context.system
       val config: ServerConfig = {
         val config = new ServerConfig
-        config.parse(BeyondConfiguration.zooKeeperConfigPath)
+        config.parse(ZooKeeperConfiguration.filePath)
         config
       }
 
