@@ -5,8 +5,6 @@ object ZooKeeperConfiguration {
 
   def filePath: String = configuration.getString("config-path").get
 
-  def servers: Set[String] = {
-    import scala.collection.JavaConverters._
-    configuration.getStringList("servers").map(_.asScala).get.toSet
-  }
+  def servers: Set[String] =
+    configuration.getStringSeq("servers").get.toSet
 }
