@@ -22,7 +22,7 @@ class LauncherSupervisor extends Actor {
   private def launchZooKeeperServerIfNecessary() {
     if (!BeyondConfiguration.isStandaloneMode) {
 
-      if (ZooKeeperConfiguration.isCurrentMachineInServerList) {
+      if (!ZooKeeperConfiguration.isReplicatedMode || ZooKeeperConfiguration.isCurrentMachineInServerList) {
         context.actorOf(Props[ZooKeeperLauncher], name = "zooKeeperLauncher")
       }
     }
