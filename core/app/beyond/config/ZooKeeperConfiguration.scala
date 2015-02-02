@@ -6,6 +6,7 @@ import java.net.InetAddress
 import java.net.NetworkInterface
 import play.api.Configuration
 import scala.util.Properties
+import scalax.file.Path
 import scalax.io.Codec
 import scalax.io.Resource
 
@@ -51,6 +52,20 @@ object ZooKeeperConfiguration extends Logging {
     "initLimit", "syncLimit", "electionAlg", "autopurge.snapRetainCount", "autopurge.purgeInterval")
   private val booleanValueKeys = Seq("quorumListenOnAllIPs", "syncEnabled")
 
+  private def createMyIdFileIfNeeded() {
+    serverConfigs.find {
+      case (key, ServerConfig(name, _, _)) =>
+        isLocalAddress(name)
+    }.headOption.foreach { // Make myid file only for first matched address.
+      case (key, ServerConfig(name, _, _)) =>
+        configuration.getString("dataDir").foreach { dataDirPath: String =>
+          val dataDir = Path.fromString(dataDirPath)
+          dataDir.createDirectory(createParents = true, failIfExists = false)
+          (dataDir / "myid").write(key.toString)(Codec.UTF8)
+        }
+    }
+  }
+
   lazy val filePath: String = {
     val temporaryConfigFile = File.createTempFile("beyond-", "-zookeeper.cfg")
     def getOptions[T](keys: Seq[String])(getter: String => Option[T]): Seq[String] = {
@@ -75,6 +90,8 @@ object ZooKeeperConfiguration extends Logging {
     val options = stringValueOptions ++: intValueOptions ++: booleanValueOptions ++: serverOptions
 
     Resource.fromFile(temporaryConfigFile).writeStrings(options, Properties.lineSeparator)(Codec.UTF8)
+
+    createMyIdFileIfNeeded()
 
     logger.info(s"ZooKeeper configuration file is created at ${temporaryConfigFile.getCanonicalPath}")
 
