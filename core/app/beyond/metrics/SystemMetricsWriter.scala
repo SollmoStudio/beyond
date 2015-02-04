@@ -8,7 +8,9 @@ import java.util.Date
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.modules.reactivemongo.json.collection.JSONCollection
+import reactivemongo.core.commands.LastError
 import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 
 private class OWritesOps[A](writes: OWrites[A]) {
   def addTag(tag: String): OWrites[A] =
@@ -19,7 +21,7 @@ private object OWritesOps {
   implicit def from[A](writes: OWrites[A]): OWritesOps[A] = new OWritesOps(writes)
 }
 
-object SystemMetricsWriter {
+object SystemMetricsWriter extends MongoMixin {
 
   import OWritesOps._
 
@@ -72,38 +74,18 @@ object SystemMetricsWriter {
     (JsPath \ "date").write[Date] and
     (JsPath \ "count").write[Int]
   )(unlift(NumberOfRequestsPerSecond.unapply)).addTag("NumberOfRequestsPerSecond")
+
+  private def collection: JSONCollection =
+    db.collection[JSONCollection]("admin.metrics")
+
+  def save(metrics: SystemLoadAverage)(implicit ec: ExecutionContext): Future[LastError] =
+    collection.save(Json.toJson(metrics))
+  def save(metrics: HeapMemoryUsage)(implicit ec: ExecutionContext): Future[LastError] =
+    collection.save(Json.toJson(metrics))
+  def save(metrics: NonHeapMemoryUsage)(implicit ec: ExecutionContext): Future[LastError] =
+    collection.save(Json.toJson(metrics))
+  def save(metrics: SwapMemoryUsage)(implicit ec: ExecutionContext): Future[LastError] =
+    collection.save(Json.toJson(metrics))
+  def save(metrics: NumberOfRequestsPerSecond)(implicit ec: ExecutionContext): Future[LastError] =
+    collection.save(Json.toJson(metrics))
 }
-
-class SystemMetricsWriter extends Actor with ActorLogging with MongoMixin {
-
-  import SystemMetricsWriter._
-  import play.api.Play.current
-  import play.api.libs.concurrent.Akka
-
-  implicit val ec: ExecutionContext = Akka.system.dispatcher
-
-  private def collection: JSONCollection = db.collection[JSONCollection]("admin.metrics")
-
-  override def preStart() {
-    log.info("SystemMetricsWriter started")
-  }
-
-  override def postStop() {
-    log.info("SystemMetricsWriter stopped")
-  }
-
-  // FIXME: Needs error handling.
-  override def receive: Receive = {
-    case msg: SystemLoadAverage =>
-      collection.save(Json.toJson(msg))
-    case msg: HeapMemoryUsage =>
-      collection.save(Json.toJson(msg))
-    case msg: NonHeapMemoryUsage =>
-      collection.save(Json.toJson(msg))
-    case msg: SwapMemoryUsage =>
-      collection.save(Json.toJson(msg))
-    case msg: NumberOfRequestsPerSecond =>
-      collection.save(Json.toJson(msg))
-  }
-}
-

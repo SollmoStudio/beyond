@@ -25,7 +25,6 @@ class SystemMetricsSupervisor extends {
   import SystemMetricsMonitor._
   import SystemMetricsWriter._
   val monitor = context.actorOf(Props[SystemMetricsMonitor], SystemMetricsMonitor.Name)
-  val writer = context.actorOf(Props[SystemMetricsWriter], SystemMetricsWriter.Name)
 
   override def preStart() {
     log.info("SystemMetricsSupervisor started")
@@ -43,30 +42,31 @@ class SystemMetricsSupervisor extends {
 
       implicit val ec: ExecutionContext = context.dispatcher
       import SystemMetricsSupervisor.QueryTimeout
-      val systemLoadAverage = for {
+
+      for {
         SystemLoadAverageReply(loadAverage) <- monitor ? SystemLoadAverageRequest
-      } yield SystemLoadAverage(hostname, now, loadAverage)
-      systemLoadAverage pipeTo writer
+        lastError <- SystemMetricsWriter.save(SystemLoadAverage(hostname, now, loadAverage))
+      } yield lastError
 
-      val heapMemoryUsage = for {
+      for {
         HeapMemoryUsageReply(memoryUsage) <- monitor ? HeapMemoryUsageRequest
-      } yield HeapMemoryUsage(hostname, now, memoryUsage)
-      heapMemoryUsage pipeTo writer
+        lastError <- SystemMetricsWriter.save(HeapMemoryUsage(hostname, now, memoryUsage))
+      } yield lastError
 
-      val nonHeapMemoryUsage = for {
+      for {
         NonHeapMemoryUsageReply(nonHeapMemoryUsage) <- monitor ? NonHeapMemoryUsageRequest
-      } yield NonHeapMemoryUsage(hostname, now, nonHeapMemoryUsage)
-      nonHeapMemoryUsage pipeTo writer
+        lastError <- SystemMetricsWriter.save(NonHeapMemoryUsage(hostname, now, nonHeapMemoryUsage))
+      } yield lastError
 
-      val swapMemoryUsage = for {
+      for {
         SwapMemoryUsageReply(swapMemoryFree, swapMemoryTotal, swapMemoryUsed) <- monitor ? SwapMemoryUsageRequest
-      } yield SwapMemoryUsage(hostname, now, swapMemoryFree, swapMemoryTotal, swapMemoryUsed)
-      swapMemoryUsage pipeTo writer
+        lastError <- SystemMetricsWriter.save(SwapMemoryUsage(hostname, now, swapMemoryFree, swapMemoryTotal, swapMemoryUsed))
+      } yield lastError
 
-      val requestsPerSecond = for {
+      for {
         NumberOfRequestsPerSecondReply(count) <- monitor ? NumberOfRequestsPerSecondRequest
-      } yield NumberOfRequestsPerSecond(hostname, now, count)
-      requestsPerSecond pipeTo writer
+        lastError <- SystemMetricsWriter.save(NumberOfRequestsPerSecond(hostname, now, count))
+      } yield lastError
   }
 }
 
