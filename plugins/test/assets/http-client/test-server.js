@@ -1,4 +1,4 @@
-/* global console, process */
+/* global console */
 var Buffer = require('buffer').Buffer;
 var http = require('http');
 var qsparser = require('querystring').parse;
@@ -69,7 +69,7 @@ function authenticate(req) {
 
   // malformed
   var parts = auth.split(' ');
-  if ('basic' !== parts[0].toLowerCase() || !parts[1]) {
+  if (parts[0].toLowerCase() !== 'basic' || !parts[1]) {
     return null;
   }
   auth = parts[1];
@@ -102,7 +102,7 @@ handlers['/basic-auth'] = function (url, req, res) {
 handlers['/quit'] = function (url, req, res) {
   res.end();
   server.close();
-  process.exit();
+  throw new Error('quit');
 };
 
 server.listen(1234, function () {

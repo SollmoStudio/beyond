@@ -14,7 +14,6 @@ describe('crypto', function () {
     it('returns a signed value with HMAC-SHA1.', function () {
       var sign1 = crypto.sign('Hello, world!');
       var sign2 = crypto.sign('Hello, world!');
-      var signRegex = /^[a-f0-9]{40}$/;
       assert.equal(sign1, sign2);
     });
 

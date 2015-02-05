@@ -53,15 +53,17 @@ function Bdd() {
     var that = this;
     var index = -1; // to ensure runNext starts with index 0 in the first time
 
-    function runNext() {
+    var run, runNext;
+
+    runNext = function () {
       index++;
       setTimeout(run, 0);
-    }
+    };
 
-    function run() {
+    run = function () {
       var task = that.tasks[index];
 
-      if (typeof(task) === 'undefined') {
+      if (typeof task === 'undefined') {
         done(result);
         return;
       }
@@ -74,7 +76,7 @@ function Bdd() {
           function taskDone(err) {
             if (!done) {
               clearTimeout(timeoutTimer);
-              if (typeof(err) === 'undefined') {
+              if (typeof err === 'undefined') {
                 result.successCount++;
                 reporter.taskFinished(that.depth, task.name);
               } else {
@@ -107,7 +109,7 @@ function Bdd() {
         that.try(that.afterEach);
         runNext();
       }
-    }
+    };
 
     runNext();
   };
@@ -116,15 +118,17 @@ function Bdd() {
     var that = this;
     var index = -1; // to ensure runNext starts with index 0 in the first time
 
-    function runNext() {
+    var run, runNext;
+
+    runNext = function () {
       index++;
       setTimeout(run, 0);
-    }
+    };
 
-    function run() {
+    run = function () {
       var taskGroup = that.taskGroups[index];
 
-      if (typeof(taskGroup) === 'undefined') {
+      if (typeof taskGroup === 'undefined') {
         done(result);
         return;
       }
@@ -137,7 +141,7 @@ function Bdd() {
 
         runNext();
       });
-    }
+    };
 
     runNext();
   };
@@ -164,7 +168,7 @@ function Bdd() {
   bdd.describe = function (name, definition, only) {
     var newTaskGroup = new TaskGroup(name, currentTaskGroup.depth + 1);
 
-    if (typeof(only) !== 'undefined') {
+    if (typeof only !== 'undefined') {
       newTaskGroup.only = !!only;
     }
 
@@ -185,14 +189,14 @@ function Bdd() {
     bdd.describe(name, definition, true);
   };
 
-  bdd.describe.skip = function (name, definition) {
+  bdd.describe.skip = function () {
     // Do nothing
   };
 
   bdd.it = function (name, test, options) {
     var newTask = new Task(name, test);
 
-    if (typeof(options) !== 'undefined') {
+    if (typeof options !== 'undefined') {
       newTask.only = !!options.only;
       newTask.async = !!options.async;
     }
@@ -208,7 +212,7 @@ function Bdd() {
     bdd.it('will ' + name, test, {async: true, only: !!only});
   };
 
-  bdd.it.skip = bdd.it.will.skip = function (name, test) {
+  bdd.it.skip = bdd.it.will.skip = function () {
     // Do nothing
   };
 

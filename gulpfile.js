@@ -1,14 +1,15 @@
 var gulp = require('gulp');
-var jshint = require('gulp-jshint');
-var jshintStylish = require('jshint-stylish');
+var eslint = require('gulp-eslint');
 
-gulp.task('jshint', function () {
+gulp.task('eslint', function () {
   return gulp.src([
+      './core/public/js_lib/**/*.js',
       './gulpfile.js',
       './plugins/**/*.js'
     ])
-    .pipe(jshint())
-    .pipe(jshint.reporter(jshintStylish));
+    .pipe(eslint())
+    .pipe(eslint.format())
+    .pipe(eslint.failOnError());
 });
 
-gulp.task('default', ['jshint']);
+gulp.task('default', ['eslint']);

@@ -5,7 +5,7 @@ var counter = 1;
 var ids = {};
 
 exports.mount = function (global) {
-  var setTimeout = function (fn,delay) {
+  var setTimeout = function (fn, delay) {
     var id = counter++;
     var runnable = new JavaAdapter(java.lang.Runnable, {run: fn});
     ids[id] = executor.schedule(runnable, delay, java.util.concurrent.TimeUnit.MILLISECONDS);
@@ -18,7 +18,7 @@ exports.mount = function (global) {
     delete ids[id];
   };
 
-  var setInterval = function (fn,delay) {
+  var setInterval = function (fn, delay) {
     var id = counter++;
     var runnable = new JavaAdapter(java.lang.Runnable, {run: fn});
     ids[id] = executor.scheduleAtFixedRate(runnable, delay, delay, java.util.concurrent.TimeUnit.MILLISECONDS);

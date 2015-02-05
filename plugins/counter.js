@@ -4,4 +4,3 @@ exports.count = function() {
   counter++;
   return counter;
 };
-
