@@ -35,7 +35,7 @@ exports.insert = function (key, value) {
         .onSuccess(function (doc) {
             console.info(
                 "New document{ _id: %s, key: %s, value: %s, time: %s } is inserted.",
-                doc.objectId.stringify, doc.key(), doc.value(), doc.time());
+                doc._id.stringify, doc.key(), doc.value(), doc.time());
         });
 };
 
@@ -137,7 +137,7 @@ exports.referenceInsert = function (key) {
     }).onFailure(function (message) {
         console.error("Cannot find data. ERROR: %s", message);
     }).map(function (data) {
-        console.log("ID: %s", data.objectId.stringify);
+        console.log("ID: %s", data._id.stringify);
         if (data) {
             return collection2.insert({ key: data.key(), value: data.value(), time: data.time(), ref: data }).onComplete(console.error);
         }
