@@ -1,10 +1,10 @@
-package beyond.config
+package beyond
 
 import java.io.File
 import play.api.Configuration
 
-trait ConfigurationMixin {
-  protected def configuration =
+package object config {
+  private[config] def rootConfiguration =
     try {
       play.api.Play.current.configuration
     } catch {
@@ -12,4 +12,7 @@ trait ConfigurationMixin {
       // Mainly for tests or console
       case _: RuntimeException => Configuration.load(new File("."))
     }
+
+  private[config] def configuration(implicit prefix: String) =
+    rootConfiguration.getConfig(prefix).getOrElse(Configuration.empty)
 }
