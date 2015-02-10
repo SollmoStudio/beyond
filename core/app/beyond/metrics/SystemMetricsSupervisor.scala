@@ -6,8 +6,8 @@ import akka.actor.Props
 import akka.pattern.ask
 import akka.pattern.pipe
 import akka.util.Timeout
-import beyond.BeyondConfiguration
 import beyond.TickGenerator
+import beyond.config.BeyondConfiguration
 import java.util.Date
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._

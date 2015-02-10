@@ -1,4 +1,4 @@
-package beyond
+package beyond.config
 
 import beyond.route.RouteAddress
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }

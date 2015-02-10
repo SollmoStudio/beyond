@@ -1,5 +1,6 @@
 package beyond
 
+import beyond.config.BeyondConfiguration
 import play.api.libs.concurrent.Promise
 import play.api.mvc._
 import play.api.mvc.Results.InternalServerError

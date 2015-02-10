@@ -1,5 +1,6 @@
 package beyond
 
+import beyond.config.BeyondConfiguration
 import beyond.metrics.NumberOfRequestsPerSecond
 import java.lang.management.ManagementFactory
 import javax.management.MBeanServer

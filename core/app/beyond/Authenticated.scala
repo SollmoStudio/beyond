@@ -1,5 +1,6 @@
 package beyond
 
+import beyond.config.BeyondConfiguration
 import beyond.route.RouteAddress
 import beyond.route.RoutingTableView
 import beyond.route.RoutingTableView.HandleHere

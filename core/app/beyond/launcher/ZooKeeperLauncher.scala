@@ -7,9 +7,9 @@ import akka.actor.Cancellable
 import akka.io.IO
 import akka.io.Tcp
 import akka.util.ByteString
-import beyond.BeyondConfiguration
 import beyond.BeyondRuntime
 import beyond.TickGenerator
+import beyond.config.BeyondConfiguration
 import java.net.InetSocketAddress
 import org.apache.zookeeper.server.ServerConfig
 import scala.concurrent.duration._

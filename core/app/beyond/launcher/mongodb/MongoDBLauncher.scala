@@ -2,9 +2,9 @@ package beyond.launcher.mongodb
 
 import akka.actor.Actor
 import akka.actor.ActorLogging
-import beyond.BeyondConfiguration
 import beyond.MongoMixin
 import beyond.TickGenerator
+import beyond.config.BeyondConfiguration
 import java.io.IOException
 import play.api.libs.concurrent.Akka
 import reactivemongo.core.commands.Status

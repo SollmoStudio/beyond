@@ -1,4 +1,4 @@
-package beyond
+package beyond.config
 
 import beyond.launcher.mongodb.MongoDBInstanceType
 

@@ -3,6 +3,7 @@ package beyond
 import akka.actor.Actor
 import akka.actor.ActorLogging
 import akka.actor.Props
+import beyond.config.BeyondConfiguration
 import beyond.route.RoutingTableUpdater
 import beyond.route.RoutingTableWatcher
 import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }

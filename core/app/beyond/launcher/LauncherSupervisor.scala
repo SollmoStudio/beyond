@@ -5,7 +5,7 @@ import akka.actor.ActorLogging
 import akka.actor.OneForOneStrategy
 import akka.actor.Props
 import akka.actor.SupervisorStrategy._
-import beyond.BeyondConfiguration
+import beyond.config.BeyondConfiguration
 import beyond.launcher.mongodb.MongoDBConfigLauncher
 import beyond.launcher.mongodb.MongoDBInstanceType
 import beyond.launcher.mongodb.MongoDBStandaloneLauncher

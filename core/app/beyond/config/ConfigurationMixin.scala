@@ -1,4 +1,4 @@
-package beyond
+package beyond.config
 
 import java.io.File
 import play.api.Configuration

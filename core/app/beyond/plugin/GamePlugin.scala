@@ -1,6 +1,6 @@
 package beyond.plugin
 
-import beyond.BeyondConfiguration
+import beyond.config.BeyondConfiguration
 import beyond.engine.javascript.AssetsModuleSourceProvider
 import beyond.engine.javascript.BeyondGlobal
 import beyond.engine.javascript.BeyondJavaScriptEngine

@@ -1,6 +1,6 @@
 package beyond.engine.javascript.lib.filesystem
 
-import beyond.BeyondConfiguration
+import beyond.config.BeyondConfiguration
 import beyond.engine.javascript.BeyondContext
 import beyond.engine.javascript.BeyondContextFactory
 import beyond.engine.javascript.JSArray

@@ -1,7 +1,7 @@
 package beyond.metrics
 
 import akka.actor.Props
-import beyond.BeyondConfiguration
+import beyond.config.BeyondConfiguration
 import play.api.libs.concurrent.Akka
 import play.api.mvc._
 import scala.concurrent.Future

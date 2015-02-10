@@ -1,6 +1,6 @@
 package beyond.launcher.mongodb
 
-import beyond.BeyondConfiguration
+import beyond.config.BeyondConfiguration
 import java.io.File
 import scala.sys.process._
 

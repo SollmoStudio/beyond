@@ -2,6 +2,7 @@ package beyond
 
 import akka.actor.Actor
 import akka.actor.ActorLogging
+import beyond.config.BeyondConfiguration
 import java.nio.charset.Charset
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.nodes.PersistentEphemeralNode
@@ -16,7 +17,7 @@ class WorkerRegistrationActor(curatorFramework: CuratorFramework) extends Actor 
 
   private val workerNode = new PersistentEphemeralNode(
     curatorFramework, PersistentEphemeralNode.Mode.PROTECTED_EPHEMERAL_SEQUENTIAL, WorkersPath + "/w-",
-    beyond.BeyondConfiguration.currentServerRouteAddress.getBytes(Charset.forName("UTF-8")))
+    BeyondConfiguration.currentServerRouteAddress.getBytes(Charset.forName("UTF-8")))
 
   override def preStart() {
     curatorFramework.create().inBackground().forPath(WorkersPath, Array[Byte](0))

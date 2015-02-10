@@ -5,6 +5,7 @@ import akka.actor.ActorPath
 import akka.actor.Address
 import akka.actor.Props
 import akka.actor.RootActorPath
+import beyond.config.BeyondConfiguration
 import beyond.launcher.LauncherSupervisor
 import beyond.metrics.SystemMetricsSupervisor
 
