@@ -6,6 +6,7 @@ import akka.actor.OneForOneStrategy
 import akka.actor.Props
 import akka.actor.SupervisorStrategy._
 import beyond.config.BeyondConfiguration
+import beyond.config.MongoConfiguration
 import beyond.launcher.mongodb.MongoDBConfigLauncher
 import beyond.launcher.mongodb.MongoDBInstanceType
 import beyond.launcher.mongodb.MongoDBStandaloneLauncher
@@ -40,7 +41,7 @@ class LauncherSupervisor extends Actor with ActorLogging {
   }
 
   private def launchMongoDBServerIfNecessary() {
-    BeyondConfiguration.mongo.instanceType match {
+    MongoConfiguration.instanceType match {
       case MongoDBInstanceType.Standalone =>
         context.actorOf(Props[MongoDBStandaloneLauncher], name = "mongoDBStandaloneLauncher")
       case MongoDBInstanceType.Config =>

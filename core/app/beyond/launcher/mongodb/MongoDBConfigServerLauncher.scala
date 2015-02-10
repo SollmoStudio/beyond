@@ -1,6 +1,6 @@
 package beyond.launcher.mongodb
 
-import beyond.config.BeyondConfiguration
+import beyond.config.MongoConfiguration
 import java.io.File
 import scala.sys.process._
 
@@ -12,12 +12,12 @@ class MongoDBConfigLauncher extends MongoDBLauncher {
   override protected val shouldCheckHealth: Boolean = false
 
   override protected def launchProcess() {
-    val dbPath = new File(BeyondConfiguration.mongo.configDbPath)
+    val dbPath = new File(MongoConfiguration.configDbPath)
     if (!dbPath.exists()) {
       dbPath.mkdirs()
     }
 
-    val port = BeyondConfiguration.mongo.configPort
+    val port = MongoConfiguration.configPort
 
     val path: String = mongodPath.getOrElse {
       throw new LauncherInitializationException

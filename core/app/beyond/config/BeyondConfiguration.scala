@@ -11,8 +11,6 @@ import scalax.file.Path
 object BeyondConfiguration extends Logging {
   implicit private val configurationPrefix: String = "beyond"
 
-  lazy val mongo = MongoConfiguration
-
   def requestTimeout: FiniteDuration =
     Duration(configuration.getString("request-timeout").get).asInstanceOf[FiniteDuration]
 
