@@ -1,0 +1,28 @@
+@(metrics: String)
+
+@admin_metrics_main("SystemLoadAverage") {
+<h1 class="page-header">System Load Average</h1>
+<div id="systemLoadAverageTable"></div>
+<script type="text/jsx">
+    /** @@jsx React.DOM */
+    require(["react", "jsx!listtable"], function (React, ListTable) {
+        var metricsData = @Html(metrics);
+
+        var metricColumns = [{
+            key: "hostname",
+            name: "Hostname"
+        }, {
+            key: "date",
+            name: "Date"
+        }, {
+            key: "loadAverage",
+            name: "LoadAverage"
+        }];
+
+        React.renderComponent(
+            <ListTable data={metricsData} columns={metricColumns} />,
+            document.getElementById('systemLoadAverageTable')
+        );
+    });
+    </script>
+}
