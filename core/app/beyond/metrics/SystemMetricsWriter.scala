@@ -1,7 +1,5 @@
 package beyond.metrics
 
-import akka.actor.Actor
-import akka.actor.ActorLogging
 import beyond.MongoMixin
 import java.lang.management.MemoryUsage
 import java.util.Date
