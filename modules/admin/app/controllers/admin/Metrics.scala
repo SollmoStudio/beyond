@@ -7,6 +7,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Action
 import play.api.mvc.AnyContent
 import play.api.mvc.Controller
+import play.api.mvc.Result
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
 import reactivemongo.api.QueryOpts
@@ -36,23 +37,22 @@ object Metrics extends Controller with MongoController {
       .collect[Seq](upTo = maxNumber)
   }
 
-  def systemLoadAverage(maxNumber: Int): Action[AnyContent] = AuthenticatedAction.async { request =>
+  private def metricsWithHeader[T](tag: String, maxNumber: Int)(implicit format: Format[T]): Future[Result] = {
     import play.api.libs.concurrent.Execution.Implicits._
 
-    implicit val format = Json.format[SystemLoadAverage]
-    metrics("SystemLoadAverage", maxNumber).map { metrics =>
+    metrics[T](tag, maxNumber).map { metrics =>
       Ok(Json.toJson(metrics))
         .withHeaders("Cache-Control" -> "no-cache")
     }
   }
 
-  def numberOfRequestsPerSecond(maxNumber: Int): Action[AnyContent] = AuthenticatedAction.async { request =>
-    import play.api.libs.concurrent.Execution.Implicits._
+  def systemLoadAverage(maxNumber: Int): Action[AnyContent] = AuthenticatedAction.async { request =>
+    implicit val format = Json.format[SystemLoadAverage]
+    metricsWithHeader[SystemLoadAverage]("SystemLoadAverage", maxNumber)
+  }
 
+  def numberOfRequestsPerSecond(maxNumber: Int): Action[AnyContent] = AuthenticatedAction.async { request =>
     implicit val format = Json.format[NumberOfRequestsPerSecond]
-    metrics("NumberOfRequestsPerSecond", maxNumber).map { metrics =>
-      Ok(Json.toJson(metrics))
-        .withHeaders("Cache-Control" -> "no-cache")
-    }
+    metricsWithHeader[NumberOfRequestsPerSecond]("NumberOfRequestsPerSecond", maxNumber)
   }
 }
