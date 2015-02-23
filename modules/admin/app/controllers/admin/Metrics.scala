@@ -4,6 +4,8 @@ import java.lang.management.MemoryUsage
 import java.util.Date
 import play.api.libs.json.Format
 import play.api.libs.json.Json
+import play.api.mvc.Action
+import play.api.mvc.AnyContent
 import play.api.mvc.Controller
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
@@ -32,5 +34,15 @@ object Metrics extends Controller with MongoController {
       .sort(Json.obj("date" -> -1))
       .cursor[T]
       .collect[Seq](upTo = maxNumber)
+  }
+
+  def numberOfRequestsPerSecond(maxNumber: Int): Action[AnyContent] = AuthenticatedAction.async { request =>
+    import play.api.libs.concurrent.Execution.Implicits._
+
+    implicit val format = Json.format[NumberOfRequestsPerSecond]
+    metrics("NumberOfRequestsPerSecond", maxNumber).map { metrics =>
+      Ok(Json.toJson(metrics))
+        .withHeaders("Cache-Control" -> "no-cache")
+    }
   }
 }

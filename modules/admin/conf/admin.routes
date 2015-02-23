@@ -12,3 +12,5 @@ GET     /logout                     controllers.admin.Admin.logout
 
 GET     /user                       controllers.admin.Admin.userIndex
 GET     /user/list                  controllers.admin.Admin.userList
+
+GET     /metrics/numberOfRequestsPerSecond/:maxNumber   controllers.admin.Metrics.numberOfRequestsPerSecond(maxNumber: Int)
