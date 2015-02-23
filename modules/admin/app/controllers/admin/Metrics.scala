@@ -36,6 +36,16 @@ object Metrics extends Controller with MongoController {
       .collect[Seq](upTo = maxNumber)
   }
 
+  def systemLoadAverage(maxNumber: Int): Action[AnyContent] = AuthenticatedAction.async { request =>
+    import play.api.libs.concurrent.Execution.Implicits._
+
+    implicit val format = Json.format[SystemLoadAverage]
+    metrics("SystemLoadAverage", maxNumber).map { metrics =>
+      Ok(Json.toJson(metrics))
+        .withHeaders("Cache-Control" -> "no-cache")
+    }
+  }
+
   def numberOfRequestsPerSecond(maxNumber: Int): Action[AnyContent] = AuthenticatedAction.async { request =>
     import play.api.libs.concurrent.Execution.Implicits._
 
