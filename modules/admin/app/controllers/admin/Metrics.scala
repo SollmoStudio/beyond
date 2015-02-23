@@ -3,7 +3,14 @@ package controllers.admin
 import java.lang.management.MemoryUsage
 import java.util.Date
 import play.api.libs.json.Format
+import play.api.libs.json.JsError
+import play.api.libs.json.JsResult
+import play.api.libs.json.JsResultException
+import play.api.libs.json.JsSuccess
+import play.api.libs.json.JsValue
 import play.api.libs.json.Json
+import play.api.libs.json.Reads
+import play.api.libs.json.Writes
 import play.api.mvc.Action
 import play.api.mvc.AnyContent
 import play.api.mvc.Controller
@@ -55,4 +62,28 @@ object Metrics extends Controller with MongoController {
     implicit val format = Json.format[NumberOfRequestsPerSecond]
     metricsWithHeader[NumberOfRequestsPerSecond]("NumberOfRequestsPerSecond", maxNumber)
   }
+
+  private implicit val memoryUsageFormat: Format[MemoryUsage] = Format[MemoryUsage](
+    new Reads[MemoryUsage] {
+      override def reads(json: JsValue): JsResult[MemoryUsage] = {
+        try {
+          val init = (json \ "init").as[Long]
+          val used = (json \ "used").as[Long]
+          val committed = (json \ "committed").as[Long]
+          val max = (json \ "max").as[Long]
+          JsSuccess(new MemoryUsage(init, used, committed, max))
+        } catch {
+          case ex: JsResultException =>
+            JsError(ex.errors)
+        }
+      }
+    }, new Writes[MemoryUsage] {
+      override def writes(usage: MemoryUsage): JsValue = Json.obj(
+        "init" -> usage.getInit,
+        "used" -> usage.getUsed,
+        "committed" -> usage.getCommitted,
+        "max" -> usage.getMax
+      )
+    }
+  )
 }
