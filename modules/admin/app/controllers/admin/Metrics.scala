@@ -86,4 +86,19 @@ object Metrics extends Controller with MongoController {
       )
     }
   )
+
+  def heapMemoryUsage(maxNumber: Int): Action[AnyContent] = AuthenticatedAction.async { request =>
+    implicit val format = Json.format[HeapMemoryUsage]
+    metricsWithHeader[HeapMemoryUsage]("HeapMemoryUsage", maxNumber)
+  }
+
+  def nonHeapMemoryUsage(maxNumber: Int): Action[AnyContent] = AuthenticatedAction.async { request =>
+    implicit val format = Json.format[NonHeapMemoryUsage]
+    metricsWithHeader[NonHeapMemoryUsage]("NonHeapMemoryUsage", maxNumber)
+  }
+
+  def swapMemoryUsage(maxNumber: Int): Action[AnyContent] = AuthenticatedAction.async { request =>
+    implicit val format = Json.format[SwapMemoryUsage]
+    metricsWithHeader[SwapMemoryUsage]("SwapMemoryUsage", maxNumber)
+  }
 }

@@ -14,4 +14,7 @@ GET     /user                       controllers.admin.Admin.userIndex
 GET     /user/list                  controllers.admin.Admin.userList
 
 GET     /metrics/systemLoadAverage/:maxNumber           controllers.admin.Metrics.systemLoadAverage(maxNumber: Int)
+GET     /metrics/heapMemoryUsage/:maxNumber             controllers.admin.Metrics.heapMemoryUsage(maxNumber: Int)
+GET     /metrics/nonHeapMemoryUsage/:maxNumber          controllers.admin.Metrics.nonHeapMemoryUsage(maxNumber: Int)
+GET     /metrics/swapMemoryUsage/:maxNumber             controllers.admin.Metrics.swapMemoryUsage(maxNumber: Int)
 GET     /metrics/numberOfRequestsPerSecond/:maxNumber   controllers.admin.Metrics.numberOfRequestsPerSecond(maxNumber: Int)
