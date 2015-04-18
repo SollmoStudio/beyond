@@ -4,7 +4,6 @@ import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import java.io.File
 import java.net.InetAddress
 import java.net.NetworkInterface
-import play.api.Configuration
 import scala.util.Properties
 import scalax.file.Path
 import scalax.io.Codec
