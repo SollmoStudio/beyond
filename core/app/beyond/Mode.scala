@@ -4,15 +4,21 @@
  */
 package beyond
 
-import play.api.Mode.{ Mode => PlayMode }
+import play.api.{ Mode => PlayMode }
 
 object Mode extends Enumeration {
   type Mode = Value
   val Dev, Test, Prod = Value
 
-  implicit def from(mode: PlayMode): Mode = mode match {
-    case play.api.Mode.Dev => Dev
-    case play.api.Mode.Prod => Prod
-    case play.api.Mode.Test => Test
+  implicit def from(mode: PlayMode.Mode): Mode = mode match {
+    case PlayMode.Dev => Dev
+    case PlayMode.Prod => Prod
+    case PlayMode.Test => Test
+  }
+
+  implicit def to(mode: Mode): PlayMode.Mode = mode match {
+    case Dev => PlayMode.Dev
+    case Prod => PlayMode.Prod
+    case Test => PlayMode.Test
   }
 }

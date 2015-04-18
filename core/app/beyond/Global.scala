@@ -8,7 +8,7 @@ import com.typesafe.scalalogging.slf4j.{ StrictLogging => Logging }
 import java.io.File
 import play.api.Application
 import play.api.Configuration
-import play.api.Mode
+import play.api.{ Mode => PlayMode }
 import play.api.Play
 import play.api.libs.concurrent.Akka
 import play.api.mvc._
@@ -19,7 +19,7 @@ import scalax.file.Path
 object Global extends WithFilters(RequestsCountFilter, TimeoutFilter) with Logging {
   private var beyondSupervisor: Option[ActorRef] = _
 
-  override def onLoadConfig(defaultConfig: Configuration, path: File, classLoader: ClassLoader, mode: Mode.Mode): Configuration = {
+  override def onLoadConfig(defaultConfig: Configuration, path: File, classLoader: ClassLoader, mode: PlayMode.Mode): Configuration = {
     def loadConfigFromFile(configName: String): Configuration = {
       val file = new File(path, s"conf/$configName")
       if (file.exists) {

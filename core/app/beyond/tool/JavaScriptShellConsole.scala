@@ -1,6 +1,7 @@
 package beyond.tool
 
 import akka.actor.ActorSystem
+import beyond.Mode
 import beyond.NullOps.asNullOps
 import beyond.engine.javascript.BeyondJavaScriptEngine
 import java.io.File
@@ -17,7 +18,6 @@ import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.commonjs.module.provider.UrlModuleSourceProvider
 import org.mozilla.javascript.tools.ToolErrorReporter
 import play.api.DefaultApplication
-import play.api.Mode
 import scala.annotation.tailrec
 import scalax.file.Path
 import scalaz.syntax.std.boolean._
