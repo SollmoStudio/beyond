@@ -1,6 +1,8 @@
-exports.successful = function (value) {
-  return Future.successful(value);
-};
+exports.successful = Future.successful;
+
+exports.sequence = Future.sequence;
+
+exports.firstCompletedOf = Future.firstCompletedOf;
 
 exports.failed = function (message) {
   return new Future(function () { throw message; });
