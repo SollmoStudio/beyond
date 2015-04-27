@@ -158,7 +158,7 @@ describe('Collection', function () {
 
   describe('#insert()', function () {
     afterEach(function () {
-      wait(c.remove(db.query().where(function () { return true; })));
+      wait(c.drop());
     });
 
     it('inserts an object into a collection', function () {
@@ -193,7 +193,7 @@ describe('Collection', function () {
     });
 
     afterEach(function () {
-      wait(c.remove(db.query().where(function () { return true; })));
+      wait(c.drop());
     });
 
     it('finds entities meeting a query condition.', function () {
@@ -218,7 +218,7 @@ describe('Collection', function () {
     });
 
     afterEach(function () {
-      wait(c.remove(db.query().where(function () { return true; })));
+      wait(c.drop());
     });
 
     it('finds a single entity meeting a query condition.', function () {
@@ -239,7 +239,7 @@ describe('Collection', function () {
     });
 
     afterEach(function () {
-      wait(c.remove(db.query().where(function () { return true; })));
+      wait(c.drop());
     });
 
     it('removes entities meeting a query condition.', function () {
@@ -263,7 +263,7 @@ describe('Collection', function () {
     });
 
     afterEach(function () {
-      wait(c.remove(db.query().where(function () { return true; })));
+      wait(c.drop());
     });
 
     it('removes a single entity meeting a query condition.', function () {
@@ -285,7 +285,7 @@ describe('Collection', function () {
     });
 
     afterEach(function () {
-      wait(c.remove(db.query().where(function () { return true; })));
+      wait(c.drop());
     });
 
     it('updates a document.', function () {
