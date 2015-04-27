@@ -105,6 +105,9 @@ exports.handle = function (req) {
     case "removeOne":
       db.removeOne.apply(db.remove, tokens);
       break;
+    case "drop":
+      f = db.drop();
+      return f.map(function (v) { return new Response(v); });
     case "findOneWithKey":
       db.findOneWithKey(tokens[0]);
       break;

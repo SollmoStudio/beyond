@@ -94,6 +94,10 @@ exports.removeOne = function () {
   return collection.removeOne(q).onSuccess(console.info).onFailure(console.error);
 };
 
+exports.drop = function () {
+  return collection.drop().onSuccess(console.info).onFailure(console.error);
+};
+
 exports.save = function () {
   var queries = Array.prototype.slice.call(arguments, 1).map(function (arg) {
     return db.query("key", arg);

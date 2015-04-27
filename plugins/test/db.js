@@ -302,4 +302,24 @@ describe('Collection', function () {
       assert.equal(result.value(), 55);
     });
   });
+
+  describe('#drop()', function () {
+    beforeEach(function () {
+      wait(c.insert({key: 'key1', value: 10, time: new Date()}));
+      wait(c.insert({key: 'key2', value: 20, time: new Date()}));
+      wait(c.insert({key: 'key3', value: 30, time: new Date()}));
+    });
+
+    it('drops a collection successfully.', function () {
+      var dropResult = wait(c.drop({}));
+      assert.equal(dropResult, true);
+
+      var findResult = wait(c.find(db.query().where(function () { return true; })));
+      assert.equal(findResult.length, 0);
+      assert.equal(findResult[0], undefined);
+
+      var secondDropResult = wait(c.drop());
+      assert.equal(secondDropResult, false);
+    });
+  });
 });

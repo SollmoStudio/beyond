@@ -155,6 +155,14 @@ object ScriptableCollection {
     ScriptableFuture(context, scriptableDocument)
   }
 
+  @JSFunctionAnnotation
+  def drop(context: Context, thisObj: Scriptable, args: JSArray, function: JSFunction): ScriptableFuture = {
+    implicit val executionContext = context.asInstanceOf[BeyondContext].executionContext
+    val thisCollection = thisObj.asInstanceOf[ScriptableCollection]
+    val dropResult = thisCollection.dropInternal()
+    ScriptableFuture(context, dropResult)
+  }
+
   def jsConstructor(context: Context, args: JSArray, constructor: JSFunction, inNewExpr: Boolean): ScriptableCollection = {
     val name = args(0).asInstanceOf[String]
     val schema = args(1).asInstanceOf[ScriptableSchema]
@@ -258,4 +266,8 @@ class ScriptableCollection(name: String, schema: ScriptableSchema) extends Scrip
       case _ =>
         true
     }
+
+  // Cannot use name 'drop', because static forwarder is not generated when the companion object and class have the same name method.
+  private def dropInternal()(implicit ec: ExecutionContext): Future[Boolean] =
+    collection.drop().recover { case _ => false }
 }
