@@ -34,6 +34,7 @@ class LauncherSupervisor extends Actor {
         context.actorOf(Props[MongoDBStandaloneLauncher], name = "mongoDBStandaloneLauncher")
       case MongoDBInstanceType.Config =>
         context.actorOf(Props[MongoDBConfigLauncher], name = "mongoDBConfigLauncher")
+      case MongoDBInstanceType.None =>
       case _ =>
         // FIXME: launch a proper MongoDB instance for sharding.
         ???

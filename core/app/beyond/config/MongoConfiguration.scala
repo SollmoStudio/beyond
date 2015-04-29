@@ -12,6 +12,7 @@ object MongoConfiguration {
         case "config" => MongoDBInstanceType.Config
         case "routing" => MongoDBInstanceType.Routing
         case "shard" => MongoDBInstanceType.Shard
+        case "none" => MongoDBInstanceType.None
         case _ => throw new IllegalArgumentException("wrong.mongodb.type")
       }
       .getOrElse(MongoDBInstanceType.default)
