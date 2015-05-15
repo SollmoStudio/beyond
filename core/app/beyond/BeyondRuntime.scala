@@ -4,14 +4,13 @@ import java.io.File
 import java.lang.management.ManagementFactory
 import java.lang.management.RuntimeMXBean
 import java.net.URLClassLoader
-import play.api.Mode
 import scalax.file.Path
 
 object BeyondRuntime {
   lazy val classPath: String = {
     import play.api.Play.current
     val currentClassLoaderURLs = current.classloader.asInstanceOf[URLClassLoader].getURLs
-    val urls = current.mode match {
+    val urls = Mode.from(current.mode) match {
       case Mode.Dev =>
         val parent: ClassLoader = current.classloader.getParent.getParent
         val parentURLs = parent.asInstanceOf[URLClassLoader].getURLs

@@ -6,6 +6,7 @@ libraryDependencies ++= Seq(
   ws,
   "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.2",
   "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.2",
+  "com.typesafe" % "config" % "1.2.1",
   "com.typesafe.akka" %% "akka-actor" % "2.2.4",
   "com.typesafe.akka" %% "akka-slf4j" % "2.2.4",
   "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",

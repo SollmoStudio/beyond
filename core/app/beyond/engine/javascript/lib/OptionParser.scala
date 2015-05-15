@@ -1,8 +1,8 @@
 package beyond.engine.javascript.lib
 
+import beyond.config.Configuration
 import beyond.engine.javascript.JSArray
 import org.mozilla.javascript.ScriptableObject
-import play.api.Configuration
 
 object OptionParser {
   def parse(args: JSArray, idx: Int): Configuration = {

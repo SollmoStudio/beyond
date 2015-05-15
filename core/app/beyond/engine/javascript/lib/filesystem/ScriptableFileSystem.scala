@@ -1,6 +1,7 @@
 package beyond.engine.javascript.lib.filesystem
 
 import beyond.config.BeyondConfiguration
+import beyond.config.Configuration
 import beyond.engine.javascript.BeyondContext
 import beyond.engine.javascript.BeyondContextFactory
 import beyond.engine.javascript.JSArray
@@ -12,7 +13,6 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.annotations.{ JSStaticFunction => JSStaticFunctionAnnotation }
-import play.api.Configuration
 import scala.concurrent.future
 import scala.sys.process._
 import scalax.io.Codec
