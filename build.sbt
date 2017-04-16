@@ -39,6 +39,10 @@ lazy val jsConsole = TaskKey[Unit]("js-console", "JavaScript shell console in Be
 
 fullRunTask(jsConsole, Compile, "beyond.tool.JavaScriptShellConsole")
 
+lazy val jsConsole = TaskKey[Unit]("js-console", "JavaScript shell console in Beyond")
+
+fullRunTask(jsConsole, Compile, "beyond.tool.JavaScriptShellConsole")
+
 scalariformSettings
 
 Common.settings
